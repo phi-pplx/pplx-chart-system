@@ -4,7 +4,15 @@
   "private": true,
   "description": "Perplexity Chart System v7 · Two surfaces, one rulebook.",
   "scripts": {
-    "test": "node tests/integration.test.js"
+    "test": "node tests/integration.test.js",
+    "test:visual": "node tests/visual.test.js",
+    "test:all": "npm test && npm run test:visual",
+    "baseline": "node tests/visual.test.js --update-baselines"
+  },
+  "devDependencies": {
+    "pixelmatch": "^7.1.0",
+    "playwright": "^1.50.1",
+    "pngjs": "^7.0.0"
   },
   "engines": {
     "node": ">=18"

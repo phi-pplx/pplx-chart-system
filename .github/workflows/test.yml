@@ -1,8 +1,8 @@
-name: Integration test
+name: Tests
 
-# Runs the skill-authoring integration test on every push to main and
-# on every PR. Also runs nightly so we catch drift if the live manifest
-# or templates are edited out-of-band.
+# Runs the integration test on every push and PR.
+# Runs the visual regression test on push/PR with Playwright + pinned Chromium.
+# Both run nightly so we catch drift in the live manifest or templates.
 on:
   push:
     branches: [main]
@@ -19,15 +19,38 @@ jobs:
   integration:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node 20
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
-
       - name: Run integration test
         run: node tests/integration.test.js
         env:
           NO_COLOR: '1'
+
+  visual:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium --with-deps
+      - name: Run visual regression test
+        run: node tests/visual.test.js
+        env:
+          NO_COLOR: '1'
+      - name: Upload visual report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-regression-report
+          path: |
+            tests/visual-report.html
+            tests/current/
+            tests/diffs/
+          retention-days: 14

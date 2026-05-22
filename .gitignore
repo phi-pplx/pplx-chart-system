@@ -6,3 +6,11 @@ Thumbs.db
 .idea/
 node_modules/
 *.log
+
+# Visual regression per-run artifacts (only baselines/ is committed)
+tests/current/
+tests/diffs/
+tests/visual-report.html
+# Playwright caches
+playwright-report/
+.playwright/

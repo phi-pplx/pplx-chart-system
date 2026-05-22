@@ -119,9 +119,14 @@ https://phi-pplx.github.io/pplx-chart-system/manifest.json
 
 See the `skill_usage` block in `manifest.json` for the full fetch pattern.
 
-### Integration test
+### Tests
 
-The repo ships an end-to-end integration test at `tests/integration.test.js` that simulates exactly what a skill does: fetch `manifest.json`, iterate every archetype, fetch each `template_url`, substitute placeholders with synthetic fixtures, and check that (a) no placeholder is left unsubstituted, (b) the PPLX 2026 mark is present in the rendered HTML, and (c) every asset URL listed in the manifest returns 2xx. Run it with `npm test` (or `node tests/integration.test.js`). Zero dependencies, Node 18+. CI runs it on every push and nightly. If you're authoring a skill that consumes this system, this is the regression net you want to keep green.
+Two test suites under `tests/`. Both run against the live `manifest.json` so they catch drift in templates, CSS, or fonts even when no code in this repo changes.
+
+- **`integration.test.js`** — simulates a skill: fetch manifest, fetch each `template_url`, substitute placeholders with synthetic fixtures, check no placeholder is left unsubstituted, check the PPLX 2026 mark is in every rendered card, HEAD-check every asset URL. Run with `npm test`. Zero dependencies, Node 18+.
+- **`visual.test.js`** — renders each archetype with the same fixtures in headless Chromium at its native viewport, screenshots the `.card` element, and diffs pixel-by-pixel against a committed baseline. Tolerance is 0.50% of pixels; in practice back-to-back runs produce 0.000% diffs because the renders are byte-identical. Emits a `tests/visual-report.html` showing baseline / current / diff side-by-side per archetype. Run with `npm run test:visual`. Regenerate baselines with `npm run baseline` after intentional design changes. Requires `playwright`, `pixelmatch`, and `pngjs` (`npm install`).
+
+CI runs both on every push, every PR, and nightly. On visual failure, the workflow uploads the report and diff PNGs as a downloadable artifact.
 
 ---
 
