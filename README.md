@@ -33,6 +33,7 @@ The reference experience. Open `index.html` locally or hit the live URL above. I
 - `v7-edge-cases.html` — failure stress test with the audit-findings annotations
 - `v7-academic-dark.html`, `v7-academic-light.html`, `v7-editorial-dark.html`, `v7-editorial-light.html` — the four surface variants
 - `fit.js` — layout balancer + validator (CCR classifier, three failure detection classes: horizontal-overflow, density-mismatch, missing-structure)
+- `templates/` — **stable template directory for skill integration.** One minimal HTML file per archetype with `{{ kicker }}`, `{{ title }}`, `{{ hero }}`, `{{ footer_left }}`, `{{ footer_right }}` placeholder syntax. Shared `_base.css` holds all the rhythm + archetype rules. Templates reference the CSS by absolute URL so a single fetch gets you a working card.
 
 ### `03_fonts/` — variable fonts
 - `GT-Canon-VF.woff2` — upright (wdth 37–150, wght 300–900, opsz 8–144)
@@ -96,6 +97,27 @@ Copy `01_deployable-site/` to any static host (Vercel, Netlify, S3+CloudFront, C
 - **Breath** — the fluid `1fr` space below the hero stack. Never let content fill it. A minimum `gap: 4cqi` on the body grid guarantees the breath is never zero.
 - **Content** — chart, list, comparison, or grid. Pins above the footer.
 - **Foot** — hairline rule + Mono footer caption. Pins to bottom.
+
+---
+
+## For skill authors · manifest.json
+
+The repo ships a `manifest.json` at the root and at the Pages URL. It's the single fetch target a skill needs: every asset URL, every archetype contract, the decision tree, the Comet palette role table, the type ramp, and the locked principles — all in one JSON document.
+
+```
+https://phi-pplx.github.io/pplx-chart-system/manifest.json
+```
+
+**Pattern for skills:**
+
+1. Fetch `manifest.json` once
+2. Use `manifest.decision_tree` to pick the archetype for the data shape
+3. Fetch that archetype's `template_url` (e.g. `templates/E.html`)
+4. Substitute placeholders — `{{ kicker }}`, `{{ title }}`, `{{ hero }}`, etc. Repeatable blocks (bars, columns, rows) follow the per-archetype `placeholders` list
+5. The rendered HTML is self-contained: it loads `_base.css` by absolute URL, which loads the fonts. No build step required.
+6. Optionally fetch `fit.js` and load it after render to validate the card against its contract (attaches `data-fit-warn` on any breakage)
+
+See the `skill_usage` block in `manifest.json` for the full fetch pattern.
 
 ---
 

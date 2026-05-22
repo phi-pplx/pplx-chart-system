@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Archetype E · editorial stat block</title>
+<!--
+  Archetype E · 4:5 hero + deck + footer triad. Three supporting metrics pinned to bottom.
+  Placeholders use {{ name }} syntax. Substitute server-side or via JS.
+  Required: kicker, title, hero, footer_left, footer_right.
+  See repo manifest.json for the full asset map.
+-->
+<link rel="stylesheet" href="https://phi-pplx.github.io/pplx-chart-system/templates/_base.css" />
+</head>
+<body>
+<div class="card r-45 arche-e">
+  <div class="head">
+    <div class="head-text">
+      <div class="h-kicker">{{ kicker }}</div>
+      <div class="h-title">{{ title }}</div>
+    </div>
+    <svg class="h-mark" viewBox="0 0 254 275" fill="currentColor" aria-label="Perplexity"><path d="M207.649 2.21927C209.816 0.0528457 213.075 -0.595764 215.905 0.576694C218.736 1.74918 220.581 4.5119 220.581 7.57572V86.2554H245.452C249.636 86.2557 253.027 89.6472 253.027 93.8306V202.187C253.027 206.371 249.636 209.762 245.452 209.762H220.581V267.043C220.581 270.107 218.735 272.87 215.904 274.043C213.074 275.215 209.816 274.566 207.649 272.4L134.091 198.841V267.085C134.091 271.268 130.699 274.66 126.516 274.66C122.332 274.66 118.94 271.268 118.94 267.085V198.842L45.3828 272.4C43.2164 274.566 39.9585 275.215 37.1279 274.043C34.2973 272.87 32.4512 270.107 32.4512 267.043V209.762H7.5752C3.39155 209.762 2.88624e-05 206.371 0 202.187V93.8306C6.59711e-05 89.647 3.39158 86.2554 7.5752 86.2554H32.4512V7.57572C32.4512 4.51189 34.2973 1.74917 37.1279 0.576694C39.9584 -0.595448 43.2165 0.0529879 45.3828 2.21927L118.94 75.7769V7.57572C118.94 3.39212 122.332 0.000522602 126.516 0.000522602C130.699 0.000522602 134.091 3.39212 134.091 7.57572V75.7769L207.649 2.21927ZM47.6016 173.175V248.755L118.94 177.417V110.757L47.6016 173.175ZM134.091 177.416L205.431 248.755V202.303C205.43 202.265 205.428 202.226 205.428 202.187C205.428 202.148 205.43 202.109 205.431 202.07V173.175L134.091 110.757V177.416ZM217.993 164.037C219.637 165.475 220.581 167.553 220.581 169.738V194.612H237.877V101.406H146.411L217.993 164.037ZM15.1504 194.612H32.4512V169.738C32.4512 167.553 33.3941 165.475 35.0381 164.037L106.621 101.406H15.1504V194.612ZM47.6016 86.2554H107.993L47.6016 25.8638V86.2554ZM145.04 86.2554H205.431V25.8638L145.04 86.2554Z" /></svg>
+  </div>
+  <div class="body">
+    <div class="hero-stack">
+      <div class="hero">{{ hero }}<span class="unit">{{ hero_unit }}</span></div>
+      <div class="deck">{{ deck }}</div>
+    </div>
+    <div></div>
+    <div class="content">
+      <div class="e-triad">
+        <!-- Exactly 3 cells. -->
+        <div class="e-cell">
+          <div class="e-cell-label">{{ triad_1_label }}</div>
+          <div class="e-cell-value">{{ triad_1_value }}<span class="u">{{ triad_1_unit }}</span></div>
+        </div>
+        <div class="e-cell">
+          <div class="e-cell-label">{{ triad_2_label }}</div>
+          <div class="e-cell-value">{{ triad_2_value }}<span class="u">{{ triad_2_unit }}</span></div>
+        </div>
+        <div class="e-cell">
+          <div class="e-cell-label">{{ triad_3_label }}</div>
+          <div class="e-cell-value">{{ triad_3_value }}<span class="u">{{ triad_3_unit }}</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>{{ footer_left }}</span><span>{{ footer_right }}</span></div>
+</div>
+</body>
+</html>
