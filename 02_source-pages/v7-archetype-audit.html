@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>PPLX Chart System v7 — Archetype Audit</title>
+<style>
+@font-face{font-family:'GT Canon';src:url('../03_system/assets/fonts/GT-Canon-VF.woff2') format('woff2-variations');font-weight:300 900;font-style:normal;font-display:block;}
+@font-face{font-family:'GT Canon';src:url('../03_system/assets/fonts/GT-Canon-Italic-VF.woff2') format('woff2-variations');font-weight:300 900;font-style:italic;font-display:block;}
+@font-face{font-family:'PPLX Sans';src:url('../03_system/assets/fonts/PPLX-Sans-Beta-v2-VF.woff2') format('woff2-variations');font-weight:100 900;font-style:normal;font-display:block;}
+@font-face{font-family:'PPLX Mono';src:url('../03_system/assets/fonts/PPLX-Mono-Beta-v0-VF.woff2') format('woff2-variations');font-weight:100 900;font-style:normal;font-display:block;}
+
+:root{
+  --paper-light:#FBFAF4;
+  --paper-dark:#0a0b0c;
+  --ink:#0a0a0a;
+  --teal:#0fb5b3;
+  --teal-dim:#0a8281;
+  --teal-deep:#076968;
+  --hairline-dark:rgba(255,255,255,0.10);
+  --hairline-light:rgba(10,10,10,0.10);
+  --text-dark-1:#f5f3eb;
+  --text-dark-2:rgba(245,243,235,0.62);
+  --text-dark-3:rgba(245,243,235,0.40);
+  --s-4:4px;--s-8:8px;--s-14:14px;--s-20:20px;--s-28:28px;--s-40:40px;--s-56:56px;--s-80:80px;
+}
+*,*::before,*::after{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--paper-light);color:var(--ink);font-family:'PPLX Sans',sans-serif;-webkit-font-smoothing:antialiased;}
+
+.page{padding:var(--s-80) var(--s-40) calc(var(--s-80) * 2);max-width:none;}
+.page-head{max-width:760px;margin:0 auto var(--s-56);text-align:left;}
+.kicker{font-family:'PPLX Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(10,10,10,0.62);font-weight:500;}
+.page-title{font-family:'GT Canon',serif;font-weight:500;font-size:48px;line-height:1.0;letter-spacing:-0.02em;margin:var(--s-20) 0 var(--s-20);text-wrap:balance;}
+.page-deck{font-family:'PPLX Sans',sans-serif;font-size:16px;line-height:1.5;color:rgba(10,10,10,0.62);max-width:560px;}
+
+/* contract bar */
+.contract{margin:0 auto var(--s-56);max-width:1200px;padding:var(--s-20) var(--s-28);border:1px solid var(--hairline-light);border-radius:8px;background:rgba(0,0,0,0.02);}
+.contract-title{font-family:'PPLX Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:rgba(10,10,10,0.42);margin-bottom:var(--s-14);}
+.contract-rows{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s-28);font-family:'PPLX Sans',sans-serif;font-size:13px;line-height:1.5;color:rgba(10,10,10,0.78);}
+.contract-rows b{font-family:'PPLX Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:rgba(10,10,10,1);display:block;margin-bottom:4px;}
+
+/* grid layout for archetypes — keep cards at NATIVE pixel ratio */
+.grid{max-width:1500px;margin:0 auto;display:grid;grid-template-columns:repeat(12,1fr);gap:var(--s-56) var(--s-28);align-items:start;}
+
+.slot{display:flex;flex-direction:column;gap:var(--s-14);}
+.slot-tag{display:flex;justify-content:space-between;align-items:baseline;gap:var(--s-14);padding-bottom:var(--s-8);border-bottom:1px solid var(--hairline-light);}
+.slot-tag-name{font-family:'PPLX Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.10em;color:rgba(10,10,10,0.82);}
+.slot-tag-spec{font-family:'PPLX Mono',monospace;font-size:10px;color:rgba(10,10,10,0.42);text-transform:uppercase;letter-spacing:0.08em;}
+.slot-meta{font-family:'PPLX Sans',sans-serif;font-size:12px;color:rgba(10,10,10,0.62);line-height:1.45;}
+.slot-meta b{color:rgba(10,10,10,1);font-weight:500;}
+
+/* footprints */
+.s11{grid-column:span 4;}   /* 1:1 takes 4 columns */
+.s45{grid-column:span 4;}   /* 4:5 takes 4 columns */
+.s916{grid-column:span 3;}  /* 9:16 takes 3 columns */
+.s169{grid-column:span 8;}  /* 16:9 takes 8 columns */
+
+/* ============================================================
+   THE CARD — shared shell, every variant inherits this rhythm.
+   grid-template-rows:auto 1fr auto -> head / breath / foot
+   Plus an inner content layer that nests above the foot.
+   ============================================================ */
+.card{
+  width:100%;
+  background:var(--paper-dark);
+  color:var(--text-dark-1);
+  border:1px solid var(--hairline-dark);
+  border-radius:8px;
+  padding:6.2%;       /* % keeps padding proportional to native size */
+  position:relative;
+  display:grid;
+  grid-template-rows:auto 1fr auto;
+  gap:0;
+  font-family:'PPLX Sans',sans-serif;
+  overflow:hidden;
+  container-type:inline-size;  /* enable container queries for type scaling */
+}
+.card.r-11{aspect-ratio:1/1;}
+.card.r-45{aspect-ratio:4/5;}
+.card.r-916{aspect-ratio:9/16;padding:5.4%;}
+.card.r-169{aspect-ratio:16/9;padding:3.6%;}
+
+/* head — also scale-aware */
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--s-14);}
+.head-text{display:flex;flex-direction:column;gap:2cqi;min-width:0;}
+.h-kicker{font-family:'PPLX Mono',monospace;font-size:2.8cqi;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-dark-2);font-weight:500;}
+.h-title{font-family:'PPLX Mono',monospace;font-size:4cqi;font-weight:500;color:var(--text-dark-1);letter-spacing:0;}
+.h-mark{width:6.8cqi;height:6.8cqi;color:var(--text-dark-1);flex-shrink:0;}
+.card.r-169 .h-kicker{font-size:1.6cqi;}
+.card.r-169 .h-title{font-size:2.2cqi;}
+.card.r-169 .h-mark{width:3.4cqi;height:3.4cqi;}
+
+/* body region — the breath + the content sub-layer */
+.body{
+  display:grid;
+  grid-template-rows:auto 1fr auto;  /* hero stack / breath / chart pinned bottom */
+  gap:4cqi;  /* enforce minimum gap between rows even if 1fr collapses */
+  min-height:0;
+  padding-top:4cqi;
+}
+
+/* hero stack — pinned to top of body */
+.hero-stack{display:flex;flex-direction:column;gap:var(--s-14);}
+.hero{
+  font-family:'GT Canon',serif;
+  font-weight:500;
+  font-variation-settings:'wdth' 75,'opsz' 96;
+  font-feature-settings:"pnum","lnum","kern";
+  line-height:0.92;
+  letter-spacing:-0.02em;
+  color:var(--text-dark-1);
+}
+/* type scales as % of card inline-size — works at any card scale */
+.card.r-11 .hero{font-size:36cqi;}
+.card.r-45 .hero{font-size:42cqi;}
+.card.r-916 .hero{font-size:42cqi;}
+.card.r-169 .hero{font-size:14cqi;}
+.hero .unit{font-size:0.5em;font-variation-settings:'wdth' 75,'opsz' 60;vertical-align:0.45em;margin-left:0.05em;color:var(--text-dark-2);}
+.deck{
+  font-family:'PPLX Sans',sans-serif;
+  font-size:4cqi;line-height:1.42;color:var(--text-dark-2);
+  max-width:32ch;text-wrap:pretty;
+}
+.card.r-45 .deck{font-size:4.2cqi;}
+.card.r-916 .deck{font-size:5cqi;}
+.card.r-169 .deck{font-size:2.2cqi;max-width:48ch;}
+
+/* content layer — pinned just above foot */
+.content{
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  padding-bottom:var(--s-20);
+}
+
+/* foot — pinned bottom */
+.foot{
+  display:flex;justify-content:space-between;align-items:baseline;gap:var(--s-14);
+  padding-top:3cqi;
+  border-top:1px solid var(--hairline-dark);
+  font-family:'PPLX Mono',monospace;
+  font-size:2.6cqi;letter-spacing:0.10em;text-transform:uppercase;color:var(--text-dark-3);
+}
+.card.r-169 .foot{font-size:1.6cqi;padding-top:1.8cqi;}
+
+/* ============================================================
+   A · bar motif (1:1) — heights scale with card
+   ============================================================ */
+.bars-motif{display:grid;grid-template-columns:repeat(9,1fr);gap:1.4cqi;align-items:end;height:30cqi;}
+.bm-bar{background:var(--teal-dim);min-height:1.6cqi;border-radius:1px;position:relative;}
+.bm-bar.hi{background:var(--teal);}
+.bm-num{position:absolute;top:-5cqi;left:50%;transform:translateX(-50%);font-family:'PPLX Sans',sans-serif;font-size:2.8cqi;color:var(--text-dark-3);font-feature-settings:"tnum","lnum";white-space:nowrap;}
+.bm-bar.hi .bm-num{color:var(--text-dark-1);font-weight:500;}
+.bm-labels{display:grid;grid-template-columns:repeat(9,1fr);gap:1.4cqi;margin-top:2.4cqi;}
+.bm-label{font-family:'PPLX Mono',monospace;font-size:2.4cqi;color:var(--text-dark-3);text-align:center;}
+
+/* ============================================================
+   B · multi-metric grid 2×2 (1:1) — cqi-scaled
+   ============================================================ */
+.b-grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:0;border-top:1px solid var(--hairline-dark);border-left:1px solid var(--hairline-dark);}
+.b-cell{padding:4.8cqi;border-right:1px solid var(--hairline-dark);border-bottom:1px solid var(--hairline-dark);display:flex;flex-direction:column;justify-content:space-between;min-height:30cqi;}
+.b-cell-label{font-family:'PPLX Mono',monospace;font-size:2.7cqi;letter-spacing:0.10em;text-transform:uppercase;color:var(--text-dark-3);}
+.b-cell-value{font-family:'GT Canon',serif;font-weight:500;font-variation-settings:'wdth' 75,'opsz' 72;font-size:15cqi;line-height:1;letter-spacing:-0.01em;color:var(--text-dark-1);font-feature-settings:"tnum","lnum","kern";}
+.b-cell.hi .b-cell-value{color:var(--teal);}
+.b-cell-value .u{font-size:0.45em;color:var(--text-dark-3);vertical-align:0.6em;margin-left:0.06em;}
+.b-cell-delta{font-family:'PPLX Mono',monospace;font-size:2.7cqi;color:var(--text-dark-2);letter-spacing:0;}
+
+/* B doesn't use the bar motif — its content IS the grid */
+.card.arche-b .body{padding-top:var(--s-28);}
+.card.arche-b .content{padding-bottom:0;}
+
+/* ============================================================
+   C · comparison pair (1:1) — cqi-scaled
+   ============================================================ */
+.c-pair{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:4cqi;}
+.c-side{display:flex;flex-direction:column;gap:1.4cqi;}
+.c-side.right{align-items:flex-end;text-align:right;}
+.c-side-label{font-family:'PPLX Mono',monospace;font-size:2.6cqi;letter-spacing:0.10em;text-transform:uppercase;color:var(--text-dark-3);}
+.c-side-value{font-family:'GT Canon',serif;font-weight:500;font-variation-settings:'wdth' 75,'opsz' 72;font-size:14cqi;line-height:1;letter-spacing:-0.01em;color:var(--text-dark-1);font-feature-settings:"tnum","lnum","kern";}
+.c-side.right .c-side-value{color:var(--teal);}
+.c-side-value .u{font-size:0.45em;color:var(--text-dark-3);vertical-align:0.6em;margin-left:0.06em;}
+.c-arrow{font-family:'PPLX Mono',monospace;font-size:6cqi;color:var(--text-dark-3);align-self:center;line-height:1;}
+.c-delta{font-family:'PPLX Mono',monospace;font-size:2.8cqi;color:var(--teal);text-align:center;margin-top:2cqi;letter-spacing:0.05em;}
+
+/* ============================================================
+   D · dot-matrix (16:9) — cqi-scaled (16:9 uses smaller cqi values)
+   ============================================================ */
+.d-matrix{display:grid;grid-template-columns:repeat(7,1fr);gap:1.4cqi;padding:1.4cqi 0;}
+.d-col{display:flex;flex-direction:column;align-items:center;gap:1cqi;}
+.d-stack{display:flex;flex-direction:column-reverse;gap:0.7cqi;align-items:center;}
+.d-dot{width:0.8cqi;height:0.8cqi;border-radius:50%;background:var(--text-dark-3);}
+.d-dot.mid{background:var(--text-dark-2);}
+.d-dot.hi{background:var(--teal);width:1cqi;height:1cqi;}
+.d-col-label{font-family:'PPLX Mono',monospace;font-size:1.4cqi;color:var(--text-dark-3);}
+.d-col.peak .d-col-label{color:var(--teal);}
+
+/* ============================================================
+   E · editorial stat 4:5 — cqi-scaled
+   ============================================================ */
+.e-triad{display:grid;grid-template-columns:repeat(3,1fr);gap:3cqi;padding-top:3cqi;border-top:1px solid var(--hairline-dark);}
+.e-cell{display:flex;flex-direction:column;gap:1.2cqi;}
+.e-cell-label{font-family:'PPLX Mono',monospace;font-size:2.6cqi;color:var(--text-dark-3);letter-spacing:0.10em;text-transform:uppercase;}
+.e-cell-value{font-family:'GT Canon',serif;font-weight:500;font-variation-settings:'wdth' 75,'opsz' 60;font-size:9cqi;line-height:1;letter-spacing:-0.01em;color:var(--text-dark-1);font-feature-settings:"tnum","lnum","kern";}
+.e-cell-value .u{font-size:0.5em;color:var(--text-dark-3);vertical-align:0.5em;margin-left:0.06em;}
+
+/* E uses body with hero + breath + triad; we keep the same shell */
+.card.arche-e .content{padding-bottom:var(--s-14);}
+
+/* ============================================================
+   F · wallet list (9:16) — cqi-scaled, distributed rows
+   ============================================================ */
+.f-wallet{display:grid;gap:2.6cqi;align-content:space-between;min-height:0;height:100%;}
+.f-row{display:grid;grid-template-columns:auto 1fr auto;gap:2.6cqi;align-items:baseline;padding-bottom:3.6cqi;border-bottom:1px solid var(--hairline-dark);}
+.f-row.lead{padding-bottom:5cqi;}
+.f-rank{font-family:'PPLX Mono',monospace;font-size:3.4cqi;color:var(--text-dark-3);width:4.6cqi;}
+.f-name{font-family:'PPLX Sans',sans-serif;font-size:4.6cqi;color:var(--text-dark-2);}
+.f-row.lead .f-name{color:var(--text-dark-1);font-size:7.2cqi;font-weight:500;letter-spacing:-0.005em;}
+.f-row.lead .f-name .soft{color:var(--text-dark-2);font-weight:400;}
+.f-val{font-family:'PPLX Sans',sans-serif;font-size:4.6cqi;color:var(--text-dark-1);font-feature-settings:"tnum","lnum","kern";}
+.f-row.lead .f-val{font-family:'GT Canon',serif;font-weight:500;font-variation-settings:'wdth' 75,'opsz' 60;font-size:14cqi;line-height:1;letter-spacing:-0.01em;font-feature-settings:"tnum","lnum","kern";}
+
+/* F is a wallet — body holds the whole list, no separate content/foot for rows */
+.card.arche-f .body{grid-template-rows:1fr;padding-top:var(--s-28);padding-bottom:var(--s-20);}
+
+/* ============================================================
+   G family (1:1) — header-only · all scale with cqi
+   ============================================================ */
+.card.arche-g{padding:7%;}
+.card.arche-g .body{grid-template-rows:auto 1fr auto;padding-top:var(--s-28);}
+.g-display{
+  font-family:'GT Canon',serif;font-weight:500;font-variation-settings:'opsz' 60;
+  font-size:11cqi;line-height:1.0;letter-spacing:-0.018em;
+  color:var(--text-dark-1);
+  text-wrap:balance;max-width:14ch;
+}
+.g-editorial-title{
+  font-family:'GT Canon',serif;font-weight:500;font-variation-settings:'opsz' 48;
+  font-size:7.2cqi;line-height:1.04;letter-spacing:-0.015em;
+  color:var(--text-dark-1);
+  text-wrap:balance;max-width:18ch;
+}
+.g-rule{margin:3cqi 0 2.4cqi;border:0;border-top:1px solid var(--hairline-dark);width:7.2cqi;}
+.g-editorial-deck{font-family:'PPLX Sans',sans-serif;font-size:3.6cqi;line-height:1.45;color:var(--text-dark-2);max-width:34ch;}
+.g-quote{
+  font-family:'GT Canon',serif;font-style:italic;font-variation-settings:'wght' 550,'opsz' 60;
+  font-size:7.6cqi;line-height:1.08;letter-spacing:-0.012em;
+  color:var(--text-dark-1);
+  text-wrap:balance;max-width:18ch;
+  hanging-punctuation:first;
+}
+.g-cite-rule{display:block;width:7.2cqi;height:1px;background:var(--hairline-dark);margin:2.4cqi 0 1.4cqi;}
+.g-cite{font-family:'PPLX Mono',monospace;font-size:2.6cqi;letter-spacing:0.10em;text-transform:uppercase;color:var(--text-dark-2);}
+
+/* Section heading */
+.section-head{grid-column:1/-1;margin-top:var(--s-56);padding-top:var(--s-28);border-top:1px solid var(--hairline-light);}
+.section-head:first-of-type{margin-top:0;padding-top:0;border-top:0;}
+.section-kicker{font-family:'PPLX Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(10,10,10,0.42);margin-bottom:6px;}
+.section-title{font-family:'PPLX Sans',sans-serif;font-size:20px;font-weight:500;color:rgba(10,10,10,1);letter-spacing:-0.01em;}
+.section-sub{font-family:'PPLX Sans',sans-serif;font-size:14px;color:rgba(10,10,10,0.62);margin-top:6px;max-width:60ch;line-height:1.5;}
+
+/* Findings block */
+.findings{grid-column:1/-1;margin-top:var(--s-56);padding:var(--s-28);border:1px solid var(--hairline-light);border-radius:8px;background:rgba(0,0,0,0.02);}
+.findings-title{font-family:'PPLX Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:rgba(10,10,10,0.42);margin-bottom:var(--s-14);}
+.findings-body{font-family:'PPLX Sans',sans-serif;font-size:14px;line-height:1.55;color:rgba(10,10,10,0.78);}
+.findings-body b{color:rgba(10,10,10,1);font-weight:500;}
+.findings-body code{font-family:'PPLX Mono',monospace;font-size:12px;background:rgba(0,0,0,0.04);padding:1px 4px;border-radius:2px;}
+
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="page-head">
+    <div class="kicker">PPLX Chart System v7 · Archetype audit · All variants</div>
+    <h1 class="page-title">Every archetype, native ratio, one rhythm.</h1>
+    <p class="page-deck">A through F, plus the G family. Each card rendered at its actual aspect ratio so layout regressions surface at a glance. Same vertical rhythm contract: head pins top, content pins above footer, footer pins bottom, breath lives in the middle.</p>
+  </header>
+
+  <div class="contract">
+    <div class="contract-title">Rhythm contract — applied to every card</div>
+    <div class="contract-rows">
+      <div><b>Head</b>Kicker + title left, PPLX 2026 mark right. Pins to top.</div>
+      <div><b>Breath</b>The fluid 1fr space below the hero stack. Never let content fill it.</div>
+      <div><b>Content</b>Chart, list, comparison, or grid. Pins above the footer.</div>
+      <div><b>Foot</b>Hairline rule + Mono footer caption. Pins to bottom.</div>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <!-- ===================== ARCHETYPE A · 1:1 ===================== -->
+    <div class="section-head">
+      <div class="section-kicker">Archetype A · 1080×1080 · 1:1</div>
+      <div class="section-title">Editorial stat + bar motif</div>
+      <div class="section-sub">Hero stat in GT Canon Narrow, supporting comparison as a 9-bar motif pinned just above the footer. Breath sits between deck and bars.</div>
+    </div>
+
+    <div class="slot s11">
+      <div class="slot-tag"><span class="slot-tag-name">A · stat + bar</span><span class="slot-tag-spec">1:1 · 1080×1080</span></div>
+      <div class="card r-11 arche-a">
+        <div class="head">
+          <div class="head-text">
+            <div class="h-kicker">Humanity's Last Exam · Accuracy</div>
+            <div class="h-title">Perplexity Deep Research</div>
+          </div>
+          <svg class="h-mark" viewBox="0 0 254 275" fill="currentColor"><path d="M207.649 2.21927C209.816 0.0528457 213.075 -0.595764 215.905 0.576694C218.736 1.74918 220.581 4.5119 220.581 7.57572V86.2554H245.452C249.636 86.2557 253.027 89.6472 253.027 93.8306V202.187C253.027 206.371 249.636 209.762 245.452 209.762H220.581V267.043C220.581 270.107 218.735 272.87 215.904 274.043C213.074 275.215 209.816 274.566 207.649 272.4L134.091 198.841V267.085C134.091 271.268 130.699 274.66 126.516 274.66C122.332 274.66 118.94 271.268 118.94 267.085V198.842L45.3828 272.4C43.2164 274.566 39.9585 275.215 37.1279 274.043C34.2973 272.87 32.4512 270.107 32.4512 267.043V209.762H7.5752C3.39155 209.762 2.88624e-05 206.371 0 202.187V93.8306C6.59711e-05 89.647 3.39158 86.2554 7.5752 86.2554H32.4512V7.57572C32.4512 4.51189 34.2973 1.74917 37.1279 0.576694C39.9584 -0.595448 43.2165 0.0529879 45.3828 2.21927L118.94 75.7769V7.57572C118.94 3.39212 122.332 0.000522602 126.516 0.000522602C130.699 0.000522602 134.091 3.39212 134.091 7.57572V75.7769L207.649 2.21927ZM47.6016 173.175V248.755L118.94 177.417V110.757L47.6016 173.175ZM134.091 177.416L205.431 248.755V202.303C205.43 202.265 205.428 202.226 205.428 202.187C205.428 202.148 205.43 202.109 205.431 202.07V173.175L134.091 110.757V177.416ZM217.993 164.037C219.637 165.475 220.581 167.553 220.581 169.738V194.612H237.877V101.406H146.411L217.993 164.037ZM15.1504 194.612H32.4512V169.738C32.4512 167.553 33.3941 165.475 35.0381 164.037L106.621 101.406H15.1504V194.612ZM47.6016 86.2554H107.993L47.6016 25.8638V86.2554ZM145.04 86.2554H205.431V25.8638L145.04 86.2554Z" /></svg>
+        </div>
+        <div class="body">
+          <div class="hero-stack">
+            <div class="hero">21.1<span class="unit">%</span></div>
+            <div class="deck">Ranks 2nd of nine deep-research systems on HLE. 12 points ahead of o3-mini, behind only OpenAI Deep Research.</div>
+          </div>
+          <div></div>
+          <div class="content">
+            <div class="bars-motif">
+              <div class="bm-bar" style="height:100%;"><div class="bm-num">26.6</div></div>
+              <div class="bm-bar hi" style="height:79.3%;"><div class="bm-num">21.1</div></div>
+              <div class="bm-bar" style="height:48.9%;"><div class="bm-num">13.0</div></div>
+              <div class="bm-bar" style="height:35.3%;"><div class="bm-num">9.4</div></div>
+              <div class="bm-bar" style="height:34.2%;"><div class="bm-num">9.1</div></div>
+              <div class="bm-bar" style="height:23.3%;"><div class="bm-num">6.2</div></div>
+              <div class="bm-bar" style="height:16.2%;"><div class="bm-num">4.3</div></div>
+              <div class="bm-bar" style="height:14.3%;"><div class="bm-num">3.8</div></div>
+              <div class="bm-bar" style="height:12.4%;"><div class="bm-num">3.3</div></div>
+            </div>
+            <div class="bm-labels">
+              <div class="bm-label">OAI</div><div class="bm-label">PPLX</div><div class="bm-label">o3-m</div>
+              <div class="bm-label">DS</div><div class="bm-label">o1</div><div class="bm-label">Gem</div>
+              <div class="bm-label">Clde</div><div class="bm-label">Grok</div><div class="bm-label">4o</div>
+            </div>
+          </div>
+        </div>
+        <div class="foot"><span>HLE · 2,500 expert questions</span><span>2026</span></div>
+      </div>
+      <div class="slot-meta"><b>Rhythm pass.</b> Bars sit just above the footer with deliberate breath between deck and motif. Hero in GT Canon at 128px reads as the anchor.</div>
+    </div>
+
+    <!-- ===================== ARCHETYPE B · 1:1 multi-metric ===================== -->
+    <div class="slot s11">
+      <div class="slot-tag"><span class="slot-tag-name">B · 2×2 metric grid</span><span class="slot-tag-spec">1:1 · 1080×1080</span></div>
+      <div class="card r-11 arche-b">
+        <div class="head">
+          <div class="head-text">
+            <div class="h-kicker">Sonar Pro · vs Sonar baseline</div>
+            <div class="h-title">Performance lift</div>
+          </div>
+          <svg class="h-mark" viewBox="0 0 254 275" fill="currentColor"><path d="M207.649 2.21927C209.816 0.0528457 213.075 -0.595764 215.905 0.576694C218.736 1.74918 220.581 4.5119 220.581 7.57572V86.2554H245.452C249.636 86.2557 253.027 89.6472 253.027 93.8306V202.187C253.027 206.371 249.636 209.762 245.452 209.762H220.581V267.043C220.581 270.107 218.735 272.87 215.904 274.043C213.074 275.215 209.816 274.566 207.649 272.4L134.091 198.841V267.085C134.091 271.268 130.699 274.66 126.516 274.66C122.332 274.66 118.94 271.268 118.94 267.085V198.842L45.3828 272.4C43.2164 274.566 39.9585 275.215 37.1279 274.043C34.2973 272.87 32.4512 270.107 32.4512 267.043V209.762H7.5752C3.39155 209.762 2.88624e-05 206.371 0 202.187V93.8306C6.59711e-05 89.647 3.39158 86.2554 7.5752 86.2554H32.4512V7.57572C32.4512 4.51189 34.2973 1.74917 37.1279 0.576694C39.9584 -0.595448 43.2165 0.0529879 45.3828 2.21927L118.94 75.7769V7.57572C118.94 3.39212 122.332 0.000522602 126.516 0.000522602C130.699 0.000522602 134.091 3.39212 134.091 7.57572V75.7769L207.649 2.21927ZM47.6016 173.175V248.755L118.94 177.417V110.757L47.6016 173.175ZM134.091 177.416L205.431 248.755V202.303C205.43 202.265 205.428 202.226 205.428 202.187C205.428 202.148 205.43 202.109 205.431 202.07V173.175L134.091 110.757V177.416ZM217.993 164.037C219.637 165.475 220.581 167.553 220.581 169.738V194.612H237.877V101.406H146.411L217.993 164.037ZM15.1504 194.612H32.4512V169.738C32.4512 167.553 33.3941 165.475 35.0381 164.037L106.621 101.406H15.1504V194.612ZM47.6016 86.2554H107.993L47.6016 25.8638V86.2554ZM145.04 86.2554H205.431V25.8638L145.04 86.2554Z" /></svg>
+        </div>
+        <div class="body">
+          <div></div>
+          <div></div>
+          <div class="content">
+            <div class="b-grid">
+              <div class="b-cell hi">
+                <div class="b-cell-label">F-score · SimpleQA</div>
+                <div class="b-cell-value">0.858</div>
+                <div class="b-cell-delta">+11pp vs Sonar</div>
+              </div>
+              <div class="b-cell">
+                <div class="b-cell-label">Citations / search</div>
+                <div class="b-cell-value">2.0<span class="u">×</span></div>
+                <div class="b-cell-delta">vs Sonar baseline</div>
+              </div>
+              <div class="b-cell">
+                <div class="b-cell-label">Throughput · Copy AI</div>
+                <div class="b-cell-value">+20<span class="u">%</span></div>
+                <div class="b-cell-delta">hours saved / rep / week</div>
+              </div>
+              <div class="b-cell">
+                <div class="b-cell-label">Latency · p50</div>
+                <div class="b-cell-value">−12<span class="u">%</span></div>
+                <div class="b-cell-delta">vs Sonar baseline</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="foot"><span>SimpleQA · 4 metrics · 2026</span><span>2026</span></div>
+      </div>
+      <div class="slot-meta"><b>Rhythm pass.</b> 2×2 grid pins above footer. No hero stack — the four cells share the load. Hi cell carries the accent.</div>
+    </div>
+
+    <!-- ===================== ARCHETYPE C · 1:1 comparison pair ===================== -->
+    <div class="slot s11">
+      <div class="slot-tag"><span class="slot-tag-name">C · comparison pair</span><span class="slot-tag-spec">1:1 · 1080×1080</span></div>
+      <div class="card r-11 arche-c">
+        <div class="head">
+          <div class="head-text">
+            <div class="h-kicker">FRAMES · before / after RL training</div>
+            <div class="h-title">Cost-efficiency lift</div>
+          </div>
+          <svg class="h-mark" viewBox="0 0 254 275" fill="currentColor"><path d="M207.649 2.21927C209.816 0.0528457 213.075 -0.595764 215.905 0.576694C218.736 1.74918 220.581 4.5119 220.581 7.57572V86.2554H245.452C249.636 86.2557 253.027 89.6472 253.027 93.8306V202.187C253.027 206.371 249.636 209.762 245.452 209.762H220.581V267.043C220.581 270.107 218.735 272.87 215.904 274.043C213.074 275.215 209.816 274.566 207.649 272.4L134.091 198.841V267.085C134.091 271.268 130.699 274.66 126.516 274.66C122.332 274.66 118.94 271.268 118.94 267.085V198.842L45.3828 272.4C43.2164 274.566 39.9585 275.215 37.1279 274.043C34.2973 272.87 32.4512 270.107 32.4512 267.043V209.762H7.5752C3.39155 209.762 2.88624e-05 206.371 0 202.187V93.8306C6.59711e-05 89.647 3.39158 86.2554 7.5752 86.2554H32.4512V7.57572C32.4512 4.51189 34.2973 1.74917 37.1279 0.576694C39.9584 -0.595448 43.2165 0.0529879 45.3828 2.21927L118.94 75.7769V7.57572C118.94 3.39212 122.332 0.000522602 126.516 0.000522602C130.699 0.000522602 134.091 3.39212 134.091 7.57572V75.7769L207.649 2.21927ZM47.6016 173.175V248.755L118.94 177.417V110.757L47.6016 173.175ZM134.091 177.416L205.431 248.755V202.303C205.43 202.265 205.428 202.226 205.428 202.187C205.428 202.148 205.43 202.109 205.431 202.07V173.175L134.091 110.757V177.416ZM217.993 164.037C219.637 165.475 220.581 167.553 220.581 169.738V194.612H237.877V101.406H146.411L217.993 164.037ZM15.1504 194.612H32.4512V169.738C32.4512 167.553 33.3941 165.475 35.0381 164.037L106.621 101.406H15.1504V194.612ZM47.6016 86.2554H107.993L47.6016 25.8638V86.2554ZM145.04 86.2554H205.431V25.8638L145.04 86.2554Z" /></svg>
+        </div>
+        <div class="body">
+          <div class="hero-stack">
+            <div class="hero" style="font-size:96px;">7.5<span class="unit">×</span></div>
+            <div class="deck">Cost-efficiency multiple after RL post-training. Same accuracy bracket, fraction of the spend.</div>
+          </div>
+          <div></div>
+          <div class="content">
+            <div class="c-pair">
+              <div class="c-side">
+                <div class="c-side-label">Before · Sonnet 4.6</div>
+                <div class="c-side-value">$0.153</div>
+              </div>
+              <div class="c-arrow">→</div>
+              <div class="c-side right">
+                <div class="c-side-label">After · Qwen-SFT-RL</div>
+                <div class="c-side-value">$0.020</div>
+              </div>
+            </div>
+            <div class="c-delta">−87% cost per query · +11.5pp accuracy</div>
+          </div>
+        </div>
+        <div class="foot"><span>FRAMES · b=4 · 2026</span><span>2026</span></div>
+      </div>
+      <div class="slot-meta"><b>Rhythm pass.</b> Hero "7.5×" anchors top, before/after pair pins above footer, delta line is a Mono caption beneath. Arrow uses Mono for restraint.</div>
+    </div>
+
+    <!-- ===================== ARCHETYPE E · 4:5 editorial ===================== -->
+    <div class="section-head">
+      <div class="section-kicker">Archetype E · 1080×1350 · 4:5</div>
+      <div class="section-title">Editorial stat block</div>
+      <div class="section-sub">Hero stat dominates the upper half, footer triad of supporting metrics pinned at the bottom. The middle is breath.</div>
+    </div>
+
+    <div class="slot s45">
+      <div class="slot-tag"><span class="slot-tag-name">E · editorial stat block</span><span class="slot-tag-spec">4:5 · 1080×1350</span></div>
+      <div class="card r-45 arche-e">
+        <div class="head">
+          <div class="head-text">
+            <div class="h-kicker">FRAMES · cost-efficiency</div>
+            <div class="h-title">7.5× lower cost than Sonnet 4.6</div>
+          </div>
+          <svg class="h-mark" viewBox="0 0 254 275" fill="currentColor"><path d="M207.649 2.21927C209.816 0.0528457 213.075 -0.595764 215.905 0.576694C218.736 1.74918 220.581 4.5119 220.581 7.57572V86.2554H245.452C249.636 86.2557 253.027 89.6472 253.027 93.8306V202.187C253.027 206.371 249.636 209.762 245.452 209.762H220.581V267.043C220.581 270.107 218.735 272.87 215.904 274.043C213.074 275.215 209.816 274.566 207.649 272.4L134.091 198.841V267.085C134.091 271.268 130.699 274.66 126.516 274.66C122.332 274.66 118.94 271.268 118.94 267.085V198.842L45.3828 272.4C43.2164 274.566 39.9585 275.215 37.1279 274.043C34.2973 272.87 32.4512 270.107 32.4512 267.043V209.762H7.5752C3.39155 209.762 2.88624e-05 206.371 0 202.187V93.8306C6.59711e-05 89.647 3.39158 86.2554 7.5752 86.2554H32.4512V7.57572C32.4512 4.51189 34.2973 1.74917 37.1279 0.576694C39.9584 -0.595448 43.2165 0.0529879 45.3828 2.21927L118.94 75.7769V7.57572C118.94 3.39212 122.332 0.000522602 126.516 0.000522602C130.699 0.000522602 134.091 3.39212 134.091 7.57572V75.7769L207.649 2.21927ZM47.6016 173.175V248.755L118.94 177.417V110.757L47.6016 173.175ZM134.091 177.416L205.431 248.755V202.303C205.43 202.265 205.428 202.226 205.428 202.187C205.428 202.148 205.43 202.109 205.431 202.07V173.175L134.091 110.757V177.416ZM217.993 164.037C219.637 165.475 220.581 167.553 220.581 169.738V194.612H237.877V101.406H146.411L217.993 164.037ZM15.1504 194.612H32.4512V169.738C32.4512 167.553 33.3941 165.475 35.0381 164.037L106.621 101.406H15.1504V194.612ZM47.6016 86.2554H107.993L47.6016 25.8638V86.2554ZM145.04 86.2554H205.431V25.8638L145.04 86.2554Z" /></svg>
+        </div>
+        <div class="body">
+          <div class="hero-stack">
+            <div class="hero">73.9<span class="unit">%</span></div>
+            <div class="deck">Qwen3.5-SFT-RL beats Sonnet 4.6 by 11.5 points on FRAMES accuracy, at one seventh the cost per query.</div>
+          </div>
+          <div></div>
+          <div class="content">
+            <div class="e-triad">
+              <div class="e-cell"><div class="e-cell-label">Cost / query</div><div class="e-cell-value">$0.02</div></div>
+              <div class="e-cell"><div class="e-cell-label">vs GPT-5.4</div><div class="e-cell-value">4<span class="u">×</span></div></div>
+              <div class="e-cell"><div class="e-cell-label">vs Sonnet</div><div class="e-cell-value">7.5<span class="u">×</span></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="foot"><span>FRAMES · b=4 · n=3 models</span><span>2026</span></div>
+      </div>
+      <div class="slot-meta"><b>Rhythm pass.</b> 4:5 gives the hero stat more vertical authority. Triad pins low, breath between hero and triad gives the eye somewhere to rest.</div>
+    </div>
+
+    <!-- ===================== ARCHETYPE F · 9:16 wallet ===================== -->
+    <div class="section-head">
+      <div class="section-kicker">Archetype F · 1080×1920 · 9:16</div>
+      <div class="section-title">Wallet list</div>
+      <div class="section-sub">Distributed ranked rows. Lead row promoted to top regardless of canonical rank — narrative order. Rows space-between distributed across full height.</div>
+    </div>
+
+    <div class="slot s916">
+      <div class="slot-tag"><span class="slot-tag-name">F · wallet list</span><span class="slot-tag-spec">9:16 · 1080×1920</span></div>
+      <div class="card r-916 arche-f">
+        <div class="head">
+          <div class="head-text">
+            <div class="h-kicker">Search Arena · Elo</div>
+            <div class="h-title">Sonar models rank 1–4</div>
+          </div>
+          <svg class="h-mark" viewBox="0 0 254 275" fill="currentColor"><path d="M207.649 2.21927C209.816 0.0528457 213.075 -0.595764 215.905 0.576694C218.736 1.74918 220.581 4.5119 220.581 7.57572V86.2554H245.452C249.636 86.2557 253.027 89.6472 253.027 93.8306V202.187C253.027 206.371 249.636 209.762 245.452 209.762H220.581V267.043C220.581 270.107 218.735 272.87 215.904 274.043C213.074 275.215 209.816 274.566 207.649 272.4L134.091 198.841V267.085C134.091 271.268 130.699 274.66 126.516 274.66C122.332 274.66 118.94 271.268 118.94 267.085V198.842L45.3828 272.4C43.2164 274.566 39.9585 275.215 37.1279 274.043C34.2973 272.87 32.4512 270.107 32.4512 267.043V209.762H7.5752C3.39155 209.762 2.88624e-05 206.371 0 202.187V93.8306C6.59711e-05 89.647 3.39158 86.2554 7.5752 86.2554H32.4512V7.57572C32.4512 4.51189 34.2973 1.74917 37.1279 0.576694C39.9584 -0.595448 43.2165 0.0529879 45.3828 2.21927L118.94 75.7769V7.57572C118.94 3.39212 122.332 0.000522602 126.516 0.000522602C130.699 0.000522602 134.091 3.39212 134.091 7.57572V75.7769L207.649 2.21927ZM47.6016 173.175V248.755L118.94 177.417V110.757L47.6016 173.175ZM134.091 177.416L205.431 248.755V202.303C205.43 202.265 205.428 202.226 205.428 202.187C205.428 202.148 205.43 202.109 205.431 202.07V173.175L134.091 110.757V177.416ZM217.993 164.037C219.637 165.475 220.581 167.553 220.581 169.738V194.612H237.877V101.406H146.411L217.993 164.037ZM15.1504 194.612H32.4512V169.738C32.4512 167.553 33.3941 165.475 35.0381 164.037L106.621 101.406H15.1504V194.612ZM47.6016 86.2554H107.993L47.6016 25.8638V86.2554ZM145.04 86.2554H205.431V25.8638L145.04 86.2554Z" /></svg>
+        </div>
+        <div class="body">
+          <div class="f-wallet">
+            <div class="f-row lead">
+              <div class="f-rank">02</div>
+              <div class="f-name">Sonar-Reasoning<span class="soft">-Pro-High</span></div>
+              <div class="f-val">1136</div>
+            </div>
+            <div class="f-row"><div class="f-rank">01</div><div class="f-name">Gemini-2.5-Pro-Ground</div><div class="f-val">1142</div></div>
+            <div class="f-row"><div class="f-rank">03</div><div class="f-name">Sonar-Reasoning-Pro</div><div class="f-val">1132</div></div>
+            <div class="f-row"><div class="f-rank">04</div><div class="f-name">Sonar-Reasoning</div><div class="f-val">1115</div></div>
+            <div class="f-row"><div class="f-rank">05</div><div class="f-name">Gemini-2.0-Flash</div><div class="f-val">1082</div></div>
+          </div>
+        </div>
+        <div class="foot"><span>10,000+ head-to-head votes</span><span>2026</span></div>
+      </div>
+      <div class="slot-meta"><b>Rhythm pass.</b> Rows distribute via space-between to fill 9:16. Lead row hero "1136" in GT Canon at 52px gives the column its anchor.</div>
+    </div>
+
+    <!-- ===================== ARCHETYPE D · 16:9 dot-matrix ===================== -->
+    <div class="section-head">
+      <div class="section-kicker">Archetype D · 1920×1080 · 16:9</div>
+      <div class="section-title">Dot-matrix · categorical rhythm</div>
+      <div class="section-sub">For multi-category comparisons where shape matters more than precision. 16:9 gives horizontal room for 7+ columns.</div>
+    </div>
+
+    <div class="slot s169">
+      <div class="slot-tag"><span class="slot-tag-name">D · dot-matrix</span><span class="slot-tag-spec">16:9 · 1920×1080</span></div>
+      <div class="card r-169 arche-d">
+        <div class="head">
+          <div class="head-text">
+            <div class="h-kicker">FRAMES · accuracy vs tool-call budget</div>
+            <div class="h-title">Qwen-SFT-RL leads at every budget</div>
+          </div>
+          <svg class="h-mark" viewBox="0 0 254 275" fill="currentColor"><path d="M207.649 2.21927C209.816 0.0528457 213.075 -0.595764 215.905 0.576694C218.736 1.74918 220.581 4.5119 220.581 7.57572V86.2554H245.452C249.636 86.2557 253.027 89.6472 253.027 93.8306V202.187C253.027 206.371 249.636 209.762 245.452 209.762H220.581V267.043C220.581 270.107 218.735 272.87 215.904 274.043C213.074 275.215 209.816 274.566 207.649 272.4L134.091 198.841V267.085C134.091 271.268 130.699 274.66 126.516 274.66C122.332 274.66 118.94 271.268 118.94 267.085V198.842L45.3828 272.4C43.2164 274.566 39.9585 275.215 37.1279 274.043C34.2973 272.87 32.4512 270.107 32.4512 267.043V209.762H7.5752C3.39155 209.762 2.88624e-05 206.371 0 202.187V93.8306C6.59711e-05 89.647 3.39158 86.2554 7.5752 86.2554H32.4512V7.57572C32.4512 4.51189 34.2973 1.74917 37.1279 0.576694C39.9584 -0.595448 43.2165 0.0529879 45.3828 2.21927L118.94 75.7769V7.57572C118.94 3.39212 122.332 0.000522602 126.516 0.000522602C130.699 0.000522602 134.091 3.39212 134.091 7.57572V75.7769L207.649 2.21927ZM47.6016 173.175V248.755L118.94 177.417V110.757L47.6016 173.175ZM134.091 177.416L205.431 248.755V202.303C205.43 202.265 205.428 202.226 205.428 202.187C205.428 202.148 205.43 202.109 205.431 202.07V173.175L134.091 110.757V177.416ZM217.993 164.037C219.637 165.475 220.581 167.553 220.581 169.738V194.612H237.877V101.406H146.411L217.993 164.037ZM15.1504 194.612H32.4512V169.738C32.4512 167.553 33.3941 165.475 35.0381 164.037L106.621 101.406H15.1504V194.612ZM47.6016 86.2554H107.993L47.6016 25.8638V86.2554ZM145.04 86.2554H205.431V25.8638L145.04 86.2554Z" /></svg>
+        </div>
+        <div class="body">
+          <div class="hero-stack" style="flex-direction:row;align-items:baseline;gap:var(--s-40);">
+            <div class="hero">+11.5<span class="unit">pp</span></div>
+            <div class="deck" style="max-width:36ch;">Peak advantage at b=4. Diminishing returns above b=7. Same accuracy as Sonnet at one seventh the cost.</div>
+          </div>
+          <div></div>
+          <div class="content">
+            <div class="d-matrix">
+              <div class="d-col">
+                <div class="d-stack"><div class="d-dot"></div><div class="d-dot"></div><div class="d-dot"></div><div class="d-dot mid"></div><div class="d-dot mid"></div><div class="d-dot mid"></div></div>
+                <div class="d-col-label">b=1</div>
+              </div>
+              <div class="d-col">
+                <div class="d-stack"><div class="d-dot"></div><div class="d-dot"></div><div class="d-dot"></div><div class="d-dot mid"></div><div class="d-dot mid"></div><div class="d-dot mid"></div><div class="d-dot mid"></div></div>
+                <div class="d-col-label">2</div>
+              </div>
+              <div class="d-col">
+                <div class="d-stack"><div class="d-dot"></div><div class="d-dot"></div><div class="d-dot"></div><div class="d-dot mid"></div><div class="d-dot mid"></div><div class="d-dot mid"></div><div class="d-dot mid"></div><div class="d-dot mid"></div></div>
+                <div class="d-col-label">3</div>
+              </div>
+              <div class="d-col peak">
+                <div class="d-stack"><div class="d-dot"></div><div class="d-dot"></div><div class="d-dot"></div><div class="d-dot mid"></div><div class="d-dot mid"></div><div class="d-dot mid"></div><div class="d-dot mid"></div><div class="d-dot mid"></div><div class="d-dot hi"></div></div>
+                <div class="d-col-label">4</div>
+              </div>
+              <div class="d-col">
+                <div class="d-stack"><div class="d-dot"></div><div class="d-dot"></div><div class="d-dot"></div><div class="d-dot mid"></div><div class="d-dot mid"></div><div class="d-dot mid"></div><div class="d-dot mid"></div><div class="d-dot mid"></div><div class="d-dot mid"></div></div>
+                <div class="d-col-label">5</div>
+              </div>
+              <div class="d-col">
+                <div class="d-stack"><div class="d-dot"></div><div class="d-dot"></div><div class="d-dot"></div><div class="d-dot mid"></div><div class="d-dot mid"></div><div class="d-dot mid"></div><div class="d-dot mid"></div><div class="d-dot mid"></div><div class="d-dot mid"></div></div>
+                <div class="d-col-label">6</div>
+              </div>
+              <div class="d-col">
+                <div class="d-stack"><div class="d-dot"></div><div class="d-dot"></div><div class="d-dot"></div><div class="d-dot mid"></div><div class="d-dot mid"></div><div class="d-dot mid"></div><div class="d-dot mid"></div><div class="d-dot mid"></div><div class="d-dot mid"></div></div>
+                <div class="d-col-label">7</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="foot"><span>FRAMES · 3 models × 7 budgets · 2026</span><span>2026</span></div>
+      </div>
+      <div class="slot-meta"><b>Rhythm pass.</b> 16:9 puts hero + deck on one line (row-flex). Matrix pins above footer. Peak column gets the teal dot and label, reads as the takeaway.</div>
+    </div>
+
+    <!-- ===================== ARCHETYPE G · header-only family ===================== -->
+    <div class="section-head">
+      <div class="section-kicker">Archetype G · 1080×1080 · 1:1 · header-only family</div>
+      <div class="section-title">G-display · G-editorial · G-quote</div>
+      <div class="section-sub">When the headline IS the content. GT Canon as title face, Mono confined to kicker and footer chrome. Three variants for three rhetorical moves: display claim, editorial framing, italic quotation.</div>
+    </div>
+
+    <!-- G-display -->
+    <div class="slot s11">
+      <div class="slot-tag"><span class="slot-tag-name">G-display · cover claim</span><span class="slot-tag-spec">1:1 · 1080×1080</span></div>
+      <div class="card r-11 arche-g">
+        <div class="head">
+          <div class="head-text">
+            <div class="h-kicker">Perplexity Deep Research · 2026</div>
+          </div>
+          <svg class="h-mark" viewBox="0 0 254 275" fill="currentColor"><path d="M207.649 2.21927C209.816 0.0528457 213.075 -0.595764 215.905 0.576694C218.736 1.74918 220.581 4.5119 220.581 7.57572V86.2554H245.452C249.636 86.2557 253.027 89.6472 253.027 93.8306V202.187C253.027 206.371 249.636 209.762 245.452 209.762H220.581V267.043C220.581 270.107 218.735 272.87 215.904 274.043C213.074 275.215 209.816 274.566 207.649 272.4L134.091 198.841V267.085C134.091 271.268 130.699 274.66 126.516 274.66C122.332 274.66 118.94 271.268 118.94 267.085V198.842L45.3828 272.4C43.2164 274.566 39.9585 275.215 37.1279 274.043C34.2973 272.87 32.4512 270.107 32.4512 267.043V209.762H7.5752C3.39155 209.762 2.88624e-05 206.371 0 202.187V93.8306C6.59711e-05 89.647 3.39158 86.2554 7.5752 86.2554H32.4512V7.57572C32.4512 4.51189 34.2973 1.74917 37.1279 0.576694C39.9584 -0.595448 43.2165 0.0529879 45.3828 2.21927L118.94 75.7769V7.57572C118.94 3.39212 122.332 0.000522602 126.516 0.000522602C130.699 0.000522602 134.091 3.39212 134.091 7.57572V75.7769L207.649 2.21927ZM47.6016 173.175V248.755L118.94 177.417V110.757L47.6016 173.175ZM134.091 177.416L205.431 248.755V202.303C205.43 202.265 205.428 202.226 205.428 202.187C205.428 202.148 205.43 202.109 205.431 202.07V173.175L134.091 110.757V177.416ZM217.993 164.037C219.637 165.475 220.581 167.553 220.581 169.738V194.612H237.877V101.406H146.411L217.993 164.037ZM15.1504 194.612H32.4512V169.738C32.4512 167.553 33.3941 165.475 35.0381 164.037L106.621 101.406H15.1504V194.612ZM47.6016 86.2554H107.993L47.6016 25.8638V86.2554ZM145.04 86.2554H205.431V25.8638L145.04 86.2554Z" /></svg>
+        </div>
+        <div class="body">
+          <div></div>
+          <div class="content">
+            <div class="g-display">Hours of expert work, in under three minutes.</div>
+          </div>
+        </div>
+        <div class="foot"><span>HLE 21.1% · SimpleQA 93.9%</span><span>2026</span></div>
+      </div>
+      <div class="slot-meta"><b>Rhythm pass.</b> Headline pinned above the footer, leaving the upper two-thirds as breath. GT Canon upright at 84px with text-wrap balance.</div>
+    </div>
+
+    <!-- G-editorial -->
+    <div class="slot s11">
+      <div class="slot-tag"><span class="slot-tag-name">G-editorial · framed claim</span><span class="slot-tag-spec">1:1 · 1080×1080</span></div>
+      <div class="card r-11 arche-g">
+        <div class="head">
+          <div class="head-text">
+            <div class="h-kicker">From the research blog · April 2026</div>
+          </div>
+          <svg class="h-mark" viewBox="0 0 254 275" fill="currentColor"><path d="M207.649 2.21927C209.816 0.0528457 213.075 -0.595764 215.905 0.576694C218.736 1.74918 220.581 4.5119 220.581 7.57572V86.2554H245.452C249.636 86.2557 253.027 89.6472 253.027 93.8306V202.187C253.027 206.371 249.636 209.762 245.452 209.762H220.581V267.043C220.581 270.107 218.735 272.87 215.904 274.043C213.074 275.215 209.816 274.566 207.649 272.4L134.091 198.841V267.085C134.091 271.268 130.699 274.66 126.516 274.66C122.332 274.66 118.94 271.268 118.94 267.085V198.842L45.3828 272.4C43.2164 274.566 39.9585 275.215 37.1279 274.043C34.2973 272.87 32.4512 270.107 32.4512 267.043V209.762H7.5752C3.39155 209.762 2.88624e-05 206.371 0 202.187V93.8306C6.59711e-05 89.647 3.39158 86.2554 7.5752 86.2554H32.4512V7.57572C32.4512 4.51189 34.2973 1.74917 37.1279 0.576694C39.9584 -0.595448 43.2165 0.0529879 45.3828 2.21927L118.94 75.7769V7.57572C118.94 3.39212 122.332 0.000522602 126.516 0.000522602C130.699 0.000522602 134.091 3.39212 134.091 7.57572V75.7769L207.649 2.21927ZM47.6016 173.175V248.755L118.94 177.417V110.757L47.6016 173.175ZM134.091 177.416L205.431 248.755V202.303C205.43 202.265 205.428 202.226 205.428 202.187C205.428 202.148 205.43 202.109 205.431 202.07V173.175L134.091 110.757V177.416ZM217.993 164.037C219.637 165.475 220.581 167.553 220.581 169.738V194.612H237.877V101.406H146.411L217.993 164.037ZM15.1504 194.612H32.4512V169.738C32.4512 167.553 33.3941 165.475 35.0381 164.037L106.621 101.406H15.1504V194.612ZM47.6016 86.2554H107.993L47.6016 25.8638V86.2554ZM145.04 86.2554H205.431V25.8638L145.04 86.2554Z" /></svg>
+        </div>
+        <div class="body">
+          <div></div>
+          <div class="content">
+            <div>
+              <div class="g-editorial-title">Advancing search-augmented language models.</div>
+              <hr class="g-rule" />
+              <div class="g-editorial-deck">A frontier-scale reward model, anchored efficiency penalties, and a synthetic verifiable QA pipeline. Qwen3.5-SFT-RL matches GPT-5.4 at one fifth the cost.</div>
+            </div>
+          </div>
+        </div>
+        <div class="foot"><span>research.perplexity.ai · 2026</span><span>2026</span></div>
+      </div>
+      <div class="slot-meta"><b>Rhythm pass.</b> Title in GT Canon at 48px, hairline rule glyph, deck in PPLX Sans. Three elements stacked, hairline rule does the work that the bars do in A.</div>
+    </div>
+
+    <!-- G-quote -->
+    <div class="slot s11">
+      <div class="slot-tag"><span class="slot-tag-name">G-quote · italic attribution</span><span class="slot-tag-spec">1:1 · 1080×1080</span></div>
+      <div class="card r-11 arche-g">
+        <div class="head">
+          <div class="head-text">
+            <div class="h-kicker">From the launch post · April 2026</div>
+          </div>
+          <svg class="h-mark" viewBox="0 0 254 275" fill="currentColor"><path d="M207.649 2.21927C209.816 0.0528457 213.075 -0.595764 215.905 0.576694C218.736 1.74918 220.581 4.5119 220.581 7.57572V86.2554H245.452C249.636 86.2557 253.027 89.6472 253.027 93.8306V202.187C253.027 206.371 249.636 209.762 245.452 209.762H220.581V267.043C220.581 270.107 218.735 272.87 215.904 274.043C213.074 275.215 209.816 274.566 207.649 272.4L134.091 198.841V267.085C134.091 271.268 130.699 274.66 126.516 274.66C122.332 274.66 118.94 271.268 118.94 267.085V198.842L45.3828 272.4C43.2164 274.566 39.9585 275.215 37.1279 274.043C34.2973 272.87 32.4512 270.107 32.4512 267.043V209.762H7.5752C3.39155 209.762 2.88624e-05 206.371 0 202.187V93.8306C6.59711e-05 89.647 3.39158 86.2554 7.5752 86.2554H32.4512V7.57572C32.4512 4.51189 34.2973 1.74917 37.1279 0.576694C39.9584 -0.595448 43.2165 0.0529879 45.3828 2.21927L118.94 75.7769V7.57572C118.94 3.39212 122.332 0.000522602 126.516 0.000522602C130.699 0.000522602 134.091 3.39212 134.091 7.57572V75.7769L207.649 2.21927ZM47.6016 173.175V248.755L118.94 177.417V110.757L47.6016 173.175ZM134.091 177.416L205.431 248.755V202.303C205.43 202.265 205.428 202.226 205.428 202.187C205.428 202.148 205.43 202.109 205.431 202.07V173.175L134.091 110.757V177.416ZM217.993 164.037C219.637 165.475 220.581 167.553 220.581 169.738V194.612H237.877V101.406H146.411L217.993 164.037ZM15.1504 194.612H32.4512V169.738C32.4512 167.553 33.3941 165.475 35.0381 164.037L106.621 101.406H15.1504V194.612ZM47.6016 86.2554H107.993L47.6016 25.8638V86.2554ZM145.04 86.2554H205.431V25.8638L145.04 86.2554Z" /></svg>
+        </div>
+        <div class="body">
+          <div></div>
+          <div class="content">
+            <div>
+              <div class="g-quote">“We rebuilt the reward model from first principles, then re-trained Qwen on its own preferences.”</div>
+              <span class="g-cite-rule"></span>
+              <div class="g-cite">Perplexity Research · 2026</div>
+            </div>
+          </div>
+        </div>
+        <div class="foot"><span>Advancing search-augmented LMs</span><span>2026</span></div>
+      </div>
+      <div class="slot-meta"><b>Rhythm pass.</b> GT Canon Italic at opsz 60 / wght 550 with smart quotes and hanging-punctuation. 48px rule glyph replaces em-dash before attribution.</div>
+    </div>
+
+    <!-- ===================== FINDINGS ===================== -->
+    <div class="findings">
+      <div class="findings-title">Audit findings</div>
+      <div class="findings-body">
+        <p><b>Rhythm contract holds across all nine cards.</b> Every variant respects head / breath / content / foot. The head pins top, content pins above the foot, and the breath lives in the middle <code>1fr</code> slot.</p>
+        <p><b>Regression caught: type sized in pixels breaks at non-export scales.</b> The first render of this audit had G-display at 84px GT Canon and the quote at 54px italic. At a 250px-wide audit card, both wrapped to 7–8 lines and clipped the footer. The fix was switching every type-size declaration from <code>px</code> to <code>cqi</code> (container query inline units), so type scales with the actual card width. Same archetype works at 250px in the audit and at 1080px on social export.</p>
+        <p><b>Regression caught: A bars overlapped the deck.</b> When the <code>1fr</code> breath row collapses (because hero + content sum exceeds body height), the bar motif climbs up into the deck. Fix: enforce a <code>gap: 4cqi</code> on the body grid so the breath is never zero. Now there's a guaranteed minimum gap between hero-stack and content even when 1fr collapses.</p>
+        <p><b>Native aspect ratios produced different hero scales.</b> 1:1 hero = 36cqi (≈389px on 1080 export); 4:5 = 42cqi; 9:16 = 42cqi (narrow but tall, so percent-of-width is small relative to height); 16:9 = 14cqi (paired inline with deck via row-flex). PPLX 2026 mark = 6.8cqi on square/portrait, 3.4cqi on 16:9.</p>
+        <p><b>The only structural exception is B (2×2 grid).</b> B has no hero stack — the four cells share the load. The hero-stack row becomes empty (intentionally) and the grid pins above the foot. No regression, just a different occupancy of the same shell.</p>
+        <p><b>F wallet is the most format-sensitive.</b> 9:16 requires <code>align-content: space-between</code> on the row container so rows distribute across the full vertical column. The lead row title at 7.2cqi naturally wraps to 2 lines on long names like “Sonar-Reasoning-Pro-High” — the wrap is acceptable when the suffix uses the <code>.soft</code> span for tonal differentiation.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

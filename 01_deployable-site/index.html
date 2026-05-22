@@ -1,0 +1,1628 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Perplexity Chart System · v7 · four-surface reference</title>
+<meta name="description" content="Perplexity chart system reference: four surfaces (academic dark/light, editorial dark/light), six archetypes, type ramp, spacing scale, unit-chrome rules. Optimized for agent consumption with JSON token export and copyable code blocks." />
+<link rel="canonical" href="./index.html" />
+<link rel="preload" href="./fonts/PPLX-Sans-Beta-v2-VF.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="./fonts/PPLX-Mono-Beta-v0-VF.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="./fonts/GT-Canon-VF.woff2" as="font" type="font/woff2" crossorigin />
+<style>
+  @font-face {
+    font-family: 'PPLX Sans';
+    src: url('./fonts/PPLX-Sans-Beta-v2-VF.woff2') format('woff2-variations');
+    font-weight: 100 900;
+    font-display: block;
+  }
+  @font-face {
+    font-family: 'PPLX Mono';
+    src: url('./fonts/PPLX-Mono-Beta-v0-VF.woff2') format('woff2-variations');
+    font-weight: 100 900;
+    font-display: block;
+  }
+  @font-face {
+    font-family: 'GT Canon VF';
+    src: url('./fonts/GT-Canon-VF.woff2') format('woff2-variations'),
+         url('./fonts/GT-Canon-VF.woff2') format('woff2');
+    font-weight: 300 900;
+    font-stretch: 37% 150%;
+    font-style: normal;
+    font-display: block;
+  }
+  @font-face {
+    font-family: 'GT Canon VF';
+    src: url('./fonts/GT-Canon-Italic-VF.woff2') format('woff2-variations'),
+         url('./fonts/GT-Canon-Italic-VF.woff2') format('woff2');
+    font-weight: 300 900;
+    font-stretch: 37% 150%;
+    font-style: italic;
+    font-display: block;
+  }
+
+  /* Dark mode default. Hero color: white. Baseline: cool grey. Accent: teal used sparingly. */
+  :root {
+    --canvas:        #0a0a0a;
+    --canvas-2:      #141414;
+    --canvas-3:      #1c1c1c;
+    --text:          #FBFAF4;
+    --text-dim:      #9a9a9a;
+    --text-mute:     #6a6a6a;
+    --rule:          rgba(251, 250, 244, 0.12);
+    --rule-bright:   rgba(251, 250, 244, 0.40);
+    --accent:        #2ca1ab;
+    --accent-mute:   rgba(44, 161, 171, 0.18);
+    --hero:          #FBFAF4;
+    --code-bg:       #16100b;
+    --s-1:  4px;
+    --s-2:  8px;
+    --s-3:  14px;
+    --s-4:  20px;
+    --s-5:  28px;
+    --s-6:  40px;
+    --s-7:  56px;
+    --s-8:  80px;
+    --s-9:  112px;
+
+    /* Responsive page rhythm — distinct from card spacing scale.
+       Card cards stay locked to 4/8/14/20/28/40/56/80/112. Page rhythm flexes. */
+    --gap-section:   88px;   /* gap between major sections */
+    --gap-block:     32px;   /* gap between blocks inside a section */
+    --pad-edge:      40px;   /* horizontal page edge padding */
+    --maxw:          1280px;
+  }
+  @media (max-width: 1024px) {
+    :root { --gap-section: 72px; --gap-block: 28px; --pad-edge: 32px; }
+  }
+  @media (max-width: 720px) {
+    :root { --gap-section: 56px; --gap-block: 24px; --pad-edge: 20px; }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--canvas);
+    color: var(--text);
+    font-family: 'PPLX Sans', system-ui, sans-serif;
+    font-feature-settings: 'kern' 1;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
+    line-height: 1.5;
+  }
+  ::selection { background: var(--accent-mute); color: var(--text); }
+
+  /* ---------------- Type ramp ---------------- */
+  .t-kicker {
+    font-family: 'PPLX Mono', monospace;
+    font-size: 14px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    font-variation-settings: 'wght' 480;
+  }
+  .t-footer, .t-micro {
+    font-family: 'PPLX Mono', monospace;
+    font-size: 14px;
+    letter-spacing: 0.10em;
+    color: var(--text-dim);
+  }
+  .t-title {
+    font-family: 'PPLX Mono', monospace;
+    font-variation-settings: 'wght' 520;
+    font-size: 28px;
+    line-height: 1.18;
+    letter-spacing: -0.005em;
+    color: var(--text);
+  }
+  .t-body {
+    font-family: 'PPLX Sans', system-ui, sans-serif;
+    font-size: 18px;
+    line-height: 1.55;
+    color: var(--text-dim);
+    max-width: 64ch;
+  }
+  .t-body strong { color: var(--text); font-variation-settings: 'wght' 540; }
+  .t-hero {
+    font-family: 'GT Canon VF', serif;
+    font-variation-settings: 'wdth' 75, 'wght' 500, 'opsz' 144;
+    font-feature-settings: "pnum" 1, "lnum" 1, "kern" 1;
+    line-height: 0.88;
+    letter-spacing: -0.015em;
+    color: var(--text);
+  }
+
+  /* Code blocks — agent-readable, copyable */
+  pre, code, .code {
+    font-family: 'PPLX Mono', ui-monospace, monospace;
+    font-size: 13px;
+    line-height: 1.65;
+    color: #d4cdc1;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--rule);
+    padding: var(--s-3) var(--s-4);
+    border-radius: 6px;
+    overflow-x: auto;
+    position: relative;
+    max-width: 100%;
+    white-space: pre;
+  }
+  @media (max-width: 480px) {
+    pre { font-size: 12px; padding: var(--s-3); }
+  }
+  pre .tok-key { color: #7fc8d2; }
+  pre .tok-str { color: #f4cd87; }
+  pre .tok-num { color: #c8a2ff; }
+  pre .tok-com { color: var(--text-mute); }
+  code:not(pre code) {
+    background: var(--code-bg);
+    border: 1px solid var(--rule);
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: #d4cdc1;
+  }
+
+  .copy-btn {
+    position: absolute;
+    top: 10px; right: 10px;
+    font-family: 'PPLX Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    background: transparent;
+    border: 1px solid var(--rule-bright);
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: color 140ms ease, border-color 140ms ease, background 140ms ease;
+  }
+  .copy-btn:hover { color: var(--text); border-color: var(--text); }
+  .copy-btn:active { background: var(--accent-mute); }
+  .copy-btn.copied { color: var(--accent); border-color: var(--accent); }
+
+  /* ---------------- Layout ---------------- */
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--pad-edge); }
+
+  header.page {
+    border-bottom: 1px solid var(--rule);
+    padding: var(--s-7) 0 var(--s-7);
+    margin-bottom: var(--gap-section);
+  }
+  @media (max-width: 720px) {
+    header.page { padding: var(--s-5) 0; }
+  }
+  header.page .wrap {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--s-6);
+    align-items: end;
+  }
+  @media (max-width: 720px) {
+    header.page .wrap {
+      grid-template-columns: 1fr;
+      gap: var(--s-4);
+    }
+    .page-meta { text-align: left; }
+  }
+  .page-title {
+    font-family: 'PPLX Mono', monospace;
+    font-variation-settings: 'wght' 520;
+    font-size: clamp(22px, 2.6vw + 8px, 32px);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+  .page-deck {
+    font-family: 'PPLX Sans', sans-serif;
+    font-size: 17px;
+    color: var(--text-dim);
+    margin-top: var(--s-3);
+    max-width: 70ch;
+    line-height: 1.55;
+  }
+  @media (max-width: 720px) { .page-deck { font-size: 15px; } }
+  .page-meta {
+    font-family: 'PPLX Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.10em;
+    color: var(--text-dim);
+    text-align: right;
+    line-height: 1.6;
+  }
+  .page-meta a { color: var(--text-dim); text-decoration: none; }
+  .page-meta a:hover { color: var(--text); }
+
+  nav.toc {
+    border: 1px solid var(--rule);
+    background: var(--canvas-2);
+    padding: var(--s-4) var(--s-5);
+    border-radius: 8px;
+    margin-bottom: var(--gap-section);
+  }
+  nav.toc .t-kicker { margin-bottom: var(--s-3); display: block; }
+  nav.toc ol {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--s-2) var(--s-5);
+  }
+  @media (max-width: 880px) {
+    nav.toc ol { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 480px) {
+    nav.toc ol { grid-template-columns: 1fr; }
+  }
+  nav.toc ol li { display: flex; gap: var(--s-3); align-items: baseline; }
+  nav.toc ol li .toc-num {
+    font-family: 'PPLX Mono', monospace;
+    font-size: 12px;
+    color: var(--text-mute);
+    letter-spacing: 0.10em;
+    min-width: 28px;
+  }
+  nav.toc .toc-zones {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--s-5);
+  }
+  @media (max-width: 880px) { nav.toc .toc-zones { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px) { nav.toc .toc-zones { grid-template-columns: 1fr; } }
+  nav.toc .toc-zone-label {
+    font-family: 'PPLX Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+    padding-bottom: var(--s-2);
+    margin-bottom: var(--s-3);
+    border-bottom: 1px solid var(--rule);
+  }
+  nav.toc .toc-zone ol {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-2);
+  }
+  nav.toc a {
+    color: var(--text);
+    text-decoration: none;
+    font-size: 16px;
+    border-bottom: 1px solid transparent;
+    transition: border-color 140ms ease, color 140ms ease;
+  }
+  nav.toc a:hover { border-bottom-color: var(--text); }
+
+  section {
+    margin-bottom: var(--gap-section);
+    scroll-margin-top: var(--s-5);
+  }
+  section .section-head {
+    display: grid;
+    grid-template-columns: 64px 1fr auto;
+    gap: var(--s-4);
+    align-items: baseline;
+    border-top: 1px solid var(--rule-bright);
+    padding-top: var(--s-4);
+    margin-bottom: var(--s-6);
+  }
+  @media (max-width: 720px) {
+    section .section-head {
+      grid-template-columns: 1fr auto;
+      gap: var(--s-2);
+      padding-top: var(--s-3);
+      margin-bottom: var(--s-5);
+    }
+    section .section-num { grid-column: 1 / -1; }
+  }
+  section .section-intro {
+    color: var(--text-dim);
+    font-family: 'PPLX Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    max-width: 64ch;
+    margin-bottom: var(--gap-block);
+  }
+  section .section-num {
+    font-family: 'PPLX Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+  section .section-title {
+    font-family: 'PPLX Mono', monospace;
+    font-variation-settings: 'wght' 520;
+    font-size: clamp(22px, 1.8vw + 12px, 28px);
+    line-height: 1.15;
+    letter-spacing: -0.005em;
+  }
+  section .section-anchor {
+    font-family: 'PPLX Mono', monospace;
+    font-size: 12px;
+    color: var(--text-mute);
+    text-decoration: none;
+    letter-spacing: 0.10em;
+  }
+  section .section-anchor:hover { color: var(--text); }
+
+  /* ---------------- Live iframe embeds ---------------- */
+  .iframe-wrap {
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--canvas-2);
+    margin-top: var(--s-4);
+  }
+  .iframe-wrap iframe {
+    display: block;
+    width: 100%;
+    height: 1400px;
+    border: 0;
+    background: var(--canvas);
+  }
+  .iframe-wrap .iframe-tag {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--s-3) var(--s-4);
+    border-top: 1px solid var(--rule);
+    font-family: 'PPLX Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+  }
+  .iframe-wrap .iframe-tag a {
+    color: var(--text-dim);
+    text-decoration: none;
+    border-bottom: 1px solid var(--rule-bright);
+  }
+  .iframe-wrap .iframe-tag a:hover { color: var(--text); border-bottom-color: var(--text); }
+  @media (max-width: 880px) {
+    .iframe-wrap iframe { height: 2200px; }
+  }
+
+  /* ---------------- Surface cards ---------------- */
+  .surfaces {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--s-4);
+  }
+  @media (max-width: 720px) {
+    .surfaces { grid-template-columns: 1fr; gap: var(--s-3); }
+  }
+  .surface-card {
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--canvas-2);
+  }
+  .surface-preview {
+    height: 220px;
+    background-size: cover;
+    background-position: center 12%;
+    border-bottom: 1px solid var(--rule);
+  }
+  @media (max-width: 480px) {
+    .surface-preview { height: 160px; }
+  }
+  .surface-info {
+    padding: var(--s-4);
+  }
+  .surface-info .name {
+    font-family: 'PPLX Mono', monospace;
+    font-variation-settings: 'wght' 520;
+    font-size: 16px;
+    margin-bottom: var(--s-2);
+  }
+  .surface-info .name em {
+    font-family: 'GT Canon VF', serif;
+    font-variation-settings: 'wdth' 75, 'wght' 500;
+    font-style: italic;
+    color: var(--text-dim);
+    font-size: 15px;
+  }
+  .surface-info .intent {
+    font-family: 'PPLX Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.5;
+    margin-bottom: var(--s-3);
+  }
+  .swatch-row { display: flex; gap: var(--s-3); flex-wrap: wrap; margin-bottom: var(--s-3); }
+  .swatch {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'PPLX Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.04em;
+  }
+  .swatch .sw {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border-radius: 2px;
+    border: 1px solid var(--rule-bright);
+  }
+  .surface-actions {
+    display: flex;
+    gap: var(--s-3);
+    margin-top: var(--s-3);
+    font-family: 'PPLX Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+  }
+  .surface-actions a {
+    color: var(--text-dim);
+    text-decoration: none;
+    border-bottom: 1px solid var(--rule-bright);
+    padding-bottom: 2px;
+    transition: color 140ms ease, border-color 140ms ease;
+  }
+  .surface-actions a:hover { color: var(--text); border-color: var(--text); }
+
+  /* ---------------- Token tables ---------------- */
+  table.tokens {
+    width: 100%;
+    border-collapse: collapse;
+    margin: var(--s-5) 0;
+    font-family: 'PPLX Mono', monospace;
+    font-size: 13px;
+  }
+  table.tokens th, table.tokens td {
+    text-align: left;
+    padding: var(--s-3) var(--s-4);
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  table.tokens th {
+    color: var(--text-dim);
+    font-variation-settings: 'wght' 480;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    font-size: 11px;
+    padding-bottom: var(--s-3);
+    background: var(--canvas-2);
+  }
+  table.tokens td.token-name { color: var(--text); }
+  table.tokens td.token-value {
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+  table.tokens td.token-use {
+    font-family: 'PPLX Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+  table.tokens td .sw {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border-radius: 2px;
+    border: 1px solid var(--rule-bright);
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+
+  /* ---------------- Two-column layouts ---------------- */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: var(--s-7);
+    align-items: start;
+  }
+  @media (max-width: 880px) {
+    .two-col { grid-template-columns: 1fr; }
+  }
+
+  /* ---------------- Archetype cards ---------------- */
+  .archetypes {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--s-4);
+  }
+  @media (max-width: 880px) {
+    .archetypes { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 560px) {
+    .archetypes { grid-template-columns: 1fr; gap: var(--s-3); }
+  }
+  .archetype-card {
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: var(--s-4);
+    background: var(--canvas-2);
+    display: grid;
+    grid-template-rows: auto auto 1fr;
+    gap: var(--s-2);
+  }
+  .archetype-card .letter {
+    font-family: 'GT Canon VF', serif;
+    font-variation-settings: 'wdth' 75, 'wght' 500, 'opsz' 60;
+    font-size: 48px;
+    line-height: 1;
+    color: var(--text);
+  }
+  .archetype-card .aspect {
+    font-family: 'PPLX Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+  .archetype-card .arch-name {
+    font-family: 'PPLX Mono', monospace;
+    font-variation-settings: 'wght' 520;
+    font-size: 16px;
+    color: var(--text);
+    margin-top: var(--s-2);
+  }
+  .archetype-card .arch-use {
+    font-family: 'PPLX Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .archetype-card .arch-size {
+    font-family: 'PPLX Mono', monospace;
+    font-size: 12px;
+    color: var(--text-mute);
+    letter-spacing: 0.08em;
+  }
+
+  /* ---------------- Rules list ---------------- */
+  .rules {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .rule-row {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: var(--s-5);
+    padding: var(--s-4) var(--s-5);
+    border-bottom: 1px solid var(--rule);
+  }
+  @media (max-width: 720px) {
+    .rule-row {
+      grid-template-columns: 1fr;
+      gap: var(--s-2);
+      padding: var(--s-4);
+    }
+  }
+  .rule-row:last-child { border-bottom: none; }
+  .rule-row:nth-child(even) { background: var(--canvas-2); }
+  .rule-row .rule-key {
+    font-family: 'PPLX Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    letter-spacing: -0.005em;
+    font-variation-settings: 'wght' 520;
+  }
+  .rule-row .rule-val {
+    font-family: 'PPLX Sans', sans-serif;
+    font-size: 15px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+  .rule-row .rule-val code {
+    font-size: 12px;
+  }
+
+  /* ---------------- Spacing scale viz ---------------- */
+  /* Bars are sized by their own pixel value, anchored at left, with a max-width
+     cap on the row so --s-9 (112px) fills a meaningful proportion of the visible row. */
+  .space-scale {
+    display: grid;
+    grid-template-columns: 56px 56px minmax(0, 1fr);
+    column-gap: var(--s-5);
+    max-width: 480px;
+    align-items: center;
+    font-family: 'PPLX Mono', monospace;
+    font-size: 13px;
+  }
+  .space-scale > div {
+    padding: 6px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .space-scale > div:nth-last-child(-n+3) { border-bottom: none; }
+  .space-scale .bar {
+    height: 10px;
+    background: var(--text);
+    border-radius: 1px;
+  }
+  .space-scale .key { color: var(--text); }
+  .space-scale .val { color: var(--text-dim); }
+
+  /* ---------------- Type ramp viz ---------------- */
+  .type-ramp { display: grid; grid-template-columns: 1fr; gap: 0; }
+  .type-row {
+    display: grid;
+    grid-template-columns: 120px 1fr 200px;
+    gap: var(--s-5);
+    padding: var(--s-4) 0;
+    border-bottom: 1px solid var(--rule);
+    align-items: baseline;
+  }
+  @media (max-width: 720px) {
+    .type-row {
+      grid-template-columns: 1fr;
+      gap: var(--s-2);
+      padding: var(--s-3) 0;
+    }
+    .type-row .type-spec { text-align: left; }
+  }
+  .type-row:last-child { border-bottom: none; }
+  .type-row .type-label {
+    font-family: 'PPLX Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .type-row .type-spec {
+    font-family: 'PPLX Mono', monospace;
+    font-size: 12px;
+    color: var(--text-mute);
+    letter-spacing: 0.02em;
+    text-align: right;
+  }
+  .type-row .type-sample.is-footer  { font-family: 'PPLX Mono'; font-size: 14px; color: var(--text-dim); letter-spacing: 0.10em; }
+  .type-row .type-sample.is-micro   { font-family: 'PPLX Mono'; font-size: 14px; color: var(--text-dim); letter-spacing: 0.10em; }
+  .type-row .type-sample.is-kicker  { font-family: 'PPLX Mono'; font-size: 14px; color: var(--text-dim); letter-spacing: 0.16em; text-transform: uppercase; }
+  .type-row .type-sample.is-body    { font-family: 'PPLX Sans'; font-size: 18px; color: var(--text); }
+  .type-row .type-sample.is-title   { font-family: 'PPLX Mono'; font-variation-settings: 'wght' 520; font-size: 28px; letter-spacing: -0.005em; }
+  .type-row .type-sample.is-hero    {
+    font-family: 'GT Canon VF';
+    font-variation-settings: 'wdth' 75, 'wght' 500, 'opsz' 144;
+    font-feature-settings: 'pnum' 1, 'lnum' 1, 'kern' 1;
+    font-size: clamp(56px, 8vw, 96px);
+    line-height: 0.88;
+    letter-spacing: -0.015em;
+  }
+  .type-row .type-sample.is-hero .unit {
+    font-feature-settings: 'pnum' 1, 'lnum' 1, 'kern' 1;
+    font-variation-settings: 'wdth' 75, 'wght' 650, 'opsz' 60;
+    font-size: 0.46em;
+    line-height: 1;
+    margin-left: 0.04em;
+    vertical-align: 0.34em;
+    display: inline-block;
+  }
+
+  /* ---------------- Balancer strategies ---------------- */
+  .balancer-strategies {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--s-3);
+    margin-bottom: var(--gap-block);
+  }
+  @media (max-width: 880px) {
+    .balancer-strategies { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 480px) {
+    .balancer-strategies { grid-template-columns: 1fr; }
+  }
+  .balancer-strategy {
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: var(--s-4);
+    background: var(--canvas-2);
+    display: grid;
+    gap: var(--s-2);
+  }
+  /* Each strategy gets a left border accent in its identity color so the
+     five regimes feel like a system, not just five cards in a row. */
+  .balancer-strategy[data-key="amplify"]    { border-left: 2px solid #2ca1ab; }
+  .balancer-strategy[data-key="distribute"] { border-left: 2px solid #5a6878; }
+  .balancer-strategy[data-key="anchor"]     { border-left: 2px solid #FBFAF4; }
+  .balancer-strategy[data-key="pack"]       { border-left: 2px solid #b07a3a; }
+  .balancer-strategy[data-key="compact"]    { border-left: 2px solid #c64670; }
+  .balancer-strategy .bs-key {
+    font-family: 'PPLX Mono', monospace;
+    font-variation-settings: 'wght' 540;
+    font-size: 14px;
+    color: var(--text);
+    letter-spacing: -0.005em;
+  }
+  .balancer-strategy .bs-range {
+    font-family: 'PPLX Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+  }
+  .balancer-strategy .bs-intent {
+    font-family: 'PPLX Sans', sans-serif;
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .sub-h {
+    font-family: 'PPLX Mono', monospace;
+    font-variation-settings: 'wght' 520;
+    font-size: 16px;
+    color: var(--text);
+    letter-spacing: -0.005em;
+    margin-top: var(--gap-block);
+    margin-bottom: var(--s-3);
+  }
+  .stress-link {
+    display: block;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: var(--s-5);
+    background: var(--canvas-2);
+    transition: border-color 140ms ease;
+  }
+  .stress-link:hover { border-color: var(--rule-bright); }
+  .stress-link img { display: block; width: 100%; height: auto; }
+
+  /* ---------------- Gallery ---------------- */
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--s-4);
+  }
+  @media (max-width: 720px) {
+    .gallery { grid-template-columns: 1fr; gap: var(--s-3); }
+  }
+  .gallery-item {
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--canvas-2);
+    transition: border-color 140ms ease;
+    color: var(--text);
+    text-decoration: none;
+    display: block;
+  }
+  .gallery-item:hover { border-color: var(--rule-bright); }
+  .gallery-item .name { color: var(--text); }
+  .gallery-item .meta { color: var(--text-mute); }
+  .gallery-item .gallery-head {
+    padding: var(--s-4) var(--s-5);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-bottom: 1px solid var(--rule);
+  }
+  .gallery-item .gallery-head .name {
+    font-family: 'PPLX Mono', monospace;
+    font-variation-settings: 'wght' 520;
+    font-size: 14px;
+  }
+  .gallery-item .gallery-head .name em {
+    font-family: 'GT Canon VF', serif;
+    font-style: italic;
+    color: var(--text-dim);
+  }
+  .gallery-item .gallery-head .meta {
+    font-family: 'PPLX Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.10em;
+    color: var(--text-mute);
+  }
+  .gallery-item img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  /* ---------------- Footer ---------------- */
+  footer.page {
+    border-top: 1px solid var(--rule-bright);
+    padding: var(--s-5) 0;
+    margin-top: var(--gap-section);
+  }
+  footer.page .wrap {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--s-5);
+    font-family: 'PPLX Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.10em;
+    color: var(--text-dim);
+  }
+  footer.page a { color: var(--text-dim); text-decoration: none; }
+  footer.page a:hover { color: var(--text); }
+
+  /* PPLX mark */
+  .pp-mark {
+    width: 28px; height: 28px;
+    color: var(--text);
+  }
+  .pp-mark svg { width: 100%; height: 100%; display: block; }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="pp-mark" viewBox="0 0 254 275">
+      <path d="M207.649 2.21927C209.816 0.0528457 213.075 -0.595764 215.905 0.576694C218.736 1.74918 220.581 4.5119 220.581 7.57572V86.2554H245.452C249.636 86.2557 253.027 89.6472 253.027 93.8306V202.187C253.027 206.371 249.636 209.762 245.452 209.762H220.581V267.043C220.581 270.107 218.735 272.87 215.904 274.043C213.074 275.215 209.816 274.566 207.649 272.4L134.091 198.841V267.085C134.091 271.268 130.699 274.66 126.516 274.66C122.332 274.66 118.94 271.268 118.94 267.085V198.842L45.3828 272.4C43.2164 274.566 39.9585 275.215 37.1279 274.043C34.2973 272.87 32.4512 270.107 32.4512 267.043V209.762H7.5752C3.39155 209.762 2.88624e-05 206.371 0 202.187V93.8306C6.59711e-05 89.647 3.39158 86.2554 7.5752 86.2554H32.4512V7.57572C32.4512 4.51189 34.2973 1.74917 37.1279 0.576694C39.9584 -0.595448 43.2165 0.0529879 45.3828 2.21927L118.94 75.7769V7.57572C118.94 3.39212 122.332 0.000522602 126.516 0.000522602C130.699 0.000522602 134.091 3.39212 134.091 7.57572V75.7769L207.649 2.21927ZM47.6016 173.175V248.755L118.94 177.417V110.757L47.6016 173.175ZM134.091 177.416L205.431 248.755V202.303C205.43 202.265 205.428 202.226 205.428 202.187C205.428 202.148 205.43 202.109 205.431 202.07V173.175L134.091 110.757V177.416ZM217.993 164.037C219.637 165.475 220.581 167.553 220.581 169.738V194.612H237.877V101.406H146.411L217.993 164.037ZM15.1504 194.612H32.4512V169.738C32.4512 167.553 33.3941 165.475 35.0381 164.037L106.621 101.406H15.1504V194.612ZM47.6016 86.2554H107.993L47.6016 25.8638V86.2554ZM145.04 86.2554H205.431V25.8638L145.04 86.2554Z" fill="currentColor"/>
+    </symbol>
+  </defs>
+</svg>
+
+<header class="page">
+  <div class="wrap">
+    <div>
+      <div class="t-kicker" style="margin-bottom: 14px;">Perplexity · Chart system · v7</div>
+      <h1 class="page-title">Four surfaces, six archetypes, one rulebook.</h1>
+      <p class="page-deck">Reference for the Perplexity social chart system. Same archetypes render on academic dark, academic light, editorial dark, and editorial light. Tokens flip. Type ramp, spacing scale, and frame structure stay locked. Page is structured for agents. Every token block is copyable, every rule anchored, all tokens export to <a href="./tokens.json" style="color: var(--text); border-bottom: 1px solid var(--rule-bright);">tokens.json</a>.</p>
+    </div>
+    <div class="page-meta">
+      <div class="pp-mark" style="display: inline-block; margin-bottom: 12px;"><svg><use href="#pp-mark"/></svg></div><br>
+      v7 · 2026-05-22<br>
+      <a href="./tokens.json">tokens.json</a><br>
+      <a href="./v7-source.html">v7-source.html</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ============ OPENER ============ -->
+  <section id="opener" style="margin-bottom: var(--gap-section);">
+    <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:var(--s-6);align-items:start;">
+      <div>
+        <div class="t-kicker" style="margin-bottom: var(--s-3);">What this is</div>
+        <p class="t-body" style="font-size: 17px; max-width: 56ch; line-height: 1.55;">
+          v7 is the chart system Perplexity uses for social posts and research-blog figures. It's two surfaces, one rulebook. <strong>Social</strong> cards are editorial: one hero number leading, the rest as support. <strong>Research</strong> charts are instrument readouts: axes, gridlines, every value defensible. Same v7 tokens drive both — you flip treatment, not foundation.
+        </p>
+        <p class="t-body" style="font-size: 17px; max-width: 56ch; line-height: 1.55; margin-top: var(--s-3);">
+          Built to be picked up by a human or an agent. Tokens live in <a href="./tokens.json" style="color: var(--text); border-bottom: 1px solid var(--rule-bright);">tokens.json</a>. Every archetype is a live HTML embed below — resize your window and watch the cards respond.
+        </p>
+      </div>
+      <div style="border: 1px solid var(--rule); border-radius: 8px; padding: var(--s-4) var(--s-5); background: var(--canvas-2);">
+        <div class="t-kicker" style="margin-bottom: var(--s-3);">Where to start</div>
+        <ol style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:var(--s-3);">
+          <li style="display:flex; gap:var(--s-3); align-items:baseline;"><span style="font-family:'PPLX Mono',monospace;font-size:11px;color:var(--text-mute);letter-spacing:0.10em;min-width:24px;">01</span><span><strong>New to v7?</strong> Read <a href="#decision" style="color:var(--text);border-bottom:1px solid var(--rule-bright);">Decision tree</a> — it picks the archetype for your data.</span></li>
+          <li style="display:flex; gap:var(--s-3); align-items:baseline;"><span style="font-family:'PPLX Mono',monospace;font-size:11px;color:var(--text-mute);letter-spacing:0.10em;min-width:24px;">02</span><span><strong>Building a social card?</strong> Jump to <a href="#audit" style="color:var(--text);border-bottom:1px solid var(--rule-bright);">Archetype audit</a> for the live nine-card reference.</span></li>
+          <li style="display:flex; gap:var(--s-3); align-items:baseline;"><span style="font-family:'PPLX Mono',monospace;font-size:11px;color:var(--text-mute);letter-spacing:0.10em;min-width:24px;">03</span><span><strong>Building a blog figure?</strong> See <a href="#two-track" style="color:var(--text);border-bottom:1px solid var(--rule-bright);">Two-track</a> for the research treatment.</span></li>
+          <li style="display:flex; gap:var(--s-3); align-items:baseline;"><span style="font-family:'PPLX Mono',monospace;font-size:11px;color:var(--text-mute);letter-spacing:0.10em;min-width:24px;">04</span><span><strong>Agent integration?</strong> See <a href="#agent-path" style="color:var(--text);border-bottom:1px solid var(--rule-bright);">Agent path</a> for fetch → render.</span></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <nav class="toc" aria-label="Table of contents">
+    <span class="t-kicker">Reference index</span>
+    <div class="toc-zones">
+      <div class="toc-zone">
+        <div class="toc-zone-label">Foundations</div>
+        <ol>
+          <li><span class="toc-num">01</span><a href="#surfaces">Surfaces</a></li>
+          <li><span class="toc-num">02</span><a href="#type-ramp">Type ramp</a></li>
+          <li><span class="toc-num">03</span><a href="#type-rules">Type rules</a></li>
+          <li><span class="toc-num">04</span><a href="#spacing">Spacing scale</a></li>
+          <li><span class="toc-num">05</span><a href="#frame">Frame rules</a></li>
+        </ol>
+      </div>
+      <div class="toc-zone">
+        <div class="toc-zone-label">Archetypes</div>
+        <ol>
+          <li><span class="toc-num">06</span><a href="#archetypes">Archetype catalog</a></li>
+          <li><span class="toc-num">07</span><a href="#decision">Decision tree</a></li>
+          <li><span class="toc-num">08</span><a href="#audit">Archetype audit (live)</a></li>
+        </ol>
+      </div>
+      <div class="toc-zone">
+        <div class="toc-zone-label">Proofs</div>
+        <ol>
+          <li><span class="toc-num">09</span><a href="#balancer">Layout balancer</a></li>
+          <li><span class="toc-num">10</span><a href="#edge-cases">Edge cases</a></li>
+          <li><span class="toc-num">11</span><a href="#two-track">Two-track · research / social</a></li>
+          <li><span class="toc-num">12</span><a href="#blog-rebuilds">Blog rebuilds</a></li>
+          <li><span class="toc-num">13</span><a href="#gallery">Gallery · 24 cards</a></li>
+        </ol>
+      </div>
+      <div class="toc-zone">
+        <div class="toc-zone-label">Exports</div>
+        <ol>
+          <li><span class="toc-num">14</span><a href="#tokens-json">Tokens JSON</a></li>
+          <li><span class="toc-num">15</span><a href="#agent-path">Agent path</a></li>
+        </ol>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============ SURFACES ============ -->
+  <section id="surfaces">
+    <div class="section-head">
+      <div class="section-num">01</div>
+      <h2 class="section-title">Surfaces</h2>
+      <a class="section-anchor" href="#surfaces">#surfaces</a>
+    </div>
+    <p class="section-intro">Two axes: <strong>style</strong> (academic vs editorial) and <strong>value</strong> (dark vs light). A surface is a value flip. Hero and text invert with canvas; baseline and rule colors translate while preserving each surface's temperature. Slate for academic, warm grey for editorial.</p>
+
+    <div class="surfaces">
+
+      <article class="surface-card" id="surface-academic-dark">
+        <div class="surface-preview" style="background-color: #000000; background-image: url(./v7-academic-dark.jpg);"></div>
+        <div class="surface-info">
+          <div class="name">Surface I · <em>academic dark</em></div>
+          <div class="intent">Pure black canvas. Warm-white hero. Slate baseline. Maximum value contrast. Paper figures, research blog, internal benchmarks.</div>
+          <div class="swatch-row">
+            <span class="swatch"><span class="sw" style="background:#000000;"></span>#000000</span>
+            <span class="swatch"><span class="sw" style="background:#FBFAF4;"></span>#FBFAF4</span>
+            <span class="swatch"><span class="sw" style="background:#5a6878;"></span>#5a6878</span>
+          </div>
+          <pre data-copy><span class="tok-com">/* surface-academic-dark */</span>
+<span class="tok-key">--canvas</span>:      #000000;
+<span class="tok-key">--hero</span>:        #FBFAF4;
+<span class="tok-key">--baseline</span>:    #5a6878;
+<span class="tok-key">--text</span>:        #FBFAF4;
+<span class="tok-key">--text-dim</span>:    #8a8a8a;
+<span class="tok-key">--rule</span>:        rgba(251,250,244,.18);
+<span class="tok-key">--rule-bright</span>: rgba(251,250,244,.70);
+<button class="copy-btn" type="button" aria-label="Copy tokens">copy</button></pre>
+          <div class="surface-actions">
+            <a href="./v7-academic-dark.jpg" target="_blank">view full render</a>
+            <a href="#academic-dark-cards">jump to cards</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="surface-card" id="surface-editorial-dark">
+        <div class="surface-preview" style="background-color: #0d0a07; background-image: url(./v7-editorial-dark.jpg);"></div>
+        <div class="surface-info">
+          <div class="name">Surface II · <em>editorial dark</em></div>
+          <div class="intent">Warm near-black canvas. Warm-cream hero. Warm-grey baseline. Restrained warmth. NYT/FT print, magazine spread, brand moments, social posts.</div>
+          <div class="swatch-row">
+            <span class="swatch"><span class="sw" style="background:#0d0a07;"></span>#0d0a07</span>
+            <span class="swatch"><span class="sw" style="background:#f4ead4;"></span>#f4ead4</span>
+            <span class="swatch"><span class="sw" style="background:#3d3a30;"></span>#3d3a30</span>
+          </div>
+          <pre data-copy><span class="tok-com">/* surface-editorial-dark */</span>
+<span class="tok-key">--canvas</span>:      #0d0a07;
+<span class="tok-key">--hero</span>:        #f4ead4;
+<span class="tok-key">--baseline</span>:    #3d3a30;
+<span class="tok-key">--text</span>:        #f4ead4;
+<span class="tok-key">--text-dim</span>:    #8a8270;
+<span class="tok-key">--rule</span>:        rgba(244,234,212,.15);
+<span class="tok-key">--rule-bright</span>: rgba(244,234,212,.65);
+<button class="copy-btn" type="button" aria-label="Copy tokens">copy</button></pre>
+          <div class="surface-actions">
+            <a href="./v7-editorial-dark.jpg" target="_blank">view full render</a>
+            <a href="#editorial-dark-cards">jump to cards</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="surface-card" id="surface-academic-light">
+        <div class="surface-preview" style="background-color: #FBFAF4; background-image: url(./v7-academic-light.jpg);"></div>
+        <div class="surface-info">
+          <div class="name">Surface III · <em>academic light</em></div>
+          <div class="intent">Warm paper canvas (#FBFAF4). Near-black ink. Slate baseline preserved. Print-ready, research paper figures, light-mode product.</div>
+          <div class="swatch-row">
+            <span class="swatch"><span class="sw" style="background:#FBFAF4;"></span>#FBFAF4</span>
+            <span class="swatch"><span class="sw" style="background:#0a0a0a;"></span>#0a0a0a</span>
+            <span class="swatch"><span class="sw" style="background:#5a6878;"></span>#5a6878</span>
+          </div>
+          <pre data-copy><span class="tok-com">/* surface-academic-light */</span>
+<span class="tok-key">--canvas</span>:      #FBFAF4;
+<span class="tok-key">--hero</span>:        #0a0a0a;
+<span class="tok-key">--baseline</span>:    #5a6878;
+<span class="tok-key">--text</span>:        #0a0a0a;
+<span class="tok-key">--text-dim</span>:    #5a5a5a;
+<span class="tok-key">--rule</span>:        rgba(10,10,10,.18);
+<span class="tok-key">--rule-bright</span>: rgba(10,10,10,.70);
+<button class="copy-btn" type="button" aria-label="Copy tokens">copy</button></pre>
+          <div class="surface-actions">
+            <a href="./v7-academic-light.jpg" target="_blank">view full render</a>
+            <a href="#academic-light-cards">jump to cards</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="surface-card" id="surface-editorial-light">
+        <div class="surface-preview" style="background-color: #f4ead4; background-image: url(./v7-editorial-light.jpg);"></div>
+        <div class="surface-info">
+          <div class="name">Surface IV · <em>editorial light</em></div>
+          <div class="intent">Warm cream paper (#f4ead4). Warm near-black ink. Mid warm-grey baseline. Print editorial, newspaper figure, magazine spread on light.</div>
+          <div class="swatch-row">
+            <span class="swatch"><span class="sw" style="background:#f4ead4;"></span>#f4ead4</span>
+            <span class="swatch"><span class="sw" style="background:#1a1408;"></span>#1a1408</span>
+            <span class="swatch"><span class="sw" style="background:#8a8270;"></span>#8a8270</span>
+          </div>
+          <pre data-copy><span class="tok-com">/* surface-editorial-light */</span>
+<span class="tok-key">--canvas</span>:      #f4ead4;
+<span class="tok-key">--hero</span>:        #1a1408;
+<span class="tok-key">--baseline</span>:    #8a8270;
+<span class="tok-key">--text</span>:        #1a1408;
+<span class="tok-key">--text-dim</span>:    #5a5448;
+<span class="tok-key">--rule</span>:        rgba(26,20,8,.18);
+<span class="tok-key">--rule-bright</span>: rgba(26,20,8,.65);
+<button class="copy-btn" type="button" aria-label="Copy tokens">copy</button></pre>
+          <div class="surface-actions">
+            <a href="./v7-editorial-light.jpg" target="_blank">view full render</a>
+            <a href="#editorial-light-cards">jump to cards</a>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ============ ARCHETYPES ============ -->
+  <section id="archetypes">
+    <div class="section-head">
+      <div class="section-num">02</div>
+      <h2 class="section-title">Archetypes</h2>
+      <a class="section-anchor" href="#archetypes">#archetypes</a>
+    </div>
+    <p class="section-intro">Six archetypes cover the social-post grid. Each renders identically across all four surfaces. Only tokens change.</p>
+
+    <div class="archetypes">
+
+      <div class="archetype-card">
+        <div class="letter">A</div>
+        <div class="aspect">1:1 · 1080 × 1080</div>
+        <div class="arch-name">Stat + bar chart</div>
+        <p class="arch-use">Single hero stat with comparison bars. Includes Pareto bracket for highlighting a range. Use for: headline benchmark, accuracy peaks across budgets.</p>
+      </div>
+
+      <div class="archetype-card">
+        <div class="letter">B</div>
+        <div class="aspect">1:1 · 1080 × 1080</div>
+        <div class="arch-name">Pin spike</div>
+        <p class="arch-use">50-pin distribution with one hero peak. Inline callout chip names the peak. Use for: weekly highs, distribution snapshots, "broke every prior week."</p>
+      </div>
+
+      <div class="archetype-card">
+        <div class="letter">C</div>
+        <div class="aspect">4:5 · 1080 × 1350</div>
+        <div class="arch-name">Compact 2×2 comparison</div>
+        <p class="arch-use">Four metrics in a 2×2 grid. Each cell: stat + delta + sparkline. Use for: multi-benchmark quarterly comparison.</p>
+      </div>
+
+      <div class="archetype-card">
+        <div class="letter">D</div>
+        <div class="aspect">16:9 · 1920 × 1080</div>
+        <div class="arch-name">Dot-matrix bar</div>
+        <p class="arch-use">Wide dot-matrix distribution with one peak column. Use for: surface visualization, accuracy-vs-tokens across multiple suites.</p>
+      </div>
+
+      <div class="archetype-card">
+        <div class="letter">E</div>
+        <div class="aspect">4:5 · 1080 × 1350</div>
+        <div class="arch-name">Editorial stat block</div>
+        <p class="arch-use">Big GT Canon display stat with deck, sparkline, and 3-col metric quad. Use for: hero result with supporting context.</p>
+      </div>
+
+      <div class="archetype-card">
+        <div class="letter">F</div>
+        <div class="aspect">9:16 · 1080 × 1920</div>
+        <div class="arch-name">Story stack wallet list</div>
+        <p class="arch-use">Vertical story-frame for IG/TikTok. Goal progress bar plus benchmark list. Use for: full benchmark-suite recap, before/after results.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ TYPE RAMP ============ -->
+  <section id="type-ramp">
+    <div class="section-head">
+      <div class="section-num">03</div>
+      <h2 class="section-title">Type ramp</h2>
+      <a class="section-anchor" href="#type-ramp">#type-ramp</a>
+    </div>
+    <p class="section-intro">Three families, six sizes, locked. <strong>PPLX Mono</strong> for utility. <strong>PPLX Sans</strong> for body. <strong>GT Canon Narrow Medium</strong> for hero stats only. Never substitute system fonts.</p>
+
+    <div class="type-ramp">
+      <div class="type-row">
+        <div class="type-label">Footer</div>
+        <div class="type-sample is-footer">SimpleQA · 4,326 prompts · 2K tokens</div>
+        <div class="type-spec">PPLX Mono · 14 · tracking .10em</div>
+      </div>
+      <div class="type-row">
+        <div class="type-label">Micro</div>
+        <div class="type-sample is-micro">95.7%</div>
+        <div class="type-spec">PPLX Mono · 14 · tracking .10em</div>
+      </div>
+      <div class="type-row">
+        <div class="type-label">Kicker</div>
+        <div class="type-sample is-kicker">SimpleQA · Accuracy</div>
+        <div class="type-spec">PPLX Mono · 14 · tracking .16em</div>
+      </div>
+      <div class="type-row">
+        <div class="type-label">Body</div>
+        <div class="type-sample is-body">SimpleQA accuracy at 2K avg tokens per task. 1.3pp ahead of baseline.</div>
+        <div class="type-spec">PPLX Sans · 18</div>
+      </div>
+      <div class="type-row">
+        <div class="type-label">Title</div>
+        <div class="type-sample is-title">Compressed reasoning peaks at the 2K-token tier.</div>
+        <div class="type-spec">PPLX Mono · 28 · wght 520</div>
+      </div>
+      <div class="type-row">
+        <div class="type-label">Hero</div>
+        <div class="type-sample is-hero">95.7<span class="unit">%</span></div>
+        <div class="type-spec">GT Canon · wdth 75 · wght 500 · opsz 60–144</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TYPE RULES ============ -->
+  <section id="type-rules">
+    <div class="section-head">
+      <div class="section-num">04</div>
+      <h2 class="section-title">Type rules</h2>
+      <a class="section-anchor" href="#type-rules">#type-rules</a>
+    </div>
+    <p class="section-intro">Non-negotiable. Every type decision must trace to a rule below.</p>
+
+    <div class="rules">
+      <div class="rule-row">
+        <div class="rule-key">Hero color</div>
+        <div class="rule-val">Hero stat sits in <code>var(--text)</code>, never in accent. Color goes elsewhere. The hero earns its weight by typography, not by hue.</div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-key">One accent</div>
+        <div class="rule-val">Maximum one accent per card. Two accents means neither is the accent. If a card uses teal, no other element can use teal.</div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-key">Hero figures</div>
+        <div class="rule-val">Display heroes use proportional figures.<br><pre style="margin-top: 8px;"><span class="tok-key">font-feature-settings</span>: <span class="tok-str">"pnum"</span> <span class="tok-num">1</span>, <span class="tok-str">"lnum"</span> <span class="tok-num">1</span>, <span class="tok-str">"kern"</span> <span class="tok-num">1</span>;
+<span class="tok-key">font-variant-numeric</span>: proportional-nums lining-nums;</pre></div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-key">Stacked figures</div>
+        <div class="rule-val">Stacked columns (wallet lists, ledger rows) use tabular figures so digits align vertically.<br><pre style="margin-top: 8px;"><span class="tok-key">font-feature-settings</span>: <span class="tok-str">"tnum"</span> <span class="tok-num">1</span>, <span class="tok-str">"lnum"</span> <span class="tok-num">1</span>, <span class="tok-str">"kern"</span> <span class="tok-num">1</span>;
+<span class="tok-key">font-variant-numeric</span>: tabular-nums lining-nums;</pre></div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-key">Unit chrome</div>
+        <div class="rule-val">Unit glyphs (<code>%</code>, <code>pp</code>, <code>pt</code>, <code>x</code>) must never punch below the hero baseline. <code>pp</code> has descenders that, at full size, will collide with whatever sits below the hero (chart, chip, rule). Size down AND lift the baseline so the descender lands AT the hero baseline, not below it.<br><pre style="margin-top: 8px;" data-copy><span class="tok-key">.t-hero .unit</span> {
+  <span class="tok-key">font-size</span>: <span class="tok-num">0.46em</span>;
+  <span class="tok-key">line-height</span>: <span class="tok-num">1</span>;
+  <span class="tok-key">vertical-align</span>: <span class="tok-num">0.34em</span>;
+  <span class="tok-key">display</span>: inline-block;
+  <span class="tok-key">font-variation-settings</span>: <span class="tok-str">'wdth'</span> <span class="tok-num">75</span>, <span class="tok-str">'wght'</span> <span class="tok-num">650</span>, <span class="tok-str">'opsz'</span> <span class="tok-num">60</span>;
+}<button class="copy-btn" type="button" aria-label="Copy">copy</button></pre></div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-key">No em dashes</div>
+        <div class="rule-val">Use periods, commas, or separate sentences. Em dashes signal AI-generated copy.</div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-key">No serif utility</div>
+        <div class="rule-val">Sans + Mono only for utility/tool UIs and labels. Serif (GT Canon) is reserved for editorial heroes.</div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-key">Confidence in type</div>
+        <div class="rule-val">Confidence is encoded in typography. Weight, opacity, tracking carry the signal. No confidence badges, no certainty indicators. The type already says it.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SPACING ============ -->
+  <section id="spacing">
+    <div class="section-head">
+      <div class="section-num">05</div>
+      <h2 class="section-title">Spacing scale</h2>
+      <a class="section-anchor" href="#spacing">#spacing</a>
+    </div>
+    <p class="section-intro">Locked scale: 4 / 8 / 14 / 20 / 28 / 40 / 56 / 80 / 112. Card padding is <code>--s-7</code> (56px). Left and right margins must be equal.</p>
+
+    <div class="space-scale">
+      <div class="key">--s-1</div><div class="val">4px</div><div><div class="bar" style="width: 4px;"></div></div>
+      <div class="key">--s-2</div><div class="val">8px</div><div><div class="bar" style="width: 8px;"></div></div>
+      <div class="key">--s-3</div><div class="val">14px</div><div><div class="bar" style="width: 14px;"></div></div>
+      <div class="key">--s-4</div><div class="val">20px</div><div><div class="bar" style="width: 20px;"></div></div>
+      <div class="key">--s-5</div><div class="val">28px</div><div><div class="bar" style="width: 28px;"></div></div>
+      <div class="key">--s-6</div><div class="val">40px</div><div><div class="bar" style="width: 40px;"></div></div>
+      <div class="key">--s-7</div><div class="val">56px</div><div><div class="bar" style="width: 56px;"></div></div>
+      <div class="key">--s-8</div><div class="val">80px</div><div><div class="bar" style="width: 80px;"></div></div>
+      <div class="key">--s-9</div><div class="val">112px</div><div><div class="bar" style="width: 112px;"></div></div>
+    </div>
+  </section>
+
+  <!-- ============ FRAME ============ -->
+  <section id="frame">
+    <div class="section-head">
+      <div class="section-num">06</div>
+      <h2 class="section-title">Frame rules</h2>
+      <a class="section-anchor" href="#frame">#frame</a>
+    </div>
+    <div class="rules">
+      <div class="rule-row">
+        <div class="rule-key">PPLX mark</div>
+        <div class="rule-val">36×36 absolute top-right, ALWAYS. Every card. Color follows <code>var(--text)</code> so it inverts cleanly across surfaces.</div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-key">Card padding</div>
+        <div class="rule-val">Every card uses <code>--s-7</code> (56px) padding on all sides. No exceptions.</div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-key">Even margins</div>
+        <div class="rule-val">Left and right margins must be equal. Non-negotiable. Catches 2px discrepancies.</div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-key">Gradient fields</div>
+        <div class="rule-val">If any gradient effect is used, it spans the viewport as one unified field. Elements become semi-transparent windows into that field. No per-element gradient backgrounds.</div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-key">Static over interactive</div>
+        <div class="rule-val">These cards are for posting. No CTAs, no hover states, no interaction logic. Carousels and draggable elements must earn their place. On static images, they don't.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LAYOUT BALANCER ============ -->
+  <section id="balancer">
+    <div class="section-head">
+      <div class="section-num">07</div>
+      <h2 class="section-title">Layout balancer</h2>
+      <a class="section-anchor" href="#balancer">#balancer</a>
+    </div>
+    <p class="section-intro">Cards have fixed canvas, content has variable height. Static CSS can’t pick the right spacing strategy because it depends on how much content there actually is. <code>fit.js</code> measures content-to-canvas ratio (CCR) at runtime, classifies it, and applies one of five strategies via <code>data-fit</code> attribute and CSS variables. CSS owns the look; JS owns the strategy.</p>
+
+    <div class="balancer-strategies">
+      <div class="balancer-strategy" data-key="amplify">
+        <div class="bs-key">amplify</div>
+        <div class="bs-range">CCR &lt; 0.40</div>
+        <div class="bs-intent">Content too sparse. Grow the hero, expand hierarchy, widen section gaps.</div>
+      </div>
+      <div class="balancer-strategy" data-key="distribute">
+        <div class="bs-key">distribute</div>
+        <div class="bs-range">CCR 0.40–0.70</div>
+        <div class="bs-intent">Room available. Distribute remaining space proportionally with subtle hero growth.</div>
+      </div>
+      <div class="balancer-strategy" data-key="anchor">
+        <div class="bs-key">anchor</div>
+        <div class="bs-range">CCR 0.70–0.95</div>
+        <div class="bs-intent">Content fits comfortably. No adjustment. The locked design rhythm reads correctly.</div>
+      </div>
+      <div class="balancer-strategy" data-key="pack">
+        <div class="bs-key">pack</div>
+        <div class="bs-range">CCR 0.95–1.05</div>
+        <div class="bs-intent">Content fills canvas. No adjustment. Content is exactly where it should be.</div>
+      </div>
+      <div class="balancer-strategy" data-key="compact">
+        <div class="bs-key">compact</div>
+        <div class="bs-range">CCR &gt; 1.05</div>
+        <div class="bs-intent">Content overflows. Tighten type, reduce row padding, shrink hero, dim auxiliary chrome.</div>
+      </div>
+    </div>
+
+    <h3 class="sub-h">Proof · same archetype, four content payloads</h3>
+    <p class="section-intro" style="margin-bottom: var(--s-4);">Same F-card archetype, same 1080×1920 canvas, four payloads (2, 5, 12, 18 wallet rows). The balancer picks a different strategy each time. Every result reads as a deliberately designed card.</p>
+    <a class="stress-link" href="./v7-stress.jpg" target="_blank"><img src="./v7-stress.jpg" alt="Layout balancer stress test — four F-cards with 2, 5, 12, 18 rows showing amplify, distribute, anchor, and compact strategies" loading="lazy" /></a>
+
+    <h3 class="sub-h">Contract</h3>
+    <p class="section-intro">Mark a card with <code>data-fit-card</code> and its content blocks with <code>data-fit-content</code>. fit.js writes <code>data-fit</code> and four CSS variables. CSS multiplies its own values by those variables.</p>
+
+    <pre data-copy><span class="tok-com">// HTML</span>
+<span class="tok-key">&lt;section</span> <span class="tok-key">class</span>=<span class="tok-str">"f-card surface-academic"</span> <span class="tok-key">data-fit-card</span><span class="tok-key">&gt;</span>
+  <span class="tok-key">&lt;header</span> <span class="tok-key">class</span>=<span class="tok-str">"f-head"</span> <span class="tok-key">data-fit-content</span><span class="tok-key">&gt;</span>...<span class="tok-key">&lt;/header&gt;</span>
+  <span class="tok-key">&lt;div</span> <span class="tok-key">class</span>=<span class="tok-str">"f-goal"</span> <span class="tok-key">data-fit-content</span><span class="tok-key">&gt;</span>...<span class="tok-key">&lt;/div&gt;</span>
+  <span class="tok-key">&lt;div</span> <span class="tok-key">class</span>=<span class="tok-str">"f-list"</span> <span class="tok-key">data-fit-content</span><span class="tok-key">&gt;</span>...<span class="tok-key">&lt;/div&gt;</span>
+<span class="tok-key">&lt;/section&gt;</span>
+<span class="tok-key">&lt;script</span> <span class="tok-key">src</span>=<span class="tok-str">"./fit.js"</span><span class="tok-key">&gt;&lt;/script&gt;</span>
+
+<span class="tok-com">/* CSS */</span>
+<span class="tok-key">.f-row.hero .value</span> {
+  <span class="tok-key">font-size</span>: <span class="tok-num">calc</span>(<span class="tok-num">120px</span> * <span class="tok-num">var</span>(<span class="tok-key">--fit-hero-scale</span>, <span class="tok-num">1</span>));
+}
+<span class="tok-key">.f-row:not(.hero)</span> {
+  <span class="tok-key">padding</span>: <span class="tok-num">calc</span>(<span class="tok-num">var</span>(<span class="tok-key">--s-3</span>) * <span class="tok-num">var</span>(<span class="tok-key">--fit-row-pad</span>, <span class="tok-num">1</span>)) <span class="tok-num">0</span>;
+}<button class="copy-btn" type="button" aria-label="Copy">copy</button></pre>
+
+    <p class="section-intro" style="margin-top: var(--s-5);">The balancer never breaks the design contract. Mark stays 36×36, card padding stays 56px, spacing scale stays locked, type ramp stays locked. The balancer flexes only hero scale, row padding, and section gaps. Three knobs, five regimes, no other change to the system.</p>
+  </section>
+
+  <!-- ============ EDGE CASES ============ -->
+  <section id="edge-cases">
+    <div class="section-head">
+      <div class="section-num">08</div>
+      <h2 class="section-title">Edge cases</h2>
+      <a class="section-anchor" href="#edge-cases">#edge-cases</a>
+    </div>
+    <p class="section-intro">The CCR balancer is a one-dimensional diagnostic. Three classes of content break it silently. Stress test, failure documentation, and the system response below.</p>
+
+    <h3 class="sub-h">Three failure classes the balancer cannot detect alone</h3>
+    <div class="balancer-strategies" style="grid-template-columns: repeat(3, 1fr);">
+      <div class="balancer-strategy" data-key="compact" style="border-left-color: #c64670;">
+        <div class="bs-key">horizontal overflow</div>
+        <div class="bs-range">A, D charts · F rows</div>
+        <div class="bs-intent">Text wider than its column. CCR doesn't span horizontal axis. Long category labels collide silently while the balancer reports anchor.</div>
+      </div>
+      <div class="balancer-strategy" data-key="distribute" style="border-left-color: #f4cd87;">
+        <div class="bs-key">density mismatch</div>
+        <div class="bs-range">B chart · D matrix</div>
+        <div class="bs-intent">Sparse data inside an SVG looks empty, but DOM scrollHeight reports identical content. Balancer can't see visual emptiness.</div>
+      </div>
+      <div class="balancer-strategy" data-key="amplify" style="border-left-color: #2ca1ab;">
+        <div class="bs-key">missing structure</div>
+        <div class="bs-range">degenerate archetype</div>
+        <div class="bs-intent">Knobs assume hero + list exist. On header-only cards, the knobs are no-ops. Resolved by archetype G.</div>
+      </div>
+    </div>
+
+    <h3 class="sub-h">Proof sheet · nine variants across three failure classes</h3>
+    <p class="section-intro" style="margin-bottom: var(--s-4);">Each row shows four content variants. The balancer's CCR and strategy badges populate live; verdict labels are color-coded by what actually went wrong.</p>
+    <a class="stress-link" href="./v7-edge-cases.jpg" target="_blank"><img src="./v7-edge-cases.jpg" alt="Edge case stress test: A-card labels, B-card density, G-card editorial header" loading="lazy" /></a>
+
+    <h3 class="sub-h">The system response</h3>
+    <p class="section-intro">No auto-mitigation. fit.js detects each failure class and emits a console warning plus a <code>data-fit-warn</code> attribute on the offending element. With <code>&lt;body class="fit-debug"&gt;</code>, warnings render as a visible magenta strip on the card. Authors fix manually because the right response is a design decision, not a layout decision.</p>
+
+    <pre data-copy><span class="tok-com">// Console output when content breaks an archetype contract</span>
+<span class="tok-com">[pplx-fit] horizontal-overflow: category label "Compressed reasoning at 1.5K-tok budget" (37 chars) exceeds A-card limit of 12</span>
+<span class="tok-com">[pplx-fit] density-mismatch: visual density 0.18 below B-card minimum 0.25 — chart will read as empty</span>
+<span class="tok-com">[pplx-fit] missing-structure:list: archetype F requires block 'list' but no [data-fit-content="list"] found</span>
+
+<span class="tok-com">// Each warning maps to an author fix:</span>
+<span class="tok-com">//   horizontal-overflow → truncate, abbreviate, rotate, or pick a different archetype</span>
+<span class="tok-com">//   density-mismatch    → add more data, raise the baseline, or swap archetype</span>
+<span class="tok-com">//   missing-structure   → add the required block, or pick a different archetype (e.g. G)</span><button class="copy-btn" type="button" aria-label="Copy">copy</button></pre>
+
+    <h3 class="sub-h">Archetype G · editorial header</h3>
+    <p class="section-intro">The third failure class ("missing structure") was resolved by adding a new archetype rather than retrofitting the existing six. G handles cards where the headline IS the content. Three sub-variants by character.</p>
+    <table class="tokens" style="margin-top: var(--s-3);">
+      <thead>
+        <tr><th>variant</th><th>title face</th><th>size range</th><th>max chars</th><th>use</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="token-name">G-display</td>
+          <td class="token-value">GT Canon Narrow Medium</td>
+          <td class="token-value">72–180px</td>
+          <td class="token-value">80</td>
+          <td class="token-use">Single dramatic statement. Newspaper-style headline.</td>
+        </tr>
+        <tr>
+          <td class="token-name">G-editorial</td>
+          <td class="token-value">GT Canon Regular</td>
+          <td class="token-value">36–72px</td>
+          <td class="token-value">240</td>
+          <td class="token-use">Essay opener or longer headline. Reads as editorial type.</td>
+        </tr>
+        <tr>
+          <td class="token-name">G-quote</td>
+          <td class="token-value">GT Canon Italic</td>
+          <td class="token-value">48–96px</td>
+          <td class="token-value">200</td>
+          <td class="token-use">Attributed pull quote with Sans cite line.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="section-intro" style="margin-top: var(--s-4);">G uses GT Canon as title face. PPLX Mono is reserved for kicker and footer only. The title is the hero on G — it gets the same display family that the hero stat uses on data cards. The original stress test wrongly used Mono for the header card title; the difference is visible in the proof sheet's fourth column.</p>
+  </section>
+
+  <!-- ============ DECISION TREE ============ -->
+  <section id="decision">
+    <div class="section-head">
+      <div class="section-num">07</div>
+      <h2 class="section-title">Decision tree</h2>
+      <a class="section-anchor" href="#decision">#decision</a>
+    </div>
+    <p class="section-intro">Pick the archetype by the shape of your data, not by aesthetic preference. Start at the top.</p>
+
+    <div style="border:1px solid var(--rule); border-radius:8px; padding:var(--s-5); background:var(--canvas-2); font-family:'PPLX Mono', monospace; font-size:13px; line-height:1.7; color:var(--text); overflow-x:auto;">
+<pre style="margin:0; background:transparent; border:0; padding:0; color:inherit; font-size:inherit; line-height:inherit;">Is your data <span style="color:var(--accent);">a single hero number with supporting context?</span>
+├─ YES — one number plus 3 supporting metrics  → <a href="#audit" style="color:var(--text);border-bottom:1px solid var(--rule-bright);">Archetype E</a> (4:5 editorial stat block)
+├─ YES — one number plus a comparison ranking → <a href="#audit" style="color:var(--text);border-bottom:1px solid var(--rule-bright);">Archetype A</a> (1:1 stat + bar)
+├─ YES — before/after, A vs B, two states     → <a href="#audit" style="color:var(--text);border-bottom:1px solid var(--rule-bright);">Archetype C</a> (1:1 comparison pair)
+└─ NO
+   │
+   Is your data <span style="color:var(--accent);">a ranked list of 4-7 entries?</span>
+   ├─ YES — promote one to lead, story format  → <a href="#audit" style="color:var(--text);border-bottom:1px solid var(--rule-bright);">Archetype F</a> (9:16 wallet list)
+   └─ NO
+      │
+      Is your data <span style="color:var(--accent);">4 independent metrics?</span>
+      ├─ YES — multi-metric quadrant            → <a href="#audit" style="color:var(--text);border-bottom:1px solid var(--rule-bright);">Archetype B</a> (1:1 2×2 metric grid)
+      └─ NO
+         │
+         Is your data <span style="color:var(--accent);">a curve or multi-category rhythm?</span>
+         ├─ YES — social card, shape over values  → <a href="#audit" style="color:var(--text);border-bottom:1px solid var(--rule-bright);">Archetype D</a> (16:9 dot-matrix)
+         └─ YES — research figure, all values    → <a href="#two-track" style="color:var(--text);border-bottom:1px solid var(--rule-bright);">Research variant</a> (multi-line plot)
+            (when you need the actual axis-anchored numbers)
+
+No data — just a claim, quote, or headline?
+├─ Dramatic single statement                  → <a href="#audit" style="color:var(--text);border-bottom:1px solid var(--rule-bright);">Archetype G-display</a>
+├─ Editorial framing with deck                → <a href="#audit" style="color:var(--text);border-bottom:1px solid var(--rule-bright);">Archetype G-editorial</a>
+└─ Attributed pull quote                      → <a href="#audit" style="color:var(--text);border-bottom:1px solid var(--rule-bright);">Archetype G-quote</a>
+</pre>
+    </div>
+
+    <p class="section-intro" style="margin-top: var(--s-4);">Tie-breaker: if two archetypes fit, pick the one whose aspect ratio matches your distribution channel. Stories → 9:16. Feed posts → 1:1 or 4:5. Twitter/X cards → 16:9. Blog figures → always the research variant.</p>
+  </section>
+
+  <!-- ============ ARCHETYPE AUDIT (LIVE) ============ -->
+  <section id="audit">
+    <div class="section-head">
+      <div class="section-num">08</div>
+      <h2 class="section-title">Archetype audit · live</h2>
+      <a class="section-anchor" href="#audit">#audit</a>
+    </div>
+    <p class="section-intro">All nine archetypes rendered at their native aspect ratios on one canvas. Every card scales via <code>cqi</code> container query units. The audit caught two regressions mid-build: pixel-sized type breaking at non-export scales, and the A bar motif overlapping its deck when the breath row collapsed. Both are documented inline.</p>
+    <a class="stress-link" href="./v7-archetype-audit.html?theme=dark" target="_blank"><img src="./v7-archetype-audit-dark.jpg" alt="Archetype audit — nine v7 variants rendered at native aspect ratios on dark canvas" loading="lazy" /></a>
+    <p class="section-intro" style="margin-top: var(--s-4);">Open the live, interactive page: <a href="./v7-archetype-audit.html?theme=dark" target="_blank" style="color: var(--text); border-bottom: 1px solid var(--rule-bright);">v7-archetype-audit.html</a> — cards respond to viewport width via cqi.</p>
+  </section>
+
+  <!-- ============ TWO-TRACK (LIVE) ============ -->
+  <section id="two-track">
+    <div class="section-head">
+      <div class="section-num">11</div>
+      <h2 class="section-title">Two-track · research vs social</h2>
+      <a class="section-anchor" href="#two-track">#two-track</a>
+    </div>
+    <p class="section-intro">Same data, two surfaces, different jobs. The research blog publishes charts as instrument readouts: dense, axis-led, every value defensible. Social cards publish as editorial: hero-led, one number leading. Four rows side-by-side — same numbers, two treatments, same v7 token set.</p>
+    <a class="stress-link" href="./v7-two-track.html?theme=dark" target="_blank"><img src="./v7-two-track-dark.jpg" alt="Two-track comparison — research instrument readout vs social editorial, four data rows" loading="lazy" /></a>
+    <p class="section-intro" style="margin-top: var(--s-4);">Open the live page: <a href="./v7-two-track.html?theme=dark" target="_blank" style="color: var(--text); border-bottom: 1px solid var(--rule-bright);">v7-two-track.html</a></p>
+  </section>
+
+  <!-- ============ BLOG REBUILDS (LIVE) ============ -->
+  <section id="blog-rebuilds">
+    <div class="section-head">
+      <div class="section-num">12</div>
+      <h2 class="section-title">Blog rebuilds</h2>
+      <a class="section-anchor" href="#blog-rebuilds">#blog-rebuilds</a>
+    </div>
+    <p class="section-intro">Six real datasets pulled from research.perplexity.ai and the Perplexity hub, rebuilt as v7 archetype cards. Every number is verifiable to its source post. Three of six are natural fits (A on HLE, F on Search Arena, G-display on the Deep Research tagline), two are workable (E twice), one is engineered (D on tool-call curve — the strain that pushed us toward the research variant).</p>
+    <a class="stress-link" href="./v7-blog-rebuilds.html?theme=dark" target="_blank"><img src="./v7-blog-rebuilds-dark.jpg" alt="Six v7 archetype rebuilds from real Perplexity research blog data" loading="lazy" /></a>
+    <p class="section-intro" style="margin-top: var(--s-4);">Open the live page: <a href="./v7-blog-rebuilds.html?theme=dark" target="_blank" style="color: var(--text); border-bottom: 1px solid var(--rule-bright);">v7-blog-rebuilds.html</a></p>
+  </section>
+
+  <!-- ============ TOKENS JSON ============ -->
+  <section id="tokens-json">
+    <div class="section-head">
+      <div class="section-num">14</div>
+      <h2 class="section-title">Tokens JSON</h2>
+      <a class="section-anchor" href="#tokens-json">#tokens-json</a>
+    </div>
+    <p class="section-intro">Full export at <a href="./tokens.json" style="color: var(--text); border-bottom: 1px solid var(--rule-bright);">./tokens.json</a>. Agents fetch this directly. Schema includes surfaces, spacing scale, type ramp, type rules, archetypes, and frame rules.</p>
+
+    <pre data-copy><span class="tok-com">// curl the full token export</span>
+$ curl <span class="tok-str">https://[deploy-url]/tokens.json</span> | jq
+
+<span class="tok-com">// or fetch a single surface</span>
+$ curl <span class="tok-str">https://[deploy-url]/tokens.json</span> | jq <span class="tok-str">.surfaces[<span class="tok-str">"academic-dark"</span>].tokens</span>
+<button class="copy-btn" type="button" aria-label="Copy">copy</button></pre>
+  </section>
+
+  <!-- ============ AGENT PATH ============ -->
+  <section id="agent-path">
+    <div class="section-head">
+      <div class="section-num">15</div>
+      <h2 class="section-title">Agent path</h2>
+      <a class="section-anchor" href="#agent-path">#agent-path</a>
+    </div>
+    <p class="section-intro">A coding agent given a dataset and this page builds a card in three steps. No design system knowledge required — the contract lives in tokens.json and the decision tree picks the archetype.</p>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-4);margin-top:var(--s-4);">
+      <div style="border:1px solid var(--rule); border-radius:8px; padding:var(--s-4); background:var(--canvas-2);">
+        <div class="t-kicker" style="margin-bottom:var(--s-3);">01 · Fetch tokens</div>
+        <p class="t-body" style="font-size:13px;line-height:1.5;color:var(--text-dim);margin:0 0 var(--s-3);">Pull surfaces, type ramp, spacing scale, and archetype contracts from tokens.json. Cache locally.</p>
+        <pre data-copy style="margin:0;font-size:11.5px;"><span class="tok-com"># single fetch, all tokens</span>
+$ curl tokens.json &gt; v7.json<button class="copy-btn" type="button" aria-label="Copy">copy</button></pre>
+      </div>
+      <div style="border:1px solid var(--rule); border-radius:8px; padding:var(--s-4); background:var(--canvas-2);">
+        <div class="t-kicker" style="margin-bottom:var(--s-3);">02 · Pick archetype</div>
+        <p class="t-body" style="font-size:13px;line-height:1.5;color:var(--text-dim);margin:0 0 var(--s-3);">Use the decision tree to map your data shape to an archetype. The contract tells you which blocks are required.</p>
+        <pre data-copy style="margin:0;font-size:11.5px;"><span class="tok-com"># ranked list of 5? → F</span>
+$ jq <span class="tok-str">'.archetypes.F'</span> v7.json<button class="copy-btn" type="button" aria-label="Copy">copy</button></pre>
+      </div>
+      <div style="border:1px solid var(--rule); border-radius:8px; padding:var(--s-4); background:var(--canvas-2);">
+        <div class="t-kicker" style="margin-bottom:var(--s-3);">03 · Render</div>
+        <p class="t-body" style="font-size:13px;line-height:1.5;color:var(--text-dim);margin:0 0 var(--s-3);">Emit HTML using the contract’s required blocks. cqi units handle scaling. fit.js validates the result.</p>
+        <pre data-copy style="margin:0;font-size:11.5px;"><span class="tok-com"># validate after render</span>
+$ node fit.js card.html<button class="copy-btn" type="button" aria-label="Copy">copy</button></pre>
+      </div>
+    </div>
+
+    <p class="section-intro" style="margin-top: var(--s-5);">Worked example — from a hub blog post on Sonar Pro’s SimpleQA F-score (0.858 vs Sonar baseline 0.773):</p>
+    <pre data-copy><span class="tok-com">// 1. Data shape: hero number + 3 supporting metrics → Archetype E</span>
+<span class="tok-com">// 2. Contract: kicker + title + hero + deck + triad + foot</span>
+<span class="tok-com">// 3. Render — minimum viable card</span>
+
+&lt;div class=<span class="tok-str">"card r-45 arche-e"</span>&gt;
+  &lt;div class=<span class="tok-str">"head"</span>&gt;
+    &lt;div class=<span class="tok-str">"h-kicker"</span>&gt;Sonar Pro · SimpleQA&lt;/div&gt;
+    &lt;div class=<span class="tok-str">"h-title"</span>&gt;F-score lift vs Sonar baseline&lt;/div&gt;
+    &lt;svg class=<span class="tok-str">"h-mark"</span>&gt;&lt;use href=<span class="tok-str">"#pp-mark"</span>/&gt;&lt;/svg&gt;
+  &lt;/div&gt;
+  &lt;div class=<span class="tok-str">"body"</span>&gt;
+    &lt;div class=<span class="tok-str">"hero-stack"</span>&gt;
+      &lt;div class=<span class="tok-str">"hero"</span>&gt;0.858&lt;/div&gt;
+      &lt;div class=<span class="tok-str">"deck"</span>&gt;Sonar Pro beats Sonar by 11 points on SimpleQA factuality.&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div&gt;&lt;/div&gt;
+    &lt;div class=<span class="tok-str">"content"</span>&gt;
+      &lt;div class=<span class="tok-str">"e-triad"</span>&gt;
+        &lt;div class=<span class="tok-str">"e-cell"</span>&gt;&lt;div class=<span class="tok-str">"e-cell-label"</span>&gt;vs Sonar&lt;/div&gt;&lt;div class=<span class="tok-str">"e-cell-value"</span>&gt;+11&lt;span class=<span class="tok-str">"u"</span>&gt;pp&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;
+        &lt;div class=<span class="tok-str">"e-cell"</span>&gt;&lt;div class=<span class="tok-str">"e-cell-label"</span>&gt;Citations&lt;/div&gt;&lt;div class=<span class="tok-str">"e-cell-value"</span>&gt;2.0&lt;span class=<span class="tok-str">"u"</span>&gt;×&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;
+        &lt;div class=<span class="tok-str">"e-cell"</span>&gt;&lt;div class=<span class="tok-str">"e-cell-label"</span>&gt;Copy AI&lt;/div&gt;&lt;div class=<span class="tok-str">"e-cell-value"</span>&gt;+20&lt;span class=<span class="tok-str">"u"</span>&gt;%&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class=<span class="tok-str">"foot"</span>&gt;&lt;span&gt;SimpleQA · factuality&lt;/span&gt;&lt;span&gt;2026&lt;/span&gt;&lt;/div&gt;
+&lt;/div&gt;<button class="copy-btn" type="button" aria-label="Copy">copy</button></pre>
+    <p class="section-intro" style="margin-top: var(--s-4);">No SVG paths, no chart library, no rendering engine. The agent emits structural HTML, the CSS does the rest. The whole card is &lt; 1.2KB before fonts.</p>
+  </section>
+
+  <!-- ============ GALLERY ============ -->
+  <section id="gallery">
+    <div class="section-head">
+      <div class="section-num">13</div>
+      <h2 class="section-title">Gallery · 24 cards</h2>
+      <a class="section-anchor" href="#gallery">#gallery</a>
+    </div>
+    <p class="section-intro">All 24 cards. Six archetypes (A–F) × four surfaces. Click a sheet to view at full resolution.</p>
+
+    <div class="gallery">
+      <a class="gallery-item" href="./v7-academic-dark.jpg" id="academic-dark-cards" target="_blank">
+        <div class="gallery-head">
+          <span class="name">Surface I · <em>academic dark</em></span>
+          <span class="meta">6 cards · 4800 × 16124</span>
+        </div>
+        <img src="./v7-academic-dark.jpg" alt="Academic dark surface, six archetypes" loading="lazy" />
+      </a>
+      <a class="gallery-item" href="./v7-editorial-dark.jpg" id="editorial-dark-cards" target="_blank">
+        <div class="gallery-head">
+          <span class="name">Surface II · <em>editorial dark</em></span>
+          <span class="meta">6 cards · 4800 × 16124</span>
+        </div>
+        <img src="./v7-editorial-dark.jpg" alt="Editorial dark surface, six archetypes" loading="lazy" />
+      </a>
+      <a class="gallery-item" href="./v7-academic-light.jpg" id="academic-light-cards" target="_blank">
+        <div class="gallery-head">
+          <span class="name">Surface III · <em>academic light</em></span>
+          <span class="meta">6 cards · 4800 × 16124</span>
+        </div>
+        <img src="./v7-academic-light.jpg" alt="Academic light surface, six archetypes" loading="lazy" />
+      </a>
+      <a class="gallery-item" href="./v7-editorial-light.jpg" id="editorial-light-cards" target="_blank">
+        <div class="gallery-head">
+          <span class="name">Surface IV · <em>editorial light</em></span>
+          <span class="meta">6 cards · 4800 × 16124</span>
+        </div>
+        <img src="./v7-editorial-light.jpg" alt="Editorial light surface, six archetypes" loading="lazy" />
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="page">
+  <div class="wrap">
+    <div>Perplexity Chart System · v7 · 2026 · <a href="./tokens.json">tokens.json</a> · <a href="./v7-source.html">v7-source.html</a></div>
+    <div>For agents and humans.</div>
+  </div>
+</footer>
+
+<script>
+  // Copy buttons — copy parent <pre> text minus the button itself
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const pre = btn.closest('pre');
+      const clone = pre.cloneNode(true);
+      clone.querySelectorAll('.copy-btn').forEach(b => b.remove());
+      const text = clone.textContent.trim();
+      try {
+        await navigator.clipboard.writeText(text);
+        const original = btn.textContent;
+        btn.textContent = 'copied';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = original;
+          btn.classList.remove('copied');
+        }, 1400);
+      } catch (err) {
+        btn.textContent = 'error';
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

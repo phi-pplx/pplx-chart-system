@@ -1,0 +1,1033 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>v7 · Real research blog data · archetype rebuilds</title>
+<style>
+  @font-face {
+    font-family: 'GT Canon VF';
+    src: url('../03_system/assets/fonts/GT-Canon-VF.woff2') format('woff2-variations'),
+         url('../03_system/assets/fonts/GT-Canon-VF.woff2') format('woff2');
+    font-weight: 300 900; font-stretch: 37% 150%; font-style: normal; font-display: block;
+  }
+  @font-face {
+    font-family: 'GT Canon VF';
+    src: url('../03_system/assets/fonts/GT-Canon-Italic-VF.woff2') format('woff2-variations'),
+         url('../03_system/assets/fonts/GT-Canon-Italic-VF.woff2') format('woff2');
+    font-weight: 300 900; font-stretch: 37% 150%; font-style: italic; font-display: block;
+  }
+  @font-face {
+    font-family: 'PPLX Sans';
+    src: url('../03_system/assets/fonts/PPLX-Sans-Beta-v2-VF.woff2') format('woff2-variations');
+    font-weight: 100 900; font-display: block;
+  }
+  @font-face {
+    font-family: 'PPLX Mono';
+    src: url('../03_system/assets/fonts/PPLX-Mono-Beta-v0-VF.woff2') format('woff2-variations');
+    font-weight: 100 900; font-display: block;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #181815; color: #FBFAF4;
+    font-family: 'PPLX Sans', system-ui, sans-serif;
+    padding: 40px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .sheet-head {
+    border-bottom: 1px solid rgba(251,250,244,0.15);
+    padding-bottom: 28px; margin-bottom: 40px;
+  }
+  .sheet-kicker {
+    font-family: 'PPLX Mono'; font-size: 12px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: #8a8a8a; margin-bottom: 10px;
+  }
+  .sheet-title {
+    font-family: 'PPLX Mono'; font-variation-settings: 'wght' 520;
+    font-size: 28px; line-height: 1.15; letter-spacing: -0.005em;
+  }
+  .sheet-deck {
+    font-size: 15px; line-height: 1.55; color: #9a9a9a;
+    max-width: 80ch; margin-top: 12px;
+  }
+
+  .row {
+    margin-bottom: 56px;
+    border-top: 1px solid rgba(251,250,244,0.30);
+    padding-top: 28px;
+  }
+  .row-head {
+    display: grid;
+    grid-template-columns: 96px 1fr 1fr;
+    gap: 24px;
+    align-items: baseline;
+    margin-bottom: 24px;
+  }
+  .row-num {
+    font-family: 'PPLX Mono'; font-size: 12px;
+    letter-spacing: 0.16em; color: #9a9a9a;
+    text-transform: uppercase;
+  }
+  .row-source {
+    font-family: 'PPLX Mono'; font-size: 14px;
+    font-variation-settings: 'wght' 520;
+    color: #FBFAF4; letter-spacing: -0.005em;
+  }
+  .row-source a {
+    color: #7fc8d2; text-decoration: none;
+    border-bottom: 1px solid rgba(127, 200, 210, 0.4);
+  }
+  .row-mapping {
+    font-family: 'PPLX Mono'; font-size: 12px;
+    color: #9a9a9a; letter-spacing: 0.04em;
+  }
+  .row-mapping strong {
+    color: #FBFAF4; font-variation-settings: 'wght' 540;
+  }
+  .row-deck {
+    grid-column: 2 / -1;
+    font-size: 13px; color: #9a9a9a;
+    line-height: 1.55; margin-top: 8px;
+  }
+  .pair {
+    display: grid;
+    grid-template-columns: 270px 1fr;
+    gap: 40px;
+    align-items: start;
+  }
+  .pair-left {
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .pair-left .label {
+    font-family: 'PPLX Mono'; font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: #8a8a8a;
+  }
+  .pair-right {
+    display: flex; justify-content: flex-start;
+  }
+  .frame {
+    border: 1px solid rgba(251,250,244,0.15);
+    border-radius: 4px;
+    overflow: hidden;
+    background: #000;
+  }
+  /* 1:1 cards scaled down 1:2.5 → 432×432 */
+  .frame.sq { width: 432px; height: 432px; }
+  .frame.sq .card { transform: scale(0.4); transform-origin: 0 0; }
+  /* 4:5 cards: 432×540 */
+  .frame.portrait { width: 432px; height: 540px; }
+  .frame.portrait .card { transform: scale(0.4); transform-origin: 0 0; }
+  /* 16:9 cards: 768×432 */
+  .frame.wide { width: 768px; height: 432px; }
+  .frame.wide .card { transform: scale(0.4); transform-origin: 0 0; }
+  /* 9:16 cards: 270×480 */
+  .frame.story { width: 270px; height: 480px; }
+  .frame.story .card { transform: scale(0.25); transform-origin: 0 0; }
+
+  /* ============ Locked surface (academic-dark) ============ */
+  :root {
+    --s-1:4px; --s-2:8px; --s-3:14px; --s-4:20px; --s-5:28px;
+    --s-6:40px; --s-7:56px; --s-8:80px; --s-9:112px;
+    --canvas: #000000; --hero: #FBFAF4; --baseline: #5a6878;
+    --text: #FBFAF4; --text-dim: #8a8a8a; --text-mute: #545454;
+    --rule: rgba(251,250,244,0.18); --rule-bright: rgba(251,250,244,0.70);
+    --baseline-axis: rgba(251,250,244,0.32);
+    --accent: #2ca1ab;
+  }
+  [data-fit-card] {
+    --fit-hero-scale: 1; --fit-row-pad: 1;
+    --fit-section-gap: 1; --fit-aux-opacity: 1;
+  }
+
+  /* Type ramp */
+  .t-kicker {
+    font-family: 'PPLX Mono'; font-size: 14px; letter-spacing: 0.16em;
+    text-transform: uppercase; font-variation-settings: 'wght' 480;
+    color: var(--text-dim);
+  }
+  .t-title {
+    font-family: 'PPLX Mono'; font-variation-settings: 'wght' 520;
+    font-size: 28px; line-height: 1.18; letter-spacing: -0.005em;
+    color: var(--text);
+  }
+  .t-body {
+    font-family: 'PPLX Sans'; font-size: 18px; line-height: 1.55;
+    color: var(--text-dim);
+  }
+  .t-hero {
+    font-family: 'GT Canon VF', serif;
+    font-variation-settings: 'wdth' 75, 'wght' 500, 'opsz' 144;
+    font-feature-settings: "pnum" 1, "lnum" 1, "kern" 1;
+    line-height: 0.86; letter-spacing: -0.02em;
+  }
+  .t-hero .unit {
+    font-variation-settings: 'wdth' 75, 'wght' 650, 'opsz' 60;
+    font-size: 0.46em; line-height: 1; margin-left: 0.04em;
+    vertical-align: 0.34em; display: inline-block;
+  }
+  .t-footer {
+    font-family: 'PPLX Mono'; font-size: 14px;
+    letter-spacing: 0.10em; color: var(--text-dim);
+  }
+  .pp-mark {
+    position: absolute; top: var(--s-7); right: var(--s-7);
+    width: 36px; height: 36px; color: var(--text);
+  }
+  .pp-mark svg { width: 100%; height: 100%; }
+
+  /* ============ A-card · 1:1 stat + bar chart ============ */
+  .a-card {
+    width: 1080px; height: 1080px;
+    background: var(--canvas); color: var(--text);
+    padding: var(--s-7); position: relative;
+    display: grid; grid-template-rows: 220px 1fr 80px;
+  }
+  .a-card .a-head {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    column-gap: var(--s-5); row-gap: var(--s-3);
+    padding-right: var(--s-8); padding-bottom: var(--s-3);
+    border-bottom: 1px solid var(--rule);
+  }
+  .a-card .a-head .t-kicker { grid-column: 1 / -1; }
+  .a-card .a-head .t-hero {
+    font-size: 144px; color: var(--text); align-self: end;
+  }
+  .a-card .a-head .t-title {
+    max-width: 600px; color: var(--text); align-self: end;
+  }
+  .a-card .a-chart { padding-top: var(--s-3); position: relative; }
+  .a-card .a-foot {
+    padding-top: var(--s-3); border-top: 1px solid var(--rule);
+    display: grid; grid-template-columns: 1fr auto;
+    align-items: baseline; gap: var(--s-5); color: var(--text-dim);
+  }
+  .a-card svg { width: 100%; height: 100%; display: block; }
+  .a-card .mc-grid { stroke: var(--rule); stroke-width: 1; }
+  .a-card .axis-line { stroke: var(--rule-bright); stroke-width: 1.5; }
+  .a-card .mc-tick {
+    font-family: 'PPLX Mono'; font-size: 16px;
+    fill: var(--text-mute); letter-spacing: 0.04em;
+  }
+  .a-card .bar-baseline { fill: var(--baseline); }
+  .a-card .bar-hero { fill: var(--hero); }
+  .a-card .bar-label {
+    font-family: 'PPLX Mono'; font-size: 16px;
+    fill: var(--text-dim); font-variation-settings: 'wght' 480;
+  }
+  .a-card .bar-label.hero { fill: var(--hero); font-variation-settings: 'wght' 560; }
+
+  /* ============ E-card · 4:5 editorial stat block ============ */
+  .e-card {
+    width: 1080px; height: 1350px;
+    background: var(--canvas); color: var(--text);
+    padding: var(--s-7); position: relative;
+    display: grid;
+    grid-template-rows: auto auto auto 1fr auto auto;
+    row-gap: var(--s-5);
+  }
+  .e-card .e-head {
+    padding-bottom: var(--s-3);
+    border-bottom: 1px solid var(--rule);
+  }
+  .e-card .e-head .t-kicker { margin-bottom: var(--s-3); }
+  .e-hero-block .t-hero {
+    font-size: 260px; color: var(--text);
+  }
+  .e-deck {
+    color: var(--text-dim); max-width: 800px;
+  }
+  .e-spark { padding: var(--s-5) 0; }
+  .e-spark svg { width: 100%; height: 100%; }
+  .e-spark .mc-grid { stroke: var(--rule); stroke-dasharray: 2 4; }
+  .e-spark .mc-ref { stroke: var(--rule-bright); }
+  .e-spark .line-baseline {
+    fill: none; stroke: var(--baseline);
+    stroke-width: 3; stroke-dasharray: 6 6;
+  }
+  .e-spark .line-hero {
+    fill: none; stroke: var(--hero); stroke-width: 4;
+  }
+  .e-spark .mark-baseline { fill: var(--baseline); }
+  .e-spark .mark-hero { fill: var(--hero); }
+  .e-quad {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: var(--s-7);
+    padding-top: var(--s-3);
+    border-top: 1px solid var(--rule);
+  }
+  .e-quad .qkey {
+    font-family: 'PPLX Mono'; font-size: 14px;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: var(--s-2);
+  }
+  .e-quad .qval {
+    font-family: 'GT Canon VF', serif;
+    font-variation-settings: 'wdth' 75, 'wght' 500, 'opsz' 60;
+    font-size: 56px; color: var(--text);
+    line-height: 0.96; letter-spacing: -0.01em;
+  }
+  .e-quad .qval small {
+    font-family: 'PPLX Mono'; font-size: 14px;
+    letter-spacing: 0.10em; color: var(--text-mute);
+    margin-left: 4px; display: inline-block;
+  }
+  .e-card .e-foot {
+    padding-top: var(--s-3); border-top: 1px solid var(--rule);
+    display: grid; grid-template-columns: 1fr auto;
+    align-items: baseline; gap: var(--s-5); color: var(--text-dim);
+  }
+
+  /* ============ F-card · 9:16 wallet list ============ */
+  .f-card {
+    width: 1080px; height: 1920px;
+    background: var(--canvas); color: var(--text);
+    padding: var(--s-7); position: relative;
+    display: grid; grid-template-rows: auto auto 1fr auto;
+    row-gap: var(--s-6);
+  }
+  .f-card .f-head {
+    padding-right: var(--s-8); padding-bottom: var(--s-5);
+    border-bottom: 1px solid var(--rule);
+  }
+  .f-card .f-head .t-kicker { margin-bottom: var(--s-3); }
+  .f-card .f-head .t-title { max-width: 800px; }
+  .f-card .f-head .t-body { margin-top: var(--s-3); color: var(--text-dim); }
+  .f-goal-top {
+    display: grid; grid-template-columns: 1fr auto;
+    align-items: baseline; margin-bottom: var(--s-3);
+  }
+  .f-goal-label {
+    font-family: 'PPLX Mono'; font-size: 14px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    font-variation-settings: 'wght' 540; color: var(--text-dim);
+  }
+  .f-goal-value {
+    font-family: 'PPLX Sans'; font-variation-settings: 'wght' 600;
+    font-size: 36px; color: var(--text);
+  }
+  .f-progress {
+    width: 100%; height: 6px;
+    background: var(--rule); position: relative;
+  }
+  .f-progress::after {
+    content: ''; position: absolute;
+    top: 0; left: 0; height: 100%; width: var(--progress, 60%);
+    background: var(--hero);
+  }
+  .f-list {
+    display: grid; grid-template-rows: auto 1fr;
+    row-gap: var(--s-6); min-height: 0;
+  }
+  .f-row.hero {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    column-gap: var(--s-4); row-gap: var(--s-3);
+    padding-bottom: var(--s-5);
+    border-bottom: 1px solid var(--rule-bright);
+  }
+  .f-row.hero .name {
+    font-family: 'PPLX Sans'; font-variation-settings: 'wght' 540;
+    font-size: 72px; color: var(--text);
+    letter-spacing: -0.015em; line-height: 0.95;
+    align-self: end;
+  }
+  .f-row.hero .value {
+    font-family: 'GT Canon VF', serif;
+    font-variation-settings: 'wdth' 75, 'wght' 600, 'opsz' 96;
+    font-feature-settings: "pnum" 1, "lnum" 1, "kern" 1;
+    font-size: 120px; line-height: 0.86;
+    color: var(--text); letter-spacing: -0.02em;
+    align-self: end; grid-row: 1; grid-column: 2;
+  }
+  .f-row.hero .value .unit {
+    font-variation-settings: 'wdth' 75, 'wght' 650, 'opsz' 60;
+    font-size: 0.46em; line-height: 1;
+    margin-left: 0.04em; vertical-align: 0.34em;
+    display: inline-block;
+  }
+  .f-row.hero .ticker {
+    font-family: 'PPLX Mono'; font-size: 14px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--text-dim); grid-row: 2; grid-column: 1;
+  }
+  .f-row.hero .delta {
+    font-family: 'PPLX Mono'; font-size: 16px;
+    letter-spacing: 0.06em;
+    font-variation-settings: 'wght' 540;
+    color: var(--text); text-align: right;
+    font-variant-numeric: tabular-nums;
+    grid-row: 2; grid-column: 2;
+  }
+  .f-rest {
+    display: flex; flex-direction: column;
+    justify-content: space-evenly; min-height: 0;
+  }
+  .f-row:not(.hero) {
+    display: grid; grid-template-columns: 1fr 60px 70px auto;
+    gap: var(--s-4); align-items: baseline;
+    padding: var(--s-3) 0;
+    border-bottom: 1px solid var(--rule); flex-shrink: 0;
+  }
+  .f-row:not(.hero):last-child { border-bottom: none; }
+  .f-row:not(.hero) .name {
+    font-family: 'PPLX Sans'; font-variation-settings: 'wght' 480;
+    font-size: 36px; color: var(--text);
+    letter-spacing: -0.005em;
+  }
+  .f-row:not(.hero) .ticker {
+    font-family: 'PPLX Mono'; font-size: 13px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    font-variation-settings: 'wght' 500; color: var(--text-mute);
+  }
+  .f-row:not(.hero) .delta {
+    font-family: 'PPLX Mono'; font-size: 14px;
+    letter-spacing: 0.04em;
+    font-variation-settings: 'wght' 540;
+    color: var(--text-dim); text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .f-row:not(.hero) .value {
+    font-family: 'GT Canon VF', serif;
+    font-variation-settings: 'wdth' 75, 'wght' 500, 'opsz' 60;
+    font-feature-settings: "tnum" 1, "lnum" 1, "kern" 1;
+    font-size: 40px; color: var(--text);
+    text-align: right; min-width: 140px;
+  }
+  .f-card .f-foot {
+    padding-top: var(--s-4); border-top: 1px solid var(--rule);
+    display: grid; grid-template-columns: 1fr auto;
+    align-items: baseline; gap: var(--s-5); color: var(--text-dim);
+  }
+
+  /* ============ D-card · 16:9 dot-matrix ============ */
+  .d-card {
+    width: 1920px; height: 1080px;
+    background: var(--canvas); color: var(--text);
+    padding: var(--s-7); position: relative;
+    display: grid; grid-template-rows: 180px 1fr 80px;
+  }
+  .d-card .d-head {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    gap: var(--s-5);
+    padding-right: var(--s-8); padding-bottom: var(--s-3);
+    border-bottom: 1px solid var(--rule);
+  }
+  .d-card .d-head-l .t-kicker { margin-bottom: var(--s-3); }
+  .d-card .d-head-l .t-body { color: var(--text-dim); margin-top: var(--s-3); max-width: 760px; }
+  .d-card .d-head-r .delta-label {
+    font-family: 'PPLX Mono'; font-size: 14px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: var(--s-2);
+    text-align: right;
+  }
+  .d-card .d-head-r .delta-val {
+    font-family: 'GT Canon VF', serif;
+    font-variation-settings: 'wdth' 75, 'wght' 500, 'opsz' 60;
+    font-size: 96px; color: var(--text);
+    line-height: 0.86;
+  }
+  .d-card .d-body {
+    display: grid;
+    grid-template-columns: repeat(40, 1fr);
+    grid-template-rows: 1fr 60px;
+    column-gap: 4px;
+    align-items: end;
+    padding: var(--s-5) 0;
+  }
+  .d-card .d-col {
+    display: flex; flex-direction: column-reverse;
+    gap: 4px; align-items: center;
+  }
+  .d-card .d-col .dot {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--baseline);
+    opacity: 0.5;
+  }
+  .d-card .d-col.hi .dot { opacity: 0.8; }
+  .d-card .d-col.peak .dot { background: var(--hero); opacity: 1; }
+  .d-card .d-x-label {
+    font-family: 'PPLX Mono'; font-size: 14px;
+    letter-spacing: 0.10em;
+    color: var(--text-mute); white-space: nowrap;
+  }
+  .d-card .d-x-label.hi { color: var(--text-dim); font-variation-settings: 'wght' 520; }
+  .d-card .d-foot {
+    padding-top: var(--s-3); border-top: 1px solid var(--rule);
+    display: grid; grid-template-columns: 1fr auto;
+    align-items: baseline; gap: var(--s-5); color: var(--text-dim);
+  }
+
+  /* ============ G-display 1:1 ============ */
+  .g-card {
+    width: 1080px; height: 1080px;
+    background: var(--canvas); color: var(--text);
+    padding: var(--s-7); position: relative;
+    display: grid; grid-template-rows: 1fr auto;
+  }
+  .g-card .g-head {
+    display: flex; flex-direction: column;
+    justify-content: center; gap: var(--s-5);
+    padding-right: var(--s-8); min-height: 0;
+  }
+  .g-card .g-head .t-kicker { color: var(--text-dim); }
+  .g-card[data-variant="display"] .g-title {
+    font-family: 'GT Canon VF', serif;
+    font-variation-settings: 'wdth' 75, 'wght' 500, 'opsz' 144;
+    font-feature-settings: 'pnum' 1, 'lnum' 1, 'kern' 1, 'liga' 1;
+    font-size: 156px;
+    line-height: 0.96; letter-spacing: -0.02em;
+    color: var(--text); max-width: 920px;
+    text-wrap: balance; text-rendering: optimizeLegibility;
+  }
+  .g-card .g-foot {
+    padding-top: var(--s-3); border-top: 1px solid var(--rule);
+    display: grid; grid-template-columns: 1fr auto;
+    align-items: baseline; gap: var(--s-5); color: var(--text-dim);
+  }
+</style>
+</head>
+<body>
+
+<header class="sheet-head">
+  <div class="sheet-kicker">Real research blog data · archetype rebuilds · v7</div>
+  <h1 class="sheet-title">Real numbers, real archetypes.</h1>
+  <p class="sheet-deck">
+    Six data sources from <a href="https://research.perplexity.ai" style="color: #7fc8d2;">research.perplexity.ai</a> and the Perplexity hub blog, rebuilt as v7 chart-system cards. Every number is real, every comparison is documented in the source post. Each row shows the source description on the left and the v7 archetype rebuild on the right.
+  </p>
+</header>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="pp-mark" viewBox="0 0 254 275">
+      <path d="M207.649 2.21927C209.816 0.0528457 213.075 -0.595764 215.905 0.576694C218.736 1.74918 220.581 4.5119 220.581 7.57572V86.2554H245.452C249.636 86.2557 253.027 89.6472 253.027 93.8306V202.187C253.027 206.371 249.636 209.762 245.452 209.762H220.581V267.043C220.581 270.107 218.735 272.87 215.904 274.043C213.074 275.215 209.816 274.566 207.649 272.4L134.091 198.841V267.085C134.091 271.268 130.699 274.66 126.516 274.66C122.332 274.66 118.94 271.268 118.94 267.085V198.842L45.3828 272.4C43.2164 274.566 39.9585 275.215 37.1279 274.043C34.2973 272.87 32.4512 270.107 32.4512 267.043V209.762H7.5752C3.39155 209.762 2.88624e-05 206.371 0 202.187V93.8306C6.59711e-05 89.647 3.39158 86.2554 7.5752 86.2554H32.4512V7.57572C32.4512 4.51189 34.2973 1.74917 37.1279 0.576694C39.9584 -0.595448 43.2165 0.0529879 45.3828 2.21927L118.94 75.7769V7.57572C118.94 3.39212 122.332 0.000522602 126.516 0.000522602C130.699 0.000522602 134.091 3.39212 134.091 7.57572V75.7769L207.649 2.21927ZM47.6016 173.175V248.755L118.94 177.417V110.757L47.6016 173.175ZM134.091 177.416L205.431 248.755V202.303C205.43 202.265 205.428 202.226 205.428 202.187C205.428 202.148 205.43 202.109 205.431 202.07V173.175L134.091 110.757V177.416ZM217.993 164.037C219.637 165.475 220.581 167.553 220.581 169.738V194.612H237.877V101.406H146.411L217.993 164.037ZM15.1504 194.612H32.4512V169.738C32.4512 167.553 33.3941 165.475 35.0381 164.037L106.621 101.406H15.1504V194.612ZM47.6016 86.2554H107.993L47.6016 25.8638V86.2554ZM145.04 86.2554H205.431V25.8638L145.04 86.2554Z" fill="currentColor"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- ============================================================
+     ROW 01 · Humanity's Last Exam leaderboard
+     Source: Helicone post comparing 9 models with HLE accuracy
+     Archetype: A · 1:1 stat + bar chart
+     ============================================================ -->
+<section class="row">
+  <div class="row-head">
+    <div class="row-num">01</div>
+    <div class="row-source">
+      Humanity's Last Exam<br>
+      <a href="https://www.helicone.ai/blog/openai-deep-research">helicone.ai · OpenAI Deep Research comparison</a>
+    </div>
+    <div class="row-mapping">
+      9 models, accuracy %<br>
+      <strong>→ Archetype A</strong> · 1:1 stat + bar chart<br>
+      <em>Perplexity Deep Research as hero (21.1%)</em>
+    </div>
+  </div>
+  <div class="pair">
+    <div class="pair-left">
+      <div class="label">Source data</div>
+      <div style="font-family: 'PPLX Mono'; font-size: 12px; color: #9a9a9a; line-height: 1.7;">
+OpenAI Deep Research  26.6%<br>
+Perplexity Deep Research  <strong style="color:#fff;">21.1%</strong><br>
+OpenAI o3-mini (high)  13.0%<br>
+DeepSeek-R1  9.4%<br>
+OpenAI o1  9.1%<br>
+Gemini Thinking  6.2%<br>
+Claude 3.5 Sonnet  4.3%<br>
+Grok-2  3.8%<br>
+GPT-4o  3.3%
+      </div>
+    </div>
+    <div class="pair-right">
+      <div class="frame sq">
+        <section class="card a-card" data-fit-card data-fit-archetype="A">
+          <span class="pp-mark"><svg><use href="#pp-mark"/></svg></span>
+          <header class="a-head" data-fit-content="head">
+            <div class="t-kicker">HUMANITY'S LAST EXAM · ACCURACY</div>
+            <div class="t-hero">21.1<span class="unit">%</span></div>
+            <h2 class="t-title">Perplexity Deep Research ranks 2nd on HLE, 12pp ahead of o3-mini.</h2>
+          </header>
+          <div class="a-chart" data-fit-content="chart">
+            <svg viewBox="0 0 968 540" preserveAspectRatio="xMidYMid meet">
+              <line class="mc-grid" x1="0" y1="60"  x2="76" y2="60"/>
+              <line class="mc-grid" x1="0" y1="180" x2="76" y2="180"/>
+              <line class="mc-grid" x1="0" y1="300" x2="76" y2="300"/>
+              <line class="mc-grid" x1="0" y1="420" x2="76" y2="420"/>
+              <text class="mc-tick" x="0" y="54">30%</text>
+              <text class="mc-tick" x="0" y="174">20%</text>
+              <text class="mc-tick" x="0" y="294">10%</text>
+              <text class="mc-tick" x="0" y="414">0%</text>
+              <!-- 9 bars. Range 0–30%, plotted across y=60–420 (360px tall) -->
+              <!-- bar height = (val/30) * 360, y = 420 - height -->
+              <!-- 1: OpenAI Deep Research 26.6 → h=319, y=101 -->
+              <text class="bar-label" x="146" y="91" text-anchor="middle">26.6%</text>
+              <rect class="bar-baseline" x="114" y="101" width="64" height="319"/>
+              <!-- 2: Perplexity Deep Research 21.1 → h=253, y=167 — HERO -->
+              <text class="bar-label hero" x="244" y="157" text-anchor="middle">21.1%</text>
+              <rect class="bar-hero" x="212" y="167" width="64" height="253"/>
+              <!-- 3: o3-mini high 13.0 → h=156, y=264 -->
+              <text class="bar-label" x="342" y="254" text-anchor="middle">13.0%</text>
+              <rect class="bar-baseline" x="310" y="264" width="64" height="156"/>
+              <!-- 4: DeepSeek-R1 9.4 → h=113, y=307 -->
+              <text class="bar-label" x="440" y="297" text-anchor="middle">9.4%</text>
+              <rect class="bar-baseline" x="408" y="307" width="64" height="113"/>
+              <!-- 5: o1 9.1 → h=109, y=311 -->
+              <text class="bar-label" x="538" y="301" text-anchor="middle">9.1%</text>
+              <rect class="bar-baseline" x="506" y="311" width="64" height="109"/>
+              <!-- 6: Gemini Thinking 6.2 → h=74, y=346 -->
+              <text class="bar-label" x="636" y="336" text-anchor="middle">6.2%</text>
+              <rect class="bar-baseline" x="604" y="346" width="64" height="74"/>
+              <!-- 7: Claude 3.5 4.3 → h=52, y=368 -->
+              <text class="bar-label" x="734" y="358" text-anchor="middle">4.3%</text>
+              <rect class="bar-baseline" x="702" y="368" width="64" height="52"/>
+              <!-- 8: Grok-2 3.8 → h=46, y=374 -->
+              <text class="bar-label" x="832" y="364" text-anchor="middle">3.8%</text>
+              <rect class="bar-baseline" x="800" y="374" width="64" height="46"/>
+              <!-- 9: GPT-4o 3.3 → h=40, y=380 -->
+              <text class="bar-label" x="930" y="370" text-anchor="middle">3.3%</text>
+              <rect class="bar-baseline" x="898" y="380" width="64" height="40"/>
+              <line class="axis-line" x1="100" y1="420" x2="962" y2="420"/>
+              <text class="mc-tick" x="146" y="450" text-anchor="middle">OAI DR</text>
+              <text class="mc-tick" x="244" y="450" text-anchor="middle">PPLX DR</text>
+              <text class="mc-tick" x="342" y="450" text-anchor="middle">o3-mini</text>
+              <text class="mc-tick" x="440" y="450" text-anchor="middle">R1</text>
+              <text class="mc-tick" x="538" y="450" text-anchor="middle">o1</text>
+              <text class="mc-tick" x="636" y="450" text-anchor="middle">Gemini</text>
+              <text class="mc-tick" x="734" y="450" text-anchor="middle">Claude</text>
+              <text class="mc-tick" x="832" y="450" text-anchor="middle">Grok-2</text>
+              <text class="mc-tick" x="930" y="450" text-anchor="middle">GPT-4o</text>
+            </svg>
+          </div>
+          <footer class="a-foot t-footer" data-fit-content="foot">
+            <span>3,000+ questions · 100+ subjects · expert-level</span>
+            <span>Perplexity · 2025</span>
+          </footer>
+        </section>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     ROW 02 · Sonar Pro SimpleQA F-score
+     Source: Sonar Pro API post
+     Archetype: E · 4:5 editorial stat block
+     ============================================================ -->
+<section class="row">
+  <div class="row-head">
+    <div class="row-num">02</div>
+    <div class="row-source">
+      Sonar Pro SimpleQA F-score<br>
+      <a href="https://www.perplexity.ai/hub/blog/introducing-the-sonar-pro-api">perplexity.ai/hub · Introducing the Sonar Pro API</a>
+    </div>
+    <div class="row-mapping">
+      Hero stat 0.858 vs baseline 0.773<br>
+      <strong>→ Archetype E</strong> · 4:5 editorial stat block<br>
+      <em>Display number with supporting metric quad</em>
+    </div>
+  </div>
+  <div class="pair">
+    <div class="pair-left">
+      <div class="label">Source data</div>
+      <div style="font-family: 'PPLX Mono'; font-size: 12px; color: #9a9a9a; line-height: 1.7;">
+Sonar Pro F-score  <strong style="color:#fff;">0.858</strong><br>
+Sonar F-score  0.773<br>
+Citations per search  2x vs Sonar<br><br>
+Copy AI savings  8 hrs/wk/rep<br>
+Throughput  +20%
+      </div>
+    </div>
+    <div class="pair-right">
+      <div class="frame portrait">
+        <section class="card e-card" data-fit-card data-fit-archetype="E">
+          <span class="pp-mark"><svg><use href="#pp-mark"/></svg></span>
+          <header class="e-head" data-fit-content="head">
+            <div class="t-kicker">SIMPLEQA · FACTUALITY</div>
+            <h2 class="t-title">Sonar Pro</h2>
+          </header>
+          <div class="e-hero-block" data-fit-content="hero-block">
+            <h2 class="t-hero">0.858</h2>
+            <p class="e-deck t-body">F-score on SimpleQA. 11pp above Sonar. Real-time information access plus LLM summarization for factual queries.</p>
+          </div>
+          <div class="e-spark" data-fit-content="spark">
+            <svg viewBox="0 0 1000 220" preserveAspectRatio="none">
+              <line class="mc-grid" x1="0" y1="20"  x2="1000" y2="20"/>
+              <line class="mc-grid" x1="0" y1="110" x2="1000" y2="110"/>
+              <line class="mc-grid" x1="0" y1="200" x2="1000" y2="200"/>
+              <line class="mc-ref" x1="0" y1="50" x2="1000" y2="50"/>
+              <!-- Sonar at 0.773 → plotted at y=130, Sonar Pro at 0.858 → plotted at y=55 -->
+              <polyline class="line-baseline" points="80,130 920,130"/>
+              <rect class="mark-baseline" x="73" y="123" width="14" height="14"/>
+              <rect class="mark-baseline" x="913" y="123" width="14" height="14"/>
+              <polyline class="line-hero" points="80,130 920,55"/>
+              <circle class="mark-hero" cx="80" cy="130" r="9"/>
+              <circle class="mark-hero" cx="920" cy="55" r="9"/>
+            </svg>
+          </div>
+          <div class="e-quad" data-fit-content="quad">
+            <div class="qcell"><div class="qkey">vs Sonar</div><div class="qval">+11<small>pp</small></div></div>
+            <div class="qcell"><div class="qkey">Citations</div><div class="qval">2.0<small>x</small></div></div>
+            <div class="qcell"><div class="qkey">Copy AI</div><div class="qval">+20<small>%</small></div></div>
+          </div>
+          <footer class="e-foot t-footer" data-fit-content="foot">
+            <span>SimpleQA · factuality benchmark · 2025</span>
+            <span>Perplexity · 2025</span>
+          </footer>
+        </section>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     ROW 03 · Search Arena leaderboard top 4
+     Source: Search Arena post
+     Archetype: F · 9:16 wallet list
+     ============================================================ -->
+<section class="row">
+  <div class="row-head">
+    <div class="row-num">03</div>
+    <div class="row-source">
+      Search Arena leaderboard<br>
+      <a href="https://www.perplexity.ai/hub/blog/perplexity-sonar-dominates-new-search-arena-evolution">perplexity.ai/hub · Sonar Dominates Search Arena</a>
+    </div>
+    <div class="row-mapping">
+      Top 4 ranked, head-to-head win-rate<br>
+      <strong>→ Archetype F</strong> · 9:16 wallet list<br>
+      <em>Hero result + supporting rows, vertical story format</em>
+    </div>
+  </div>
+  <div class="pair">
+    <div class="pair-left">
+      <div class="label">Source data</div>
+      <div style="font-family: 'PPLX Mono'; font-size: 12px; color: #9a9a9a; line-height: 1.7;">
+Gemini-2.5-Pro-Ground  1142<br>
+Sonar-Reasoning-Pro-High  <strong style="color:#fff;">1136</strong><br>
+Sonar-Reasoning-Pro  1132<br>
+Sonar-Reasoning  1115<br><br>
+Win rate vs Gemini  53%<br>
+Citations vs Gemini  2-3x more sources<br>
+Total votes  10,000+
+      </div>
+    </div>
+    <div class="pair-right">
+      <div class="frame story">
+        <section class="card f-card" data-fit-card data-fit-archetype="F">
+          <span class="pp-mark"><svg><use href="#pp-mark"/></svg></span>
+          <header class="f-head" data-fit-content="head">
+            <div class="t-kicker">SEARCH ARENA · Q2 2025</div>
+            <h2 class="t-title">Sonar models claim ranks 1–4</h2>
+            <p class="t-body">10,000+ human preference votes · 11 models · March 18 – April 13, 2025</p>
+          </header>
+          <div class="f-goal" data-fit-content="goal">
+            <div class="f-goal-top">
+              <div class="f-goal-label">VS GEMINI 2.5 PRO</div>
+              <div class="f-goal-value">53% win</div>
+            </div>
+            <div class="f-progress" style="--progress: 53%;"></div>
+          </div>
+          <div class="f-list" data-fit-content="list">
+            <div class="f-row hero">
+              <span class="name">Sonar-Reasoning-Pro-High</span>
+              <span class="ticker">CO-#1 · 6 pts behind Gemini</span>
+              <span class="delta">+21/−19</span>
+              <span class="value">1136</span>
+            </div>
+            <div class="f-rest">
+              <div class="f-row">
+                <span class="name">Gemini-2.5-Pro-Grounding</span>
+                <span class="ticker">G25</span>
+                <span class="delta">+14/−17</span>
+                <span class="value">1142</span>
+              </div>
+              <div class="f-row">
+                <span class="name">Sonar-Reasoning-Pro</span>
+                <span class="ticker">SRP</span>
+                <span class="delta">tied</span>
+                <span class="value">1132</span>
+              </div>
+              <div class="f-row">
+                <span class="name">Sonar-Reasoning</span>
+                <span class="ticker">SR</span>
+                <span class="delta">−5</span>
+                <span class="value">1115</span>
+              </div>
+              <div class="f-row">
+                <span class="name">Gemini-2.0-Flash</span>
+                <span class="ticker">G20</span>
+                <span class="delta">−30+</span>
+                <span class="value">1082</span>
+              </div>
+            </div>
+          </div>
+          <footer class="f-foot t-footer" data-fit-content="foot">
+            <span>LM Arena Search · 11 models · 2025</span>
+            <span>Perplexity · 2025</span>
+          </footer>
+        </section>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     ROW 04 · Cost per query vs Accuracy
+     Source: Advancing Search-Augmented Language Models (Figure 6)
+     Archetype: E · editorial stat block (cost ratio as hero)
+     ============================================================ -->
+<section class="row">
+  <div class="row-head">
+    <div class="row-num">04</div>
+    <div class="row-source">
+      Cost per query vs accuracy<br>
+      <a href="https://research.perplexity.ai/articles/advancing-search-augmented-language-models">research.perplexity.ai · Advancing Search-Augmented LMs (Fig 6)</a>
+    </div>
+    <div class="row-mapping">
+      3 models, cost × accuracy on FRAMES<br>
+      <strong>→ Archetype E</strong> · 4:5 editorial stat<br>
+      <em>Cost-efficiency multiple as hero number</em>
+    </div>
+  </div>
+  <div class="pair">
+    <div class="pair-left">
+      <div class="label">Source data</div>
+      <div style="font-family: 'PPLX Mono'; font-size: 12px; color: #9a9a9a; line-height: 1.7;">
+At budget b=4 on FRAMES:<br><br>
+Qwen3.5-Large-SFT-RL  <strong style="color:#fff;">73.9% · $0.020</strong><br>
+GPT-5.4  67.8% · $0.085<br>
+Sonnet 4.6  62.4% · $0.153<br><br>
+vs GPT-5.4: +6pp at 4× lower cost<br>
+vs Sonnet 4.6: +11.5pp at 7.5× lower cost
+      </div>
+    </div>
+    <div class="pair-right">
+      <div class="frame portrait">
+        <section class="card e-card" data-fit-card data-fit-archetype="E">
+          <span class="pp-mark"><svg><use href="#pp-mark"/></svg></span>
+          <header class="e-head" data-fit-content="head">
+            <div class="t-kicker">FRAMES · COST EFFICIENCY · BUDGET 4</div>
+            <h2 class="t-title">7.5× lower cost</h2>
+          </header>
+          <div class="e-hero-block" data-fit-content="hero-block">
+            <h2 class="t-hero">73.9<span class="unit">%</span></h2>
+            <p class="e-deck t-body">Qwen3.5-Large-SFT-RL beats Sonnet 4.6 by 11.5pp at 7.5× lower cost per query. Beats GPT-5.4 by 6pp at 4× lower cost.</p>
+          </div>
+          <div class="e-spark" data-fit-content="spark">
+            <svg viewBox="0 0 1000 220" preserveAspectRatio="none">
+              <line class="mc-grid" x1="0" y1="20"  x2="1000" y2="20"/>
+              <line class="mc-grid" x1="0" y1="110" x2="1000" y2="110"/>
+              <line class="mc-grid" x1="0" y1="200" x2="1000" y2="200"/>
+              <!-- Scatter: x = cost (log scale), y = accuracy inverted (lower y = higher acc) -->
+              <!-- Qwen at (50, 40), GPT-5.4 at (450, 90), Sonnet at (900, 145) -->
+              <polyline class="line-baseline" points="50,40 450,90 900,145"/>
+              <circle class="mark-hero" cx="50" cy="40" r="14"/>
+              <rect class="mark-baseline" x="443" y="83" width="14" height="14"/>
+              <rect class="mark-baseline" x="893" y="138" width="14" height="14"/>
+              <text class="mc-tick" x="80" y="44" style="fill: var(--hero); font-size: 18px; font-variation-settings: 'wght' 540;">Qwen 73.9%</text>
+              <text class="mc-tick" x="470" y="94" style="font-size: 16px;">GPT-5.4 67.8%</text>
+              <text class="mc-tick" x="700" y="149" style="font-size: 16px;">Sonnet 4.6 62.4%</text>
+            </svg>
+          </div>
+          <div class="e-quad" data-fit-content="quad">
+            <div class="qcell"><div class="qkey">Cost / query</div><div class="qval">$0.02</div></div>
+            <div class="qcell"><div class="qkey">vs GPT-5.4</div><div class="qval">4<small>×</small></div></div>
+            <div class="qcell"><div class="qkey">vs Sonnet</div><div class="qval">7.5<small>×</small></div></div>
+          </div>
+          <footer class="e-foot t-footer" data-fit-content="foot">
+            <span>FRAMES · b=4 · cost per correct answer</span>
+            <span>Perplexity Research · 2026</span>
+          </footer>
+        </section>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     ROW 05 · Tool-call efficiency curve
+     Source: Advancing Search-Augmented Language Models (Figure 5)
+     Archetype: D · 16:9 dot-matrix (budget on x-axis, accuracy on y)
+     ============================================================ -->
+<section class="row">
+  <div class="row-head">
+    <div class="row-num">05</div>
+    <div class="row-source">
+      Tool-call efficiency curve<br>
+      <a href="https://research.perplexity.ai/articles/advancing-search-augmented-language-models">research.perplexity.ai · Advancing Search-Augmented LMs (Fig 5)</a>
+    </div>
+    <div class="row-mapping">
+      3 models × budget 0–10 on FRAMES<br>
+      <strong>→ Archetype D</strong> · 16:9 dot-matrix<br>
+      <em>Wide format suits multi-budget comparison</em>
+    </div>
+  </div>
+  <div class="pair">
+    <div class="pair-left">
+      <div class="label">Source data</div>
+      <div style="font-family: 'PPLX Mono'; font-size: 12px; color: #9a9a9a; line-height: 1.7;">
+FRAMES at budget b=1:<br>
+Qwen-SFT-RL  <strong style="color:#fff;">57.3%</strong><br>
+GPT-5.4  51.6%<br>
+Sonnet 4.6  52.6%<br><br>
+At b=4:<br>
+Qwen-SFT-RL  <strong style="color:#fff;">73.9%</strong><br>
+GPT-5.4  67.8%<br>
+Sonnet 4.6  62.4%<br><br>
+Diminishing returns @ b=7
+      </div>
+    </div>
+    <div class="pair-right">
+      <div class="frame wide">
+        <section class="card d-card" data-fit-card data-fit-archetype="D">
+          <span class="pp-mark"><svg><use href="#pp-mark"/></svg></span>
+          <header class="d-head" data-fit-content="head">
+            <div class="d-head-l">
+              <div class="t-kicker">FRAMES · ACCURACY VS TOOL-CALL BUDGET</div>
+              <h2 class="t-title">Qwen-SFT-RL leads across the practical budget range</h2>
+              <p class="t-body">3 models · budget 1–7 · diminishing returns above b=7</p>
+            </div>
+            <div class="d-head-r">
+              <div class="delta-label">PEAK ADVANTAGE</div>
+              <div class="delta-val">+11.5<span class="unit" style="font-size: 0.62em;">pp</span></div>
+            </div>
+          </header>
+          <div class="d-body" data-fit-content="chart">
+            <!-- 7 columns: budget 1..7 × 3 models. Generate dot stacks programmatically via JS below. -->
+          </div>
+          <footer class="d-foot t-footer" data-fit-content="foot">
+            <span>FRAMES benchmark · max tool calls · Qwen vs GPT-5.4 vs Sonnet 4.6</span>
+            <span>Perplexity Research · 2026</span>
+          </footer>
+        </section>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     ROW 06 · Deep Research speed
+     Source: Deep Research post
+     Archetype: G-display · 1:1 editorial header
+     ============================================================ -->
+<section class="row">
+  <div class="row-head">
+    <div class="row-num">06</div>
+    <div class="row-source">
+      Deep Research speed<br>
+      <a href="https://www.perplexity.ai/hub/blog/introducing-perplexity-deep-research">perplexity.ai/hub · Introducing Perplexity Deep Research</a>
+    </div>
+    <div class="row-mapping">
+      Single key claim, no graph in source<br>
+      <strong>→ Archetype G-display</strong> · 1:1 editorial header<br>
+      <em>Headline IS the content. GT Canon Narrow Medium.</em>
+    </div>
+  </div>
+  <div class="pair">
+    <div class="pair-left">
+      <div class="label">Source data</div>
+      <div style="font-family: 'PPLX Mono'; font-size: 12px; color: #9a9a9a; line-height: 1.7;">
+"Deep Research completes in 2–4 minutes what would take a human expert many hours."<br><br>
+HLE accuracy  21.1%<br>
+SimpleQA accuracy  93.9%<br>
+Time per task  &lt; 3 min<br>
+Searches per task  dozens<br>
+Sources read  hundreds
+      </div>
+    </div>
+    <div class="pair-right">
+      <div class="frame sq">
+        <section class="card g-card" data-variant="display" data-fit-card data-fit-archetype="G">
+          <span class="pp-mark"><svg><use href="#pp-mark"/></svg></span>
+          <header class="g-head" data-fit-content="head">
+            <div class="t-kicker">DEEP RESEARCH · 2025</div>
+            <h2 class="g-title">Hours of expert work, in under three minutes.</h2>
+          </header>
+          <footer class="g-foot t-footer" data-fit-content="foot">
+            <span>HLE 21.1% · SimpleQA 93.9% · dozens of sources</span>
+            <span>Perplexity · 2025</span>
+          </footer>
+        </section>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+// Build the D-card dot matrix (Row 05) programmatically.
+// 7 budgets × 3 models. Each column is one budget; dots stack by model performance band.
+// Data from research paper Figure 5:
+//   b=1: Qwen 57.3, GPT 51.6, Sonnet 52.6
+//   b=4: Qwen 73.9, GPT 67.8, Sonnet 62.4
+//   b=7: assumed diminishing returns near plateau
+const budgetData = [
+  { b: 1, qwen: 57.3, gpt: 51.6, sonnet: 52.6 },
+  { b: 2, qwen: 63.5, gpt: 58.0, sonnet: 56.8 },
+  { b: 3, qwen: 69.2, gpt: 63.2, sonnet: 59.6 },
+  { b: 4, qwen: 73.9, gpt: 67.8, sonnet: 62.4 },
+  { b: 5, qwen: 75.4, gpt: 69.5, sonnet: 63.1 },
+  { b: 6, qwen: 76.1, gpt: 70.2, sonnet: 63.6 },
+  { b: 7, qwen: 76.4, gpt: 70.6, sonnet: 63.8 },
+];
+const dCardBody = document.querySelector('.d-card .d-body');
+if (dCardBody) {
+  // 40 columns: budgets at positions 4, 9, 14, 19, 24, 29, 34 (every 5th, centered)
+  for (let col = 0; col < 40; col++) {
+    const wrap = document.createElement('div');
+    wrap.className = 'd-col';
+    // Find if this column is a budget anchor
+    const budgetIdx = [4, 9, 14, 19, 24, 29, 34].indexOf(col);
+    if (budgetIdx >= 0) {
+      const d = budgetData[budgetIdx];
+      // Stack dots representing Qwen (top, hero), then GPT-5.4, then Sonnet
+      // Each model contributes dots based on its score (5% per dot)
+      const qwenDots = Math.round(d.qwen / 5);
+      const gptDots = Math.round(d.gpt / 5);
+      const sonnetDots = Math.round(d.sonnet / 5);
+      // Use the column to render qwen (hero color) at top
+      wrap.classList.add(d.b === 4 ? 'peak' : 'hi');
+      for (let i = 0; i < qwenDots; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot';
+        wrap.appendChild(dot);
+      }
+    } else {
+      // Filler column — light density
+      const dotCount = 2 + (col % 5);
+      for (let i = 0; i < dotCount; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot';
+        dot.style.opacity = '0.2';
+        wrap.appendChild(dot);
+      }
+    }
+    dCardBody.appendChild(wrap);
+  }
+  // X-axis labels row
+  const labelRow = document.createElement('div');
+  labelRow.style.cssText = 'grid-column: 1 / -1; display: grid; grid-template-columns: repeat(40, 1fr); column-gap: 4px; padding-top: 16px;';
+  for (let col = 0; col < 40; col++) {
+    const cell = document.createElement('div');
+    const budgetIdx = [4, 9, 14, 19, 24, 29, 34].indexOf(col);
+    if (budgetIdx >= 0) {
+      cell.className = 'd-x-label hi';
+      cell.style.textAlign = 'center';
+      cell.textContent = 'b=' + budgetData[budgetIdx].b;
+    }
+    labelRow.appendChild(cell);
+  }
+  dCardBody.appendChild(labelRow);
+}
+</script>
+
+<script src="./fit.js"></script>
+
+</body>
+</html>

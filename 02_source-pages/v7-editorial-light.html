@@ -1,0 +1,1341 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Social cards · v7 · editorial-light</title>
+<style>
+  /* ======================================================================
+     FONTS
+     ====================================================================== */
+  @font-face {
+    font-family: 'GT Canon VF';
+    src: url('../03_system/assets/fonts/GT-Canon-VF.woff2') format('woff2-variations'),
+         url('../03_system/assets/fonts/GT-Canon-VF.woff2') format('woff2');
+    font-weight: 300 900;
+    font-stretch: 37% 150%;
+    font-style: normal;
+    font-display: block;
+  }
+  @font-face {
+    font-family: 'GT Canon VF';
+    src: url('../03_system/assets/fonts/GT-Canon-Italic-VF.woff2') format('woff2-variations'),
+         url('../03_system/assets/fonts/GT-Canon-Italic-VF.woff2') format('woff2');
+    font-weight: 300 900;
+    font-stretch: 37% 150%;
+    font-style: italic;
+    font-display: block;
+  }
+  @font-face {
+    font-family: 'PPLX Sans';
+    src: url('../03_system/assets/fonts/PPLX-Sans-Beta-v2-VF.woff2') format('woff2-variations');
+    font-weight: 100 900;
+    font-display: block;
+  }
+  @font-face {
+    font-family: 'PPLX Mono';
+    src: url('../03_system/assets/fonts/PPLX-Mono-Beta-v0-VF.woff2') format('woff2-variations');
+    font-weight: 100 900;
+    font-display: block;
+  }
+
+  /* ======================================================================
+     DUAL-SURFACE SYSTEM
+     The 7 surface tokens flip via a class on the card root. Every other
+     token (spacing, type, mark, hairline structure) stays constant.
+
+     Academic — punchy, instrumental, paper-figure ready
+     Editorial — warm, restrained, NYT/FT print
+     ====================================================================== */
+
+  :root {
+    /* Spacing — locked across both surfaces */
+    --s-1:  4px;
+    --s-2:  8px;
+    --s-3:  14px;
+    --s-4:  20px;
+    --s-5:  28px;
+    --s-6:  40px;
+    --s-7:  56px;
+    --s-8:  80px;
+    --s-9:  112px;
+  }
+
+  /* Academic surface (default) */
+  .surface-academic {
+    --canvas:       #000000;
+    --hero:         #FBFAF4;
+    --baseline:     #5a6878;
+    --text:         #FBFAF4;
+    --text-dim:     #8a8a8a;
+    --text-mute:    #545454;
+    --rule:         rgba(251, 250, 244, 0.18);
+    --rule-bright:  rgba(251, 250, 244, 0.70);
+    --baseline-axis: rgba(251, 250, 244, 0.32);
+  }
+
+  /* Editorial surface (dark) */
+  .surface-editorial {
+    --canvas:       #0d0a07;
+    --hero:         #f4ead4;
+    --baseline:     #3d3a30;
+    --text:         #f4ead4;
+    --text-dim:     #8a8270;
+    --text-mute:    #5a5448;
+    --rule:         rgba(244, 234, 212, 0.15);
+    --rule-bright:  rgba(244, 234, 212, 0.65);
+    --baseline-axis: rgba(244, 234, 212, 0.28);
+  }
+
+  /* Academic surface (light) — value-flip, baseline preserved */
+  .surface-academic-light {
+    --canvas:       #FBFAF4;
+    --hero:         #0a0a0a;
+    --baseline:     #5a6878;
+    --text:         #0a0a0a;
+    --text-dim:     #5a5a5a;
+    --text-mute:    #8a8a8a;
+    --rule:         rgba(10, 10, 10, 0.18);
+    --rule-bright:  rgba(10, 10, 10, 0.70);
+    --baseline-axis: rgba(10, 10, 10, 0.32);
+  }
+
+  /* Editorial surface (light) — warm cream paper, warm dark ink.
+     Baseline is mid-warm-grey (not the dark editorial baseline) so the hero pops.
+     Same value-relationship principle as the dark surfaces: hero is the value extreme,
+     baseline sits at mid-value supporting tone. */
+  .surface-editorial-light {
+    --canvas:       #f4ead4;
+    --hero:         #1a1408;
+    --baseline:     #8a8270;
+    --text:         #1a1408;
+    --text-dim:     #5a5448;
+    --text-mute:    #8a8270;
+    --rule:         rgba(26, 20, 8, 0.18);
+    --rule-bright:  rgba(26, 20, 8, 0.65);
+    --baseline-axis: rgba(26, 20, 8, 0.28);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: #d8d2c4;
+    font-family: 'PPLX Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
+  }
+
+  /* ======================================================================
+     LAYOUT BALANCER CONTRACT
+     The balancer (fit.js) sets data-fit and four CSS variables on each
+     [data-fit-card] root. CSS responds via these variables; never via
+     fixed pixel overrides.
+
+     The defaults below mean "no adjustment" — cards without the balancer
+     still render correctly.
+     ====================================================================== */
+  [data-fit-card] {
+    --fit-hero-scale:   1;
+    --fit-row-pad:      1;
+    --fit-section-gap:  1;
+    --fit-aux-opacity:  1;
+  }
+
+  /* ======================================================================
+     TYPE RAMP — 6 sizes, locked across both surfaces
+     ====================================================================== */
+  .t-footer {
+    font-family: 'PPLX Mono', monospace;
+    font-variation-settings: 'wght' 400;
+    font-size: 14px;
+    line-height: 1.3;
+    letter-spacing: 0.04em;
+  }
+  .t-micro {
+    font-family: 'PPLX Mono', monospace;
+    font-variation-settings: 'wght' 500;
+    font-size: 14px;
+    line-height: 1.3;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .t-kicker {
+    font-family: 'PPLX Mono', monospace;
+    font-variation-settings: 'wght' 500;
+    font-size: 14px;
+    line-height: 1.3;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .t-body {
+    font-family: 'PPLX Sans', sans-serif;
+    font-variation-settings: 'wght' 400;
+    font-size: 18px;
+    line-height: 1.45;
+  }
+  .t-title {
+    font-family: 'PPLX Mono', monospace;
+    font-variation-settings: 'wght' 520;
+    font-size: 28px;
+    line-height: 1.18;
+    letter-spacing: -0.005em;
+  }
+  .t-hero {
+    font-family: 'GT Canon VF', 'PPLX Serif', Georgia, serif;
+    font-variation-settings: 'wdth' 75, 'wght' 500, 'opsz' 144;
+    font-feature-settings: "pnum" 1, "lnum" 1, "kern" 1;
+    line-height: 0.86;
+    letter-spacing: -0.02em;
+  }
+  /* Unit chrome (%, pp, pt, x, etc.)
+     Rule: the unit must never punch below the hero's visual baseline.
+     We size it down AND nudge it up so its descenders (the p tails in 'pp')
+     never extend past the hero baseline into a chart, chip, or rule below. */
+  .t-hero .unit {
+    font-variation-settings: 'wdth' 75, 'wght' 650, 'opsz' 60;
+    font-feature-settings: "pnum" 1, "lnum" 1, "kern" 1;
+    font-size: 0.46em;
+    line-height: 1;
+    margin-left: 0.04em;
+    /* Lift the unit so its baseline sits ~30% up the hero cap height.
+       Combined with 0.46em size, p-descender lands AT the hero baseline,
+       not below it. */
+    vertical-align: 0.34em;
+    display: inline-block;
+  }
+  .t-hero .sign {
+    font-variation-settings: 'wdth' 75, 'wght' 500, 'opsz' 60;
+    margin-right: 0.02em;
+  }
+
+  /* ======================================================================
+     SHARED PRIMITIVES — work on any surface via CSS vars
+     ====================================================================== */
+
+  .pp-mark {
+    position: absolute;
+    top: var(--s-7);
+    right: var(--s-7);
+    width: 36px;
+    height: 36px;
+    color: var(--text);
+  }
+  .pp-mark svg { width: 100%; height: 100%; display: block; }
+
+  /* SVG chart primitives */
+  .mc-grid { stroke: var(--rule); stroke-width: 1; }
+  .mc-ref  { stroke: var(--text-dim); stroke-width: 1.4; stroke-dasharray: 3 5; opacity: 0.7; }
+  .mc-tick {
+    font-family: 'PPLX Mono';
+    font-size: 13px;
+    fill: var(--text-dim);
+    letter-spacing: 0.04em;
+  }
+  .mc-axis-label {
+    font-family: 'PPLX Mono';
+    font-size: 13px;
+    fill: var(--text-dim);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .bar-hero      { fill: var(--hero); }
+  .bar-baseline  { fill: var(--baseline); }
+  .mark-hero {
+    fill: var(--hero);
+    stroke: var(--canvas);
+    stroke-width: 2;
+  }
+  .mark-baseline {
+    fill: var(--baseline);
+    stroke: var(--canvas);
+    stroke-width: 2;
+  }
+  .line-hero {
+    stroke: var(--hero);
+    stroke-width: 3;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .line-baseline {
+    stroke: var(--baseline);
+    stroke-width: 3;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .bracket {
+    stroke: var(--rule-bright);
+    stroke-width: 1;
+    fill: none;
+  }
+  .axis-line {
+    stroke: var(--text);
+    stroke-width: 1;
+    opacity: 0.32;
+  }
+  .bar-label {
+    font-family: 'PPLX Mono';
+    font-size: 14px;
+    font-variation-settings: 'wght' 540;
+    fill: var(--text);
+    letter-spacing: 0.02em;
+  }
+  .bar-label.hero { fill: var(--hero); }
+
+  /* ======================================================================
+     CONTACT SHEET LAYOUT
+     ====================================================================== */
+  .sheet {
+    width: 2400px;
+    margin: 0 auto;
+    padding: var(--s-8) var(--s-7) var(--s-9) var(--s-7);
+  }
+  .sheet-head {
+    padding-bottom: var(--s-5);
+    margin-bottom: var(--s-8);
+    border-bottom: 1px solid rgba(4,10,13,0.4);
+    display: grid;
+    grid-template-columns: 1fr auto;
+  }
+  .sheet-h1 {
+    font-family: 'GT Canon VF', serif;
+    font-variation-settings: 'wdth' 75, 'wght' 500, 'opsz' 60;
+    font-size: 64px;
+    line-height: 0.95;
+    letter-spacing: -0.015em;
+    color: #040A0D;
+  }
+  .sheet-h1 em {
+    font-style: italic;
+    font-variation-settings: 'wdth' 75, 'wght' 400, 'opsz' 60;
+    color: rgba(4,10,13,0.6);
+  }
+  .sheet-sub {
+    margin-top: var(--s-3);
+    max-width: 1100px;
+    color: rgba(4,10,13,0.7);
+    font-family: 'PPLX Mono';
+    font-size: 14px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    line-height: 1.6;
+  }
+  .sheet-meta {
+    text-align: right;
+    color: rgba(4,10,13,0.7);
+    line-height: 1.8;
+    font-family: 'PPLX Mono';
+    font-size: 14px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .surface-header {
+    margin-top: var(--s-8);
+    margin-bottom: var(--s-5);
+    padding-bottom: var(--s-4);
+    border-bottom: 1px solid rgba(4,10,13,0.35);
+  }
+  .surface-header .name {
+    font-family: 'GT Canon VF', serif;
+    font-variation-settings: 'wdth' 75, 'wght' 500, 'opsz' 60;
+    font-size: 48px;
+    line-height: 0.95;
+    letter-spacing: -0.015em;
+    color: #040A0D;
+  }
+  .surface-header .name em {
+    font-style: italic;
+    font-variation-settings: 'wdth' 75, 'wght' 400, 'opsz' 60;
+    color: rgba(4,10,13,0.55);
+  }
+  .surface-header .meta {
+    margin-top: var(--s-3);
+    font-family: 'PPLX Mono';
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(4,10,13,0.65);
+    line-height: 1.5;
+    max-width: 1100px;
+  }
+  .surface-header .tokens {
+    margin-top: var(--s-4);
+    display: flex;
+    gap: var(--s-4);
+    flex-wrap: wrap;
+  }
+  .surface-header .tokens .tok {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'PPLX Mono';
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    color: rgba(4,10,13,0.7);
+  }
+  .surface-header .tokens .sw {
+    width: 24px;
+    height: 24px;
+    border: 1px solid rgba(4,10,13,0.2);
+  }
+
+  .row-head {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: baseline;
+    gap: var(--s-5);
+    padding-bottom: var(--s-4);
+    margin: var(--s-7) 0 var(--s-4);
+    border-bottom: 1px solid rgba(4,10,13,0.18);
+  }
+  .row-head .ticker, .row-head .meta {
+    font-family: 'PPLX Mono';
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(4,10,13,0.6);
+  }
+  .row-head .name {
+    font-family: 'GT Canon VF', serif;
+    font-variation-settings: 'wdth' 75, 'wght' 500, 'opsz' 60;
+    font-size: 28px;
+    color: #040A0D;
+    letter-spacing: -0.01em;
+  }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-7);
+  }
+  .crop-label {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    margin-bottom: var(--s-3);
+    font-family: 'PPLX Mono';
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(4,10,13,0.55);
+  }
+  .card-wrap { display: inline-block; }
+
+  /* ======================================================================
+     ARCHETYPE A — 1:1 (1080×1080) STAT + BAR
+     ====================================================================== */
+  .a-card {
+    width: 1080px;
+    height: 1080px;
+    background: var(--canvas);
+    color: var(--text);
+    padding: var(--s-7);
+    position: relative;
+    display: grid;
+    grid-template-rows: 220px 1fr 80px;
+  }
+  .a-card .a-head {
+    position: relative;
+    padding-right: var(--s-8);
+    padding-bottom: var(--s-4);
+    border-bottom: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    column-gap: var(--s-5);
+    row-gap: var(--s-3);
+  }
+  .a-card .a-head .t-kicker { grid-column: 1 / -1; color: var(--text-dim); }
+  .a-card .a-head .t-hero { font-size: 144px; color: var(--text); }
+  .a-card .a-head .t-title {
+    align-self: end;
+    padding-bottom: var(--s-5);
+    color: var(--text);
+    max-width: 520px;
+  }
+  .a-card .a-chart { padding: var(--s-5) 0 var(--s-4); min-height: 0; }
+  .a-card .a-chart svg { width: 100%; height: 100%; display: block; }
+  .a-card .a-foot {
+    padding-top: var(--s-3);
+    border-top: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    gap: var(--s-5);
+    color: var(--text-dim);
+  }
+
+  /* ======================================================================
+     ARCHETYPE B — 1:1 (1080×1080) PIN SPIKE
+     ====================================================================== */
+  .b-card {
+    width: 1080px;
+    height: 1080px;
+    background: var(--canvas);
+    color: var(--text);
+    padding: var(--s-7);
+    position: relative;
+    display: grid;
+    grid-template-rows: 180px 1fr 80px;
+  }
+  .b-card .b-head {
+    position: relative;
+    padding-right: var(--s-8);
+    padding-bottom: var(--s-4);
+    border-bottom: 1px solid var(--rule);
+  }
+  .b-card .b-head .t-kicker { color: var(--text-dim); margin-bottom: var(--s-3); }
+  .b-card .b-head .t-title { color: var(--text); max-width: 720px; }
+  .b-card .b-body {
+    padding: var(--s-5) 0;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    row-gap: var(--s-5);
+    min-height: 0;
+  }
+  .b-card .b-body .t-hero {
+    font-size: 220px;
+    color: var(--text);
+    line-height: 0.82;
+    /* Hard floor for any descender ink. The chart below starts below this. */
+    margin-bottom: var(--s-3);
+  }
+  .b-pins {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(50, 1fr);
+    column-gap: 4px;
+    align-items: end;
+    height: 100%;
+    min-height: 0;
+    padding-bottom: var(--s-3);
+    border-bottom: 1px solid var(--rule);
+  }
+  .b-pins .pin {
+    width: 100%;
+    background: var(--baseline);
+    border-radius: 1px;
+    opacity: 0.9;
+  }
+  .b-pins .pin.peak {
+    background: var(--hero);
+    opacity: 1;
+  }
+  .b-marker {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--hero);
+    border: 3px solid var(--canvas);
+    box-shadow: 0 0 0 4px var(--hero);
+  }
+  .b-marker-label {
+    position: absolute;
+    font-family: 'PPLX Mono';
+    font-size: 13px;
+    font-variation-settings: 'wght' 540;
+    letter-spacing: 0.02em;
+    color: var(--canvas);
+    background: var(--hero);
+    padding: 4px 8px;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+  .b-card .b-foot {
+    padding-top: var(--s-3);
+    border-top: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    gap: var(--s-5);
+    color: var(--text-dim);
+  }
+
+  /* ======================================================================
+     ARCHETYPE E — 4:5 (1080×1350) EDITORIAL STAT
+     ====================================================================== */
+  .e-card {
+    width: 1080px;
+    height: 1350px;
+    background: var(--canvas);
+    color: var(--text);
+    padding: var(--s-7);
+    position: relative;
+    display: grid;
+    grid-template-rows: auto auto 1fr auto auto;
+    row-gap: var(--s-6);
+  }
+  .e-card .e-head { position: relative; padding-right: var(--s-8); padding-bottom: var(--s-4); border-bottom: 1px solid var(--rule); }
+  .e-card .e-head .t-kicker { color: var(--hero); margin-bottom: var(--s-3); }
+  .e-card .e-head .t-title { color: var(--text); }
+  .e-hero-block { padding: var(--s-5) 0; }
+  .e-hero-block .t-hero { font-size: 260px; color: var(--text); }
+  .e-hero-block .e-deck {
+    margin-top: var(--s-4);
+    color: var(--text-dim);
+    max-width: 720px;
+  }
+  .e-spark {
+    height: 220px;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: var(--s-4) 0;
+  }
+  .e-spark svg { width: 100%; height: 100%; display: block; }
+  .e-quad { display: grid; grid-template-columns: repeat(3, 1fr); column-gap: 0; }
+  .e-quad .qcell { padding: 0 var(--s-5) 0 0; border-right: 1px solid var(--rule); }
+  .e-quad .qcell:last-child { border-right: none; padding-right: 0; }
+  .e-quad .qcell:not(:first-child) { padding-left: var(--s-5); }
+  .e-quad .qkey {
+    font-family: 'PPLX Mono';
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: var(--s-3);
+  }
+  .e-quad .qval {
+    font-family: 'GT Canon VF', serif;
+    font-variation-settings: 'wdth' 75, 'wght' 500, 'opsz' 60;
+    font-feature-settings: "pnum" 1, "lnum" 1, "kern" 1;
+    font-size: 56px;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    color: var(--text);
+  }
+  .e-quad .qval small {
+    font-family: 'PPLX Mono';
+    font-size: 14px;
+    color: var(--text-dim);
+    margin-left: var(--s-2);
+    font-variation-settings: 'wght' 460;
+  }
+  .e-card .e-foot {
+    padding-top: var(--s-3);
+    border-top: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    gap: var(--s-5);
+    color: var(--text-dim);
+  }
+
+  /* ======================================================================
+     ARCHETYPE F — 9:16 (1080×1920) STORY STACK
+     ====================================================================== */
+  /* F card 9:16 (1080×1920)
+     Layout balancer compatible. The card declares data-fit-card on the section
+     element and data-fit-content on each natural-height block. fit.js measures
+     the sum of content heights and applies a strategy via data-fit + variables. */
+  .f-card {
+    width: 1080px;
+    height: 1920px;
+    background: var(--canvas);
+    color: var(--text);
+    padding: var(--s-7);
+    position: relative;
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    row-gap: calc(var(--s-6) * var(--fit-section-gap, 1));
+  }
+  /* Auxiliary chrome (kicker, footer text) dims slightly in compact mode
+     so the hero stays the focal point even when space is tight. */
+  .f-card[data-fit="compact"] .t-kicker,
+  .f-card[data-fit="compact"] .t-footer { opacity: var(--fit-aux-opacity); }
+  .f-card .f-head { position: relative; padding-right: var(--s-8); padding-bottom: var(--s-5); border-bottom: 1px solid var(--rule); }
+  .f-card .f-head .t-kicker { color: var(--text-dim); margin-bottom: var(--s-3); }
+  .f-card .f-head .t-title { color: var(--text); }
+  .f-card .f-head .t-body { margin-top: var(--s-3); color: var(--text-dim); }
+  .f-goal { padding: 0; }
+  .f-goal-top { display: grid; grid-template-columns: 1fr auto; align-items: baseline; margin-bottom: var(--s-3); }
+  .f-goal-label {
+    font-family: 'PPLX Mono';
+    font-size: 14px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-variation-settings: 'wght' 540;
+    color: var(--text-dim);
+  }
+  .f-goal-value {
+    font-family: 'PPLX Sans', sans-serif;
+    font-variation-settings: 'wght' 600;
+    font-size: 36px;
+    color: var(--text);
+    font-feature-settings: "pnum" 1, "lnum" 1;
+  }
+  .f-progress {
+    width: 100%;
+    height: 6px;
+    background: var(--rule);
+    position: relative;
+  }
+  .f-progress::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; height: 100%;
+    width: 95.7%;
+    background: var(--hero);
+  }
+  /* List fills the 1fr track but with structured hierarchy, not even distribution.
+     Hero row gets a dramatic display treatment up top. Supporting rows form a
+     tighter list below. This earns the 9:16 vertical canvas with proportion,
+     not negative space. */
+  .f-list {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    row-gap: var(--s-6);
+    min-height: 0;
+  }
+  /* Hero row: huge display block, not a row in the list */
+  .f-row.hero {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    column-gap: var(--s-4);
+    row-gap: var(--s-3);
+    padding-bottom: var(--s-5);
+    border-bottom: 1px solid var(--rule-bright);
+  }
+  .f-row.hero .name {
+    font-family: 'PPLX Sans', sans-serif;
+    font-variation-settings: 'wght' 540;
+    /* Name scales with hero so the cluster reads as a unit. */
+    font-size: calc(72px * var(--fit-hero-scale, 1));
+    color: var(--text);
+    letter-spacing: -0.015em;
+    line-height: 0.95;
+    align-self: end;
+  }
+  .f-row.hero .value {
+    font-family: 'GT Canon VF', serif;
+    font-variation-settings: 'wdth' 75, 'wght' 600, 'opsz' 96;
+    font-feature-settings: "pnum" 1, "lnum" 1, "kern" 1;
+    /* Hero scales via balancer. Default = 120px. */
+    font-size: calc(120px * var(--fit-hero-scale, 1));
+    line-height: 0.86;
+    color: var(--text);
+    letter-spacing: -0.02em;
+    align-self: end;
+    grid-row: 1 / 2;
+    grid-column: 2;
+  }
+  .f-row.hero .value .unit {
+    font-family: 'GT Canon VF', serif;
+    font-variation-settings: 'wdth' 75, 'wght' 650, 'opsz' 60;
+    font-feature-settings: "pnum" 1, "lnum" 1, "kern" 1;
+    font-size: 0.46em;
+    line-height: 1;
+    margin-left: 0.04em;
+    vertical-align: 0.34em;
+    display: inline-block;
+  }
+  .f-row.hero .ticker {
+    font-family: 'PPLX Mono';
+    font-size: 14px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    grid-row: 2;
+    grid-column: 1;
+  }
+  .f-row.hero .delta {
+    font-family: 'PPLX Mono';
+    font-size: 16px;
+    letter-spacing: 0.06em;
+    font-variation-settings: 'wght' 540;
+    color: var(--text);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    grid-row: 2;
+    grid-column: 2;
+  }
+  /* Supporting rows: a tight list below the hero. Rows distribute evenly
+     within their track but with capped row heights so they feel like a list,
+     not floating cards. */
+  .f-rest {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    min-height: 0;
+  }
+  .f-row:not(.hero) {
+    display: grid;
+    grid-template-columns: 1fr 60px 70px auto;
+    gap: var(--s-4);
+    align-items: baseline;
+    /* Row padding scales via balancer. Default = --s-3. */
+    padding: calc(var(--s-3) * var(--fit-row-pad, 1)) 0;
+    border-bottom: 1px solid var(--rule);
+    flex-shrink: 0;
+  }
+  .f-row:not(.hero):last-child { border-bottom: none; }
+  .f-row:not(.hero) .name {
+    font-family: 'PPLX Sans', sans-serif;
+    font-variation-settings: 'wght' 480;
+    font-size: 36px;
+    color: var(--text);
+    letter-spacing: -0.005em;
+  }
+  .f-row:not(.hero) .ticker {
+    font-family: 'PPLX Mono';
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-variation-settings: 'wght' 500;
+    color: var(--text-mute);
+  }
+  .f-row:not(.hero) .delta {
+    font-family: 'PPLX Mono';
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    font-variation-settings: 'wght' 540;
+    color: var(--text-dim);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .f-row:not(.hero) .value {
+    font-family: 'GT Canon VF', serif;
+    font-variation-settings: 'wdth' 75, 'wght' 500, 'opsz' 60;
+    font-feature-settings: "tnum" 1, "lnum" 1, "kern" 1;
+    font-size: 40px;
+    color: var(--text);
+    text-align: right;
+    min-width: 140px;
+  }
+  .f-card .f-foot {
+    padding-top: var(--s-4);
+    border-top: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    gap: var(--s-5);
+    color: var(--text-dim);
+  }
+
+  /* ======================================================================
+     ARCHETYPE C — 4:5 (1080×1350) COMPACT 2x2
+     ====================================================================== */
+  .c-card {
+    width: 1080px;
+    height: 1350px;
+    background: var(--canvas);
+    color: var(--text);
+    padding: var(--s-7);
+    position: relative;
+    display: grid;
+    grid-template-rows: 180px 1fr 80px;
+  }
+  .c-card .c-head { position: relative; padding-right: var(--s-8); padding-bottom: var(--s-4); border-bottom: 1px solid var(--rule); }
+  .c-card .c-head .t-kicker { color: var(--text-dim); margin-bottom: var(--s-3); }
+  .c-card .c-head .t-title { color: var(--text); }
+  .c-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+  .c-panel {
+    padding: var(--s-5);
+    display: grid;
+    grid-template-rows: auto auto auto 1fr;
+    row-gap: var(--s-3);
+    min-height: 0;
+  }
+  .c-panel.tl { border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+  .c-panel.tr { border-bottom: 1px solid var(--rule); }
+  .c-panel.bl { border-right: 1px solid var(--rule); }
+  .c-panel .c-kicker {
+    font-family: 'PPLX Mono';
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-variation-settings: 'wght' 540;
+    color: var(--text-dim);
+  }
+  .c-panel .c-delta {
+    font-family: 'PPLX Mono';
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    font-variation-settings: 'wght' 540;
+    color: var(--text-dim);
+  }
+  .c-panel.hero .c-delta { color: var(--hero); }
+  .c-panel .c-num {
+    font-family: 'GT Canon VF', serif;
+    font-variation-settings: 'wdth' 75, 'wght' 500, 'opsz' 144;
+    font-feature-settings: "pnum" 1, "lnum" 1, "kern" 1;
+    font-size: 84px;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+  .c-panel .c-num .unit {
+    font-variation-settings: 'wdth' 75, 'wght' 650, 'opsz' 60;
+    font-size: 0.4em;
+    margin-left: 0.04em;
+  }
+  .c-panel .c-spark { align-self: end; height: 60px; }
+  .c-panel .c-spark svg { width: 100%; height: 100%; display: block; overflow: visible; }
+  .c-card .c-foot {
+    padding-top: var(--s-3);
+    border-top: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    gap: var(--s-5);
+    color: var(--text-dim);
+  }
+
+  /* ======================================================================
+     ARCHETYPE D — 16:9 (1920×1080) DOT-MATRIX
+     ====================================================================== */
+  .d-card {
+    width: 1920px;
+    height: 1080px;
+    background: var(--canvas);
+    color: var(--text);
+    padding: var(--s-7) var(--s-8) var(--s-7) var(--s-8);
+    position: relative;
+    display: grid;
+    grid-template-rows: 200px 1fr 80px;
+  }
+  .d-card .d-head {
+    position: relative;
+    padding-right: var(--s-8);
+    padding-bottom: var(--s-4);
+    border-bottom: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+  }
+  .d-card .d-head .d-head-l .t-kicker { color: var(--text-dim); margin-bottom: var(--s-3); }
+  .d-card .d-head .d-head-l .t-title { color: var(--text); }
+  .d-card .d-head .d-head-l .t-body { color: var(--text-dim); margin-top: var(--s-3); max-width: 760px; }
+  .d-card .d-head .d-head-r { text-align: right; padding-bottom: var(--s-2); }
+  .d-card .d-head .d-head-r .t-kicker { color: var(--text-dim); margin-bottom: var(--s-2); }
+  .d-card .d-head .d-head-r .t-hero { font-size: 96px; color: var(--text); }
+  .d-card .d-body {
+    padding: var(--s-5) 0;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    row-gap: var(--s-4);
+    min-height: 0;
+  }
+  .d-chart {
+    display: grid;
+    grid-template-columns: repeat(40, 1fr);
+    column-gap: 6px;
+    align-items: end;
+    height: 100%;
+    min-height: 0;
+  }
+  .d-col {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 5px;
+    align-items: center;
+  }
+  .d-col .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--baseline);
+    opacity: 0.7;
+  }
+  .d-col.hi .dot { background: var(--baseline); opacity: 1; }
+  .d-col.peak .dot { background: var(--hero); opacity: 1; }
+  .d-axis {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    padding-top: var(--s-3);
+    border-top: 1px solid var(--rule);
+    font-family: 'PPLX Mono';
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+  }
+  .d-axis .a-cell { display: flex; align-items: baseline; gap: var(--s-2); }
+  .d-axis .a-cell .when { color: var(--text); font-variation-settings: 'wght' 560; }
+  .d-card .d-foot {
+    padding-top: var(--s-3);
+    border-top: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    gap: var(--s-5);
+    color: var(--text-dim);
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="pp-mark" viewBox="0 0 254 275">
+      <path d="M207.649 2.21927C209.816 0.0528457 213.075 -0.595764 215.905 0.576694C218.736 1.74918 220.581 4.5119 220.581 7.57572V86.2554H245.452C249.636 86.2557 253.027 89.6472 253.027 93.8306V202.187C253.027 206.371 249.636 209.762 245.452 209.762H220.581V267.043C220.581 270.107 218.735 272.87 215.904 274.043C213.074 275.215 209.816 274.566 207.649 272.4L134.091 198.841V267.085C134.091 271.268 130.699 274.66 126.516 274.66C122.332 274.66 118.94 271.268 118.94 267.085V198.842L45.3828 272.4C43.2164 274.566 39.9585 275.215 37.1279 274.043C34.2973 272.87 32.4512 270.107 32.4512 267.043V209.762H7.5752C3.39155 209.762 2.88624e-05 206.371 0 202.187V93.8306C6.59711e-05 89.647 3.39158 86.2554 7.5752 86.2554H32.4512V7.57572C32.4512 4.51189 34.2973 1.74917 37.1279 0.576694C39.9584 -0.595448 43.2165 0.0529879 45.3828 2.21927L118.94 75.7769V7.57572C118.94 3.39212 122.332 0.000522602 126.516 0.000522602C130.699 0.000522602 134.091 3.39212 134.091 7.57572V75.7769L207.649 2.21927ZM47.6016 173.175V248.755L118.94 177.417V110.757L47.6016 173.175ZM134.091 177.416L205.431 248.755V202.303C205.43 202.265 205.428 202.226 205.428 202.187C205.428 202.148 205.43 202.109 205.431 202.07V173.175L134.091 110.757V177.416ZM217.993 164.037C219.637 165.475 220.581 167.553 220.581 169.738V194.612H237.877V101.406H146.411L217.993 164.037ZM15.1504 194.612H32.4512V169.738C32.4512 167.553 33.3941 165.475 35.0381 164.037L106.621 101.406H15.1504V194.612ZM47.6016 86.2554H107.993L47.6016 25.8638V86.2554ZM145.04 86.2554H205.431V25.8638L145.04 86.2554Z" fill="currentColor"/>
+    </symbol>
+  </defs>
+</svg>
+
+<script>
+  // Macro that emits one card section. We just include the same archetype
+  // sections twice — once under each surface header. Pre-built data lives
+  // in a single template literal so we never duplicate markup.
+</script>
+
+<div class="sheet">
+
+  <header class="sheet-head">
+    <div>
+      <h1 class="sheet-h1">Dual surface · <em>academic + editorial.</em></h1>
+      <p class="sheet-sub">Same 6 archetypes, same frame, same type ramp, same spacing scale. Two surface tokens flip canvas, hero, baseline, text, and rules. Academic: pure black, warm white hero, slate baseline — punchy, paper-figure ready. Editorial: warm near-black, warm cream hero, warm-grey baseline — restrained, NYT/FT print.</p>
+    </div>
+    <div class="sheet-meta">
+      v6 · 6 archetypes × 2 surfaces<br>
+      Chart system · social<br>
+      Perplexity · 2026
+    </div>
+  </header>
+
+  <!-- ============================================================
+       SURFACE 4 · EDITORIAL LIGHT
+       ============================================================ -->
+  <div class="surface-header">
+    <div class="name">Surface IV · <em>editorial light.</em></div>
+    <div class="meta">Warm cream paper (#f4ead4). Warm near-black ink. Mid warm-grey baseline. Print editorial, newspaper figure, magazine spread on light.</div>
+    <div class="tokens">
+      <span class="tok"><span class="sw" style="background:#f4ead4;"></span>#f4ead4 canvas</span>
+      <span class="tok"><span class="sw" style="background:#1a1408;"></span>#1a1408 hero</span>
+      <span class="tok"><span class="sw" style="background:#8a8270;"></span>#8a8270 baseline</span>
+      <span class="tok"><span class="sw" style="background:#5a5448;"></span>#5a5448 text dim</span>
+    </div>
+  </div>
+
+  <!-- A · 1:1 stat + bar (editorial) -->
+  <div class="row-head">
+    <span class="ticker">A · 1:1</span>
+    <span class="name">Stat + bar chart</span>
+    <span class="meta">1080 × 1080</span>
+  </div>
+  <div class="row">
+    <div class="card-wrap">
+      <section class="a-card surface-editorial-light">
+        <span class="pp-mark"><svg><use href="#pp-mark"/></svg></span>
+        <header class="a-head">
+          <div class="t-kicker">SIMPLEQA · ACCURACY</div>
+          <div class="t-hero">95.7<span class="unit">%</span></div>
+          <h2 class="t-title">Compressed reasoning peaks at the 2K-token tier across 7 budgets.</h2>
+        </header>
+        <div class="a-chart">
+          <svg viewBox="0 0 968 540" preserveAspectRatio="none">
+            <line class="mc-grid" x1="0" y1="88"  x2="76" y2="88"/>
+            <line class="mc-grid" x1="0" y1="202" x2="76" y2="202"/>
+            <line class="mc-grid" x1="0" y1="316" x2="76" y2="316"/>
+            <line class="mc-grid" x1="0" y1="430" x2="76" y2="430"/>
+            <text class="mc-tick" x="0" y="82">96%</text>
+            <text class="mc-tick" x="0" y="196">94%</text>
+            <text class="mc-tick" x="0" y="310">92%</text>
+            <text class="mc-tick" x="0" y="424">90%</text>
+            <path class="bracket" d="M382 60 V40 H504 V60"/>
+            <text class="mc-axis-label" x="443" y="24" text-anchor="middle">PARETO RANGE</text>
+            <text class="bar-label" x="138" y="188" text-anchor="middle">94.1%</text>
+            <rect class="bar-baseline" x="106" y="202" width="64" height="228"/>
+            <text class="bar-label" x="260" y="131" text-anchor="middle">95.1%</text>
+            <rect class="bar-baseline" x="228" y="145" width="64" height="285"/>
+            <text class="bar-label" x="382" y="74" text-anchor="middle">95.7%</text>
+            <rect class="bar-baseline" x="350" y="88" width="64" height="342"/>
+            <text class="bar-label hero" x="504" y="74" text-anchor="middle">95.7%</text>
+            <rect class="bar-hero" x="472" y="88" width="64" height="342"/>
+            <text class="bar-label" x="626" y="97" text-anchor="middle">95.5%</text>
+            <rect class="bar-baseline" x="594" y="111" width="64" height="319"/>
+            <text class="bar-label" x="748" y="103" text-anchor="middle">95.4%</text>
+            <rect class="bar-baseline" x="716" y="117" width="64" height="313"/>
+            <text class="bar-label" x="870" y="174" text-anchor="middle">94.4%</text>
+            <rect class="bar-baseline" x="838" y="188" width="64" height="242"/>
+            <line class="axis-line" x1="100" y1="430" x2="930" y2="430"/>
+            <text class="mc-tick" x="138" y="470" text-anchor="middle">700</text>
+            <text class="mc-tick" x="260" y="470" text-anchor="middle">1K</text>
+            <text class="mc-tick" x="382" y="470" text-anchor="middle">1.5K</text>
+            <text class="mc-tick" x="504" y="470" text-anchor="middle">2K</text>
+            <text class="mc-tick" x="626" y="470" text-anchor="middle">2.5K</text>
+            <text class="mc-tick" x="748" y="470" text-anchor="middle">3K</text>
+            <text class="mc-tick" x="870" y="470" text-anchor="middle">4.5K</text>
+            <text class="mc-tick" x="504" y="494" text-anchor="middle" style="fill: var(--hero);">⌃</text>
+          </svg>
+        </div>
+        <footer class="a-foot t-footer">
+          <span>SimpleQA · 4,326 prompts · 2K tokens = Pareto frontier</span>
+          <span>Perplexity · 2026</span>
+        </footer>
+      </section>
+    </div>
+
+    <!-- B · 1:1 pin spike (editorial) -->
+    <div class="card-wrap">
+      <section class="b-card surface-editorial-light">
+        <span class="pp-mark"><svg><use href="#pp-mark"/></svg></span>
+        <header class="b-head">
+          <div class="t-kicker">SIMPLEQA · Q3 PEAK</div>
+          <h2 class="t-title">Compressed reasoning surpassed every prior week.</h2>
+        </header>
+        <div class="b-body">
+          <h2 class="t-hero">+18.4<span class="unit">pp</span></h2>
+          <div class="b-pins" data-pins></div>
+        </div>
+        <footer class="b-foot t-footer">
+          <span>50-week sample · compressed vs static-cache baseline</span>
+          <span>Perplexity · 2026</span>
+        </footer>
+      </section>
+    </div>
+  </div>
+
+  <!-- E · 4:5 editorial stat (editorial) -->
+  <div class="row-head">
+    <span class="ticker">E · 4:5</span>
+    <span class="name">Editorial stat block</span>
+    <span class="meta">1080 × 1350</span>
+  </div>
+  <div class="row">
+    <div class="card-wrap">
+      <section class="e-card surface-editorial-light">
+        <span class="pp-mark"><svg><use href="#pp-mark"/></svg></span>
+        <header class="e-head">
+          <div class="t-kicker">BENCHMARK · SIMPLEQA</div>
+          <h2 class="t-title">High w/ compression</h2>
+        </header>
+        <div class="e-hero-block">
+          <h2 class="t-hero">95.7<span class="unit">%</span></h2>
+          <p class="e-deck t-body">SimpleQA accuracy at 2K avg tokens per task. 1.3pp ahead of baseline, 56% lower spend than 4.5K-token frontier.</p>
+        </div>
+        <div class="e-spark">
+          <svg viewBox="0 0 1000 220" preserveAspectRatio="none">
+            <line class="mc-grid" x1="0" y1="20"  x2="1000" y2="20"/>
+            <line class="mc-grid" x1="0" y1="110" x2="1000" y2="110"/>
+            <line class="mc-grid" x1="0" y1="200" x2="1000" y2="200"/>
+            <line class="mc-ref" x1="0" y1="50" x2="1000" y2="50"/>
+            <polyline class="line-baseline" points="80,180 380,120 800,55"/>
+            <rect class="mark-baseline" x="73" y="173" width="14" height="14"/>
+            <rect class="mark-baseline" x="373" y="113" width="14" height="14"/>
+            <rect class="mark-baseline" x="793" y="48" width="14" height="14"/>
+            <polyline class="line-hero" points="60,55 280,32 420,15"/>
+            <circle class="mark-hero" cx="60" cy="55" r="9"/>
+            <circle class="mark-hero" cx="280" cy="32" r="9"/>
+            <circle class="mark-hero" cx="420" cy="15" r="9"/>
+          </svg>
+        </div>
+        <div class="e-quad">
+          <div class="qcell"><div class="qkey">Avg tokens</div><div class="qval">2,000<small>per task</small></div></div>
+          <div class="qcell"><div class="qkey">vs Exa Fast</div><div class="qval">+1.7<small>pp</small></div></div>
+          <div class="qcell"><div class="qkey">Dataset</div><div class="qval">4,326<small>prompts</small></div></div>
+        </div>
+        <footer class="e-foot t-footer">
+          <span>Pareto-frontier at 2K avg tokens · SimpleQA</span>
+          <span>Perplexity · 2026</span>
+        </footer>
+      </section>
+    </div>
+
+  </div>
+
+  <!-- F · 9:16 story stack (editorial) -->
+  <div class="row-head">
+    <span class="ticker">F · 9:16</span>
+    <span class="name">Story stack wallet list</span>
+    <span class="meta">1080 × 1920</span>
+  </div>
+  <div class="row">
+    <div class="card-wrap">
+      <section class="f-card surface-editorial-light" data-fit-card>
+        <span class="pp-mark"><svg><use href="#pp-mark"/></svg></span>
+        <header class="f-head" data-fit-content>
+          <div class="t-kicker">BENCHMARK SUITE · 2026</div>
+          <h2 class="t-title">Frontier results vs compressed reasoning</h2>
+          <p class="t-body">5 benchmark suites · same Perplexity-grade answer · 56% lower token spend</p>
+        </header>
+        <div class="f-goal" data-fit-content>
+          <div class="f-goal-top">
+            <div class="f-goal-label">FRONTIER PEAK</div>
+            <div class="f-goal-value">95.7%</div>
+          </div>
+          <div class="f-progress"></div>
+        </div>
+        <div class="f-list" data-fit-content>
+          <div class="f-row hero"><span class="name">SimpleQA</span><span class="ticker">SQA · vs baseline</span><span class="delta">+1.3pp</span><span class="value">95.7<span class="unit">%</span></span></div>
+          <div class="f-rest">
+            <div class="f-row"><span class="name">BrowseComp</span><span class="ticker">BC</span><span class="delta">+2.1</span><span class="value">75.3%</span></div>
+            <div class="f-row"><span class="name">Snippet bar</span><span class="ticker">SB</span><span class="delta">+4.7</span><span class="value">88.4%</span></div>
+            <div class="f-row"><span class="name">Frontier line</span><span class="ticker">FL</span><span class="delta">+0.8</span><span class="value">91.2%</span></div>
+            <div class="f-row"><span class="name">Exa Fast</span><span class="ticker">EF</span><span class="delta">−1.7</span><span class="value">94.0%</span></div>
+          </div>
+        </div>
+        <footer class="f-foot t-footer">
+          <span>5 benchmarks · compressed vs baseline · Q3 2026</span>
+          <span>Perplexity · 2026</span>
+        </footer>
+      </section>
+    </div>
+  </div>
+
+  <!-- C · 4:5 compact 2x2 (editorial) -->
+  <div class="row-head">
+    <span class="ticker">C · 4:5</span>
+    <span class="name">Compact 2x2 comparison</span>
+    <span class="meta">1080 × 1350</span>
+  </div>
+  <div class="row">
+    <div class="card-wrap">
+      <section class="c-card surface-editorial-light">
+        <span class="pp-mark"><svg><use href="#pp-mark"/></svg></span>
+        <header class="c-head">
+          <div class="t-kicker">QUARTERLY BENCHMARKS · Q3 2026</div>
+          <h2 class="t-title">4 suites, compressed vs baseline</h2>
+        </header>
+        <div class="c-grid">
+          <div class="c-panel tl hero">
+            <span class="c-kicker">SimpleQA</span>
+            <span class="c-delta">↑ +1.3pp</span>
+            <h3 class="c-num">95.7<span class="unit">%</span></h3>
+            <div class="c-spark">
+              <svg viewBox="0 0 320 60" preserveAspectRatio="none">
+                <polyline class="line-hero" points="0,50 60,40 120,28 180,20 240,12 280,8 320,5" stroke-width="2.5"/>
+                <circle class="mark-hero" cx="320" cy="5" r="6"/>
+              </svg>
+            </div>
+          </div>
+          <div class="c-panel tr">
+            <span class="c-kicker">BrowseComp</span>
+            <span class="c-delta">↑ +2.1pp</span>
+            <h3 class="c-num">75.3<span class="unit">%</span></h3>
+            <div class="c-spark">
+              <svg viewBox="0 0 320 60" preserveAspectRatio="none">
+                <polyline class="line-baseline" points="0,55 60,45 120,35 180,28 240,18 280,12 320,8" stroke-width="2.5"/>
+                <rect class="mark-baseline" x="314" y="2" width="12" height="12"/>
+              </svg>
+            </div>
+          </div>
+          <div class="c-panel bl">
+            <span class="c-kicker">Snippet bar</span>
+            <span class="c-delta">↑ +4.7pp</span>
+            <h3 class="c-num">88.4<span class="unit">%</span></h3>
+            <div class="c-spark">
+              <svg viewBox="0 0 320 60" preserveAspectRatio="none">
+                <polyline class="line-baseline" points="0,52 60,42 120,34 180,28 240,18 280,10 320,5" stroke-width="2.5"/>
+                <rect class="mark-baseline" x="314" y="-1" width="12" height="12"/>
+              </svg>
+            </div>
+          </div>
+          <div class="c-panel br">
+            <span class="c-kicker">Frontier line</span>
+            <span class="c-delta">↑ +0.8pp</span>
+            <h3 class="c-num">91.2<span class="unit">%</span></h3>
+            <div class="c-spark">
+              <svg viewBox="0 0 320 60" preserveAspectRatio="none">
+                <polyline class="line-baseline" points="0,40 60,38 120,35 180,30 240,28 280,22 320,18" stroke-width="2.5" stroke-dasharray="3 4"/>
+                <rect class="mark-baseline" x="314" y="12" width="12" height="12"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+        <footer class="c-foot t-footer">
+          <span>4 benchmarks · compressed reasoning · Q3 2026</span>
+          <span>Perplexity · 2026</span>
+        </footer>
+      </section>
+    </div>
+  </div>
+
+  <!-- D · 16:9 dot-matrix (editorial) -->
+  <div class="row-head">
+    <span class="ticker">D · 16:9</span>
+    <span class="name">Dot-matrix bar</span>
+    <span class="meta">1920 × 1080</span>
+  </div>
+  <div class="row">
+    <div class="card-wrap">
+      <section class="d-card surface-editorial-light">
+        <span class="pp-mark"><svg><use href="#pp-mark"/></svg></span>
+        <header class="d-head">
+          <div class="d-head-l">
+            <div class="t-kicker">ACCURACY VS TOKENS · 4 SUITES</div>
+            <h2 class="t-title">Compressed reasoning over the benchmark surface</h2>
+            <p class="t-body">Compressed reasoning · 4 benchmark suites · same Perplexity-grade answer</p>
+          </div>
+          <div class="d-head-r">
+            <div class="t-kicker">VS BASELINE</div>
+            <div class="t-hero"><span class="sign">+</span>1.3<span class="unit">pp</span></div>
+          </div>
+        </header>
+        <div class="d-body">
+          <div class="d-chart" data-dots></div>
+          <div class="d-axis">
+            <div class="a-cell"><span class="when">Snip</span><span>$0</span></div>
+            <div class="a-cell"><span class="when">Frontier</span><span>$0.4</span></div>
+            <div class="a-cell"><span class="when">SimpleQA</span><span>$0.9</span></div>
+            <div class="a-cell"><span class="when">BrowseComp</span><span>$1.6</span></div>
+          </div>
+        </div>
+        <footer class="d-foot t-footer">
+          <span>4 benchmark suites · compressed reasoning · same Perplexity-grade</span>
+          <span>Perplexity · 2026</span>
+        </footer>
+      </section>
+    </div>
+  </div>
+
+</div>
+
+  </div>
+
+<script>
+  // Pin spike — instantiate inside any [data-pins] container
+  document.querySelectorAll('[data-pins]').forEach(pins => {
+    const cols = 50;
+    const peakIdx = 24;
+    const heights = Array.from({length: cols}, (_, i) => {
+      const d = Math.abs(i - peakIdx);
+      if (d === 0) return 1.0;
+      const env = Math.max(0.18, 0.82 * Math.exp(-d/8));
+      const wobble = 0.65 + 0.35 * Math.sin(i * 1.6);
+      return env * wobble;
+    });
+    heights.forEach((h, i) => {
+      const pin = document.createElement('div');
+      pin.className = 'pin' + (i === peakIdx ? ' peak' : '');
+      pin.style.height = (h * 100) + '%';
+      pins.appendChild(pin);
+    });
+    const peakPct = ((peakIdx + 0.5) / cols) * 100;
+    const marker = document.createElement('div');
+    marker.className = 'b-marker';
+    marker.style.left = `calc(${peakPct}% - 7px)`;
+    marker.style.top = '-12px';
+    pins.appendChild(marker);
+    const val = document.createElement('div');
+    val.className = 'b-marker-label';
+    val.style.left = `${peakPct}%`;
+    val.style.top = '-56px';
+    val.textContent = 'Q3 · 95.7%';
+    pins.appendChild(val);
+  });
+
+  // Dot matrix — instantiate inside any [data-dots] container
+  document.querySelectorAll('[data-dots]').forEach(chart => {
+    const data = [3,4,3,5,4,6,5,7,6,8,7,9,8,10,9,11,10,12,18,12,10,9,8,7,7,6,5,4,3,2,2,1,1,1,1,1,1,1,1,1];
+    const peakIdx = 18;
+    for (let i = 0; i < data.length; i++) {
+      const col = document.createElement('div');
+      col.className = 'd-col' + (data[i] >= 10 ? ' hi' : '') + (i === peakIdx ? ' peak' : '');
+      for (let j = 0; j < data[i]; j++) {
+        const d = document.createElement('div');
+        d.className = 'dot';
+        col.appendChild(d);
+      }
+      chart.appendChild(col);
+    }
+  });
+</script>
+
+
+<script src="./fit.js"></script>
+</body>
+</html>

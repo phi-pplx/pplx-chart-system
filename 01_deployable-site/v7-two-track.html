@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>PPLX Chart System v7 — Two-Track (Research vs Social)</title>
+<style>
+@font-face{font-family:'GT Canon';src:url('./fonts/GT-Canon-VF.woff2') format('woff2-variations');font-weight:300 900;font-style:normal;font-display:block;}
+@font-face{font-family:'GT Canon';src:url('./fonts/GT-Canon-Italic-VF.woff2') format('woff2-variations');font-weight:300 900;font-style:italic;font-display:block;}
+@font-face{font-family:'PPLX Sans';src:url('./fonts/PPLX-Sans-Beta-v2-VF.woff2') format('woff2-variations');font-weight:100 900;font-style:normal;font-display:block;}
+@font-face{font-family:'PPLX Mono';src:url('./fonts/PPLX-Mono-Beta-v0-VF.woff2') format('woff2-variations');font-weight:100 900;font-style:normal;font-display:block;}
+
+:root{
+  /* shared tokens — locked across both variants */
+  --ink:#0a0a0a;
+  --paper-light:#FBFAF4;
+  --paper-dark:#0a0b0c;
+  --slate:#5a6878;
+  --teal:#0fb5b3;
+  --teal-dim:#0a8281;
+  --teal-deep:#076968;
+  --hairline-dark:rgba(255,255,255,0.10);
+  --hairline-light:rgba(10,10,10,0.10);
+  --grid-dark:rgba(255,255,255,0.06);
+  --grid-light:rgba(10,10,10,0.06);
+  --text-dark-1:#f5f3eb;
+  --text-dark-2:rgba(245,243,235,0.62);
+  --text-dark-3:rgba(245,243,235,0.40);
+  --text-light-1:#0a0a0a;
+  --text-light-2:rgba(10,10,10,0.62);
+  --text-light-3:rgba(10,10,10,0.42);
+  --s-4:4px;--s-8:8px;--s-14:14px;--s-20:20px;--s-28:28px;--s-40:40px;--s-56:56px;--s-80:80px;--s-112:112px;
+}
+
+*,*::before,*::after{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:'PPLX Sans',system-ui,sans-serif;
+  font-feature-settings:"kern","ss01";
+  background:var(--paper-light);
+  color:var(--text-light-1);
+  -webkit-font-smoothing:antialiased;
+}
+
+.page{max-width:1500px;margin:0 auto;padding:var(--s-80) var(--s-40) var(--s-112);}
+
+/* page header */
+.page-head{margin-bottom:var(--s-80);max-width:760px;}
+.kicker{font-family:'PPLX Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-light-2);font-weight:500;}
+.page-title{font-family:'GT Canon',serif;font-weight:500;font-size:56px;line-height:0.98;letter-spacing:-0.02em;margin:var(--s-20) 0 var(--s-28);text-wrap:balance;}
+.page-deck{font-family:'PPLX Sans',sans-serif;font-size:17px;line-height:1.5;color:var(--text-light-2);max-width:620px;}
+
+/* hairline section break */
+.rule{border:0;border-top:1px solid var(--hairline-light);margin:0;}
+
+/* row */
+.row{display:grid;grid-template-columns:1fr;gap:var(--s-40);padding:var(--s-56) 0;border-bottom:1px solid var(--hairline-light);}
+.row-meta{display:grid;grid-template-columns:80px 1fr;gap:var(--s-40);align-items:start;}
+.row-num{font-family:'PPLX Mono',monospace;font-size:12px;font-weight:500;color:var(--text-light-3);letter-spacing:0.05em;}
+.row-title-block{display:flex;flex-direction:column;gap:var(--s-8);}
+.row-title{font-family:'PPLX Sans',sans-serif;font-size:18px;font-weight:500;letter-spacing:-0.01em;}
+.row-source{font-family:'PPLX Mono',monospace;font-size:11px;color:var(--text-light-3);text-transform:uppercase;letter-spacing:0.06em;}
+.row-source a{color:var(--text-light-2);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:0.5px;}
+
+/* pair: research card vs social card */
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-40);align-items:start;margin-top:var(--s-40);}
+.pair-col{display:flex;flex-direction:column;gap:var(--s-14);}
+.pair-tag{display:flex;align-items:baseline;justify-content:space-between;gap:var(--s-14);}
+.pair-tag-name{font-family:'PPLX Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.10em;color:var(--text-light-2);}
+.pair-tag-spec{font-family:'PPLX Mono',monospace;font-size:11px;color:var(--text-light-3);text-transform:uppercase;letter-spacing:0.06em;}
+
+/* === RESEARCH VARIANT === */
+/* dark instrument-readout style, modeled on research.perplexity.ai */
+.research{
+  background:var(--paper-dark);
+  border:1px solid var(--hairline-dark);
+  border-radius:12px;
+  padding:var(--s-20);
+  color:var(--text-dark-1);
+  font-family:'PPLX Sans',sans-serif;
+  position:relative;
+}
+.research-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 var(--s-8) var(--s-14);
+  border-bottom:1px solid var(--hairline-dark);
+  margin-bottom:var(--s-20);
+}
+.research-title{font-family:'PPLX Mono',monospace;font-size:13px;font-weight:500;color:var(--text-dark-1);letter-spacing:0;}
+.research-mark{width:18px;height:18px;color:var(--text-dark-2);}
+.research-body{display:grid;gap:var(--s-14);}
+
+/* nested subplot card */
+.subplot{
+  border:1px solid var(--hairline-dark);
+  border-radius:8px;
+  padding:var(--s-14) var(--s-14) var(--s-8);
+  background:transparent;
+  position:relative;
+}
+.subplot-title{font-family:'PPLX Mono',monospace;font-size:11px;color:var(--text-dark-1);margin-bottom:var(--s-8);letter-spacing:0;}
+.subplot-axis-x-label{
+  position:absolute;
+  bottom:14px;
+  right:14px;
+  font-family:'PPLX Mono',monospace;
+  font-size:9px;
+  color:var(--text-dark-3);
+  text-transform:uppercase;
+  letter-spacing:0.10em;
+  background:var(--paper-dark);
+  padding:2px 4px;
+}
+
+/* axis numbers — small slate sans */
+.axis-num{font-family:'PPLX Sans',sans-serif;font-size:11px;font-feature-settings:"tnum","lnum","kern";fill:var(--text-dark-2);}
+.y-tick{font-family:'PPLX Sans',sans-serif;font-size:11px;font-feature-settings:"tnum","lnum","kern";fill:var(--text-dark-2);text-anchor:end;}
+
+/* social card preview */
+.social-card{
+  width:100%;
+  aspect-ratio:1/1;
+  background:var(--paper-dark);
+  border:1px solid var(--hairline-dark);
+  border-radius:8px;
+  padding:var(--s-28);
+  color:var(--text-dark-1);
+  display:grid;
+  grid-template-rows:auto 1fr auto;
+  gap:var(--s-20);
+  position:relative;
+  overflow:hidden;
+}
+.social-card.size-45{aspect-ratio:4/5;}
+.social-card.size-916{aspect-ratio:9/16;}
+.social-card.size-169{aspect-ratio:16/9;}
+.social-kicker-row{display:flex;justify-content:space-between;align-items:center;gap:var(--s-14);}
+.social-kicker{font-family:'PPLX Mono',monospace;font-size:10px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-dark-2);}
+.social-mark{width:24px;height:24px;color:var(--text-dark-1);}
+.social-title{font-family:'PPLX Mono',monospace;font-size:14px;font-weight:500;color:var(--text-dark-1);letter-spacing:0;}
+.social-hero{
+  font-family:'GT Canon',serif;
+  font-weight:500;
+  font-variation-settings:'wdth' 75,'opsz' 96;
+  font-size:clamp(56px,9vw,128px);
+  line-height:0.92;
+  letter-spacing:-0.02em;
+  font-feature-settings:"pnum","lnum","kern";
+  color:var(--text-dark-1);
+}
+.social-hero .unit{font-size:0.5em;font-variation-settings:'wdth' 75,'opsz' 60;vertical-align:0.45em;margin-left:0.05em;color:var(--text-dark-2);}
+.social-deck{font-family:'PPLX Sans',sans-serif;font-size:13px;line-height:1.4;color:var(--text-dark-2);max-width:32ch;text-wrap:pretty;}
+.social-foot{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-14);padding-top:var(--s-14);border-top:1px solid var(--hairline-dark);}
+.social-foot-cell{display:flex;flex-direction:column;gap:2px;}
+.social-foot-label{font-family:'PPLX Mono',monospace;font-size:9px;color:var(--text-dark-3);letter-spacing:0.10em;text-transform:uppercase;}
+.social-foot-value{font-family:'GT Canon',serif;font-weight:500;font-variation-settings:'wdth' 75,'opsz' 60;font-size:24px;line-height:1;letter-spacing:-0.01em;font-feature-settings:"tnum","lnum","kern";}
+.social-foot-value .u{font-size:0.55em;font-variation-settings:'wdth' 75,'opsz' 60;color:var(--text-dark-3);}
+.social-footer-rule{font-family:'PPLX Mono',monospace;font-size:9px;color:var(--text-dark-3);letter-spacing:0.10em;text-transform:uppercase;display:flex;justify-content:space-between;padding-top:var(--s-14);border-top:1px solid var(--hairline-dark);}
+
+/* === bar chart in research mode (HLE) === */
+.bar-chart-research{position:relative;height:280px;padding-top:16px;}
+.bar-chart-research svg{display:block;width:100%;height:100%;overflow:visible;}
+.bar-chart-research .grid line{stroke:var(--grid-dark);stroke-width:1;}
+.bar-chart-research .bar{fill:var(--teal-dim);}
+.bar-chart-research .bar.hi{fill:var(--teal);}
+.bar-chart-research .bar-label{font-family:'PPLX Sans',sans-serif;font-size:9px;fill:var(--text-dark-2);text-anchor:middle;}
+.bar-chart-research .bar-value{font-family:'PPLX Sans',sans-serif;font-size:10px;font-feature-settings:"tnum","lnum";fill:var(--text-dark-1);text-anchor:middle;font-weight:500;}
+.bar-chart-research .y-tick{font-family:'PPLX Sans',sans-serif;font-size:10px;fill:var(--text-dark-2);text-anchor:end;font-feature-settings:"tnum","lnum";}
+
+/* === lollipop / ranking in research mode === */
+.ranking-research{display:grid;gap:10px;padding:8px 0;}
+.rank-row{display:grid;grid-template-columns:24px 1fr 80px 80px;gap:14px;align-items:center;font-size:12px;}
+.rank-num{font-family:'PPLX Mono',monospace;color:var(--text-dark-3);font-size:11px;}
+.rank-name{font-family:'PPLX Sans',sans-serif;color:var(--text-dark-1);font-size:13px;}
+.rank-name.hi{color:var(--teal);}
+.rank-bar{position:relative;height:6px;background:var(--hairline-dark);border-radius:1px;overflow:hidden;}
+.rank-bar-fill{position:absolute;left:0;top:0;height:100%;background:var(--teal-dim);}
+.rank-bar-fill.hi{background:var(--teal);}
+.rank-value{font-family:'PPLX Sans',sans-serif;font-size:12px;color:var(--text-dark-1);font-feature-settings:"tnum","lnum";text-align:right;}
+
+/* === scatter in research mode === */
+.scatter-research{position:relative;height:300px;}
+.scatter-research svg{display:block;width:100%;height:100%;overflow:visible;}
+.scatter-research .grid line{stroke:var(--grid-dark);stroke-width:1;}
+.scatter-research .point{fill:var(--teal-dim);}
+.scatter-research .point.hi{fill:var(--teal);}
+.scatter-research .point-label{font-family:'PPLX Mono',monospace;font-size:10px;fill:var(--text-dark-2);}
+.scatter-research .point-label.hi{fill:var(--text-dark-1);}
+.scatter-research .axis-label{font-family:'PPLX Mono',monospace;font-size:9px;fill:var(--text-dark-3);text-transform:uppercase;letter-spacing:0.10em;}
+
+/* === multi-series line in research mode (efficiency curves) === */
+.lines-research{position:relative;height:300px;}
+.lines-research svg{display:block;width:100%;height:100%;overflow:visible;}
+.lines-research .grid line{stroke:var(--grid-dark);stroke-width:1;}
+.lines-research .line-path{fill:none;stroke-width:1.5;}
+.lines-research .line-path.qwen{stroke:var(--teal);}
+.lines-research .line-path.gpt{stroke:#c4b78a;}
+.lines-research .line-path.sonnet{stroke:#9a8074;}
+.lines-research .endpoint{stroke-width:1.5;}
+.lines-research .endpoint.qwen{fill:var(--teal);stroke:var(--paper-dark);}
+.lines-research .endpoint.gpt{fill:#c4b78a;stroke:var(--paper-dark);}
+.lines-research .endpoint.sonnet{fill:#9a8074;stroke:var(--paper-dark);}
+.lines-research .series-label{font-family:'PPLX Mono',monospace;font-size:10px;font-weight:500;}
+.lines-research .series-label.qwen{fill:var(--teal);}
+.lines-research .series-label.gpt{fill:#c4b78a;}
+.lines-research .series-label.sonnet{fill:#9a8074;}
+
+/* === social card bar mini (archetype A) === */
+.social-bars{
+  display:grid;
+  grid-template-columns:repeat(9,1fr);
+  gap:4px;
+  align-items:end;
+  height:120px;
+  margin-top:var(--s-14);
+}
+.social-bar{background:var(--teal-dim);min-height:8px;border-radius:1px;position:relative;}
+.social-bar.hi{background:var(--teal);}
+.social-bar-num{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-family:'PPLX Sans',sans-serif;font-size:9px;color:var(--text-dark-3);font-feature-settings:"tnum","lnum";white-space:nowrap;}
+.social-bar.hi .social-bar-num{color:var(--text-dark-1);font-weight:500;}
+.social-bar-labels{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin-top:6px;}
+.social-bar-label{font-family:'PPLX Mono',monospace;font-size:8px;color:var(--text-dark-3);text-align:center;letter-spacing:0;}
+
+/* social wallet list */
+.social-wallet{display:grid;gap:var(--s-14);min-height:0;}
+.social-wallet-row{display:grid;grid-template-columns:auto 1fr auto;gap:var(--s-14);align-items:baseline;padding-bottom:var(--s-14);border-bottom:1px solid var(--hairline-dark);}
+.social-wallet-row.lead{padding-bottom:var(--s-20);}
+.social-wallet-rank{font-family:'PPLX Mono',monospace;font-size:11px;color:var(--text-dark-3);width:24px;}
+.social-wallet-name{font-family:'PPLX Sans',sans-serif;font-size:15px;color:var(--text-dark-2);}
+.social-wallet-row.lead .social-wallet-name{color:var(--text-dark-1);font-size:24px;font-weight:500;letter-spacing:-0.005em;}
+.social-wallet-val{font-family:'PPLX Sans',sans-serif;font-size:15px;color:var(--text-dark-1);font-feature-settings:"tnum","lnum","kern";}
+.social-wallet-row.lead .social-wallet-val{font-family:'GT Canon',serif;font-weight:500;font-variation-settings:'wdth' 75,'opsz' 60;font-size:44px;line-height:1;letter-spacing:-0.01em;font-feature-settings:"tnum","lnum","kern";}
+
+/* 9:16 wallet: distribute rows over full vertical space */
+.wallet-916{align-content:space-between;}
+.wallet-916 .social-wallet-row.lead .social-wallet-name{font-size:26px;}
+.wallet-916 .social-wallet-row.lead .social-wallet-val{font-size:52px;font-variation-settings:'wdth' 75,'opsz' 60;}
+.wallet-916 .social-wallet-name .name-soft{color:var(--text-dark-2);font-weight:400;}
+.wallet-916 .social-wallet-row{padding-bottom:var(--s-20);}
+.wallet-916 .social-wallet-row.lead{padding-bottom:var(--s-28);}
+
+/* social dot-matrix */
+.social-dots{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;padding:var(--s-20) 0;}
+.social-dots-col{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.social-dots-col-stack{display:flex;flex-direction:column;gap:3px;align-items:center;}
+.social-dot{width:6px;height:6px;border-radius:50%;background:var(--text-dark-3);}
+.social-dot.hi{background:var(--teal);width:7px;height:7px;}
+.social-dots-col-label{font-family:'PPLX Mono',monospace;font-size:9px;color:var(--text-dark-3);}
+
+/* social G-display variant */
+.social-display .social-hero-display{
+  font-family:'GT Canon',serif;
+  font-weight:500;
+  font-size:clamp(48px,7vw,88px);
+  line-height:1.0;
+  letter-spacing:-0.015em;
+  color:var(--text-dark-1);
+  text-wrap:balance;
+  max-width:14ch;
+}
+
+/* ============ NOTES sidebar ============ */
+.notes{margin-top:var(--s-28);padding:var(--s-20);border:1px solid var(--hairline-light);border-radius:8px;background:rgba(0,0,0,0.02);}
+.notes-title{font-family:'PPLX Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.10em;color:var(--text-light-3);margin-bottom:var(--s-8);}
+.notes-body{font-family:'PPLX Sans',sans-serif;font-size:13px;line-height:1.5;color:var(--text-light-2);max-width:68ch;}
+.notes-body b{color:var(--text-light-1);font-weight:500;}
+.notes-body code{font-family:'PPLX Mono',monospace;font-size:11.5px;background:rgba(0,0,0,0.04);padding:1px 4px;border-radius:2px;}
+
+/* small inline mono inline */
+.mono{font-family:'PPLX Mono',monospace;}
+
+/* keep things tidy at narrower viewports */
+@media (max-width:1100px){
+  .pair{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- =========== PAGE HEAD =========== -->
+  <header class="page-head">
+    <div class="kicker">Two-track chart system · Research vs Social · v7</div>
+    <h1 class="page-title">Same data. Two surfaces. Different jobs.</h1>
+    <p class="page-deck">The research blog publishes charts as instrument readouts: dense, axis-led, every value defensible. Social posts publish charts as editorial: hero-led, one number leading, the rest as support. Same v7 token system, two distinct treatments.</p>
+  </header>
+
+  <hr class="rule" />
+
+  <!-- =========== ROW 01 · HLE =========== -->
+  <section class="row">
+    <div class="row-meta">
+      <div class="row-num">01</div>
+      <div class="row-title-block">
+        <div class="row-title">Humanity's Last Exam · 9-model leaderboard</div>
+        <div class="row-source">helicone.ai · <a href="#">OpenAI Deep Research comparison</a></div>
+      </div>
+    </div>
+
+    <div class="pair">
+      <!-- research variant -->
+      <div class="pair-col">
+        <div class="pair-tag"><span class="pair-tag-name">Research blog · panel readout</span><span class="pair-tag-spec">740×420 inline · dark</span></div>
+        <div class="research">
+          <div class="research-head">
+            <div class="research-title">HLE benchmark accuracy across deep-research systems</div>
+            <svg class="research-mark" viewBox="0 0 254 275" fill="currentColor"><path d="M207.649 2.21927C209.816 0.0528457 213.075 -0.595764 215.905 0.576694C218.736 1.74918 220.581 4.5119 220.581 7.57572V86.2554H245.452C249.636 86.2557 253.027 89.6472 253.027 93.8306V202.187C253.027 206.371 249.636 209.762 245.452 209.762H220.581V267.043C220.581 270.107 218.735 272.87 215.904 274.043C213.074 275.215 209.816 274.566 207.649 272.4L134.091 198.841V267.085C134.091 271.268 130.699 274.66 126.516 274.66C122.332 274.66 118.94 271.268 118.94 267.085V198.842L45.3828 272.4C43.2164 274.566 39.9585 275.215 37.1279 274.043C34.2973 272.87 32.4512 270.107 32.4512 267.043V209.762H7.5752C3.39155 209.762 2.88624e-05 206.371 0 202.187V93.8306C6.59711e-05 89.647 3.39158 86.2554 7.5752 86.2554H32.4512V7.57572C32.4512 4.51189 34.2973 1.74917 37.1279 0.576694C39.9584 -0.595448 43.2165 0.0529879 45.3828 2.21927L118.94 75.7769V7.57572C118.94 3.39212 122.332 0.000522602 126.516 0.000522602C130.699 0.000522602 134.091 3.39212 134.091 7.57572V75.7769L207.649 2.21927ZM47.6016 173.175V248.755L118.94 177.417V110.757L47.6016 173.175ZM134.091 177.416L205.431 248.755V202.303C205.43 202.265 205.428 202.226 205.428 202.187C205.428 202.148 205.43 202.109 205.431 202.07V173.175L134.091 110.757V177.416ZM217.993 164.037C219.637 165.475 220.581 167.553 220.581 169.738V194.612H237.877V101.406H146.411L217.993 164.037ZM15.1504 194.612H32.4512V169.738C32.4512 167.553 33.3941 165.475 35.0381 164.037L106.621 101.406H15.1504V194.612ZM47.6016 86.2554H107.993L47.6016 25.8638V86.2554ZM145.04 86.2554H205.431V25.8638L145.04 86.2554Z" /></svg>
+          </div>
+          <div class="research-body">
+            <div class="subplot">
+              <div class="subplot-title">Accuracy (%) · 2,500 expert questions · n=9 systems</div>
+              <div class="bar-chart-research">
+                <svg viewBox="0 0 720 280" preserveAspectRatio="xMidYMid meet">
+                  <!-- gridlines -->
+                  <g class="grid">
+                    <line x1="40" y1="40" x2="700" y2="40" />
+                    <line x1="40" y1="90" x2="700" y2="90" />
+                    <line x1="40" y1="140" x2="700" y2="140" />
+                    <line x1="40" y1="190" x2="700" y2="190" />
+                    <line x1="40" y1="240" x2="700" y2="240" />
+                  </g>
+                  <!-- y-axis labels -->
+                  <text class="y-tick" x="34" y="44">30%</text>
+                  <text class="y-tick" x="34" y="94">22.5</text>
+                  <text class="y-tick" x="34" y="144">15</text>
+                  <text class="y-tick" x="34" y="194">7.5</text>
+                  <text class="y-tick" x="34" y="244">0</text>
+
+                  <!-- bars: 9 models, x-band 40-700 = 660, gap 6px => 9*bw + 8*6 = 660 => bw = ~73 -->
+                  <!-- mapping: y = 240 - (value/30)*200 -->
+                  <!-- OpenAI DR 26.6 -->
+                  <rect class="bar" x="50" y="62.7" width="60" height="177.3" />
+                  <text class="bar-value" x="80" y="56">26.6</text>
+                  <text class="bar-label" x="80" y="256">OAI DR</text>
+
+                  <!-- PPLX DR 21.1 (highlight) -->
+                  <rect class="bar hi" x="123" y="99.3" width="60" height="140.7" />
+                  <text class="bar-value" x="153" y="93">21.1</text>
+                  <text class="bar-label" x="153" y="256">PPLX DR</text>
+
+                  <!-- o3-mini 13.0 -->
+                  <rect class="bar" x="196" y="153.3" width="60" height="86.7" />
+                  <text class="bar-value" x="226" y="147">13.0</text>
+                  <text class="bar-label" x="226" y="256">o3-mini</text>
+
+                  <!-- DeepSeek 9.4 -->
+                  <rect class="bar" x="269" y="177.3" width="60" height="62.7" />
+                  <text class="bar-value" x="299" y="171">9.4</text>
+                  <text class="bar-label" x="299" y="256">DS-R1</text>
+
+                  <!-- o1 9.1 -->
+                  <rect class="bar" x="342" y="179.3" width="60" height="60.7" />
+                  <text class="bar-value" x="372" y="173">9.1</text>
+                  <text class="bar-label" x="372" y="256">o1</text>
+
+                  <!-- Gemini 6.2 -->
+                  <rect class="bar" x="415" y="198.7" width="60" height="41.3" />
+                  <text class="bar-value" x="445" y="192">6.2</text>
+                  <text class="bar-label" x="445" y="256">Gemini</text>
+
+                  <!-- Claude 4.3 -->
+                  <rect class="bar" x="488" y="211.3" width="60" height="28.7" />
+                  <text class="bar-value" x="518" y="205">4.3</text>
+                  <text class="bar-label" x="518" y="256">Claude</text>
+
+                  <!-- Grok-2 3.8 -->
+                  <rect class="bar" x="561" y="214.7" width="60" height="25.3" />
+                  <text class="bar-value" x="591" y="208">3.8</text>
+                  <text class="bar-label" x="591" y="256">Grok-2</text>
+
+                  <!-- GPT-4o 3.3 -->
+                  <rect class="bar" x="634" y="218" width="60" height="22" />
+                  <text class="bar-value" x="664" y="212">3.3</text>
+                  <text class="bar-label" x="664" y="256">GPT-4o</text>
+                </svg>
+              </div>
+              <div class="subplot-axis-x-label">Model</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- social variant -->
+      <div class="pair-col">
+        <div class="pair-tag"><span class="pair-tag-name">Social · archetype A editorial</span><span class="pair-tag-spec">1080×1080 · 1:1</span></div>
+        <div class="social-card">
+          <div class="social-kicker-row">
+            <div>
+              <div class="social-kicker">Humanity's Last Exam · Accuracy</div>
+              <div class="social-title" style="margin-top:6px;">Perplexity Deep Research</div>
+            </div>
+            <svg class="social-mark" viewBox="0 0 254 275" fill="currentColor"><path d="M207.649 2.21927C209.816 0.0528457 213.075 -0.595764 215.905 0.576694C218.736 1.74918 220.581 4.5119 220.581 7.57572V86.2554H245.452C249.636 86.2557 253.027 89.6472 253.027 93.8306V202.187C253.027 206.371 249.636 209.762 245.452 209.762H220.581V267.043C220.581 270.107 218.735 272.87 215.904 274.043C213.074 275.215 209.816 274.566 207.649 272.4L134.091 198.841V267.085C134.091 271.268 130.699 274.66 126.516 274.66C122.332 274.66 118.94 271.268 118.94 267.085V198.842L45.3828 272.4C43.2164 274.566 39.9585 275.215 37.1279 274.043C34.2973 272.87 32.4512 270.107 32.4512 267.043V209.762H7.5752C3.39155 209.762 2.88624e-05 206.371 0 202.187V93.8306C6.59711e-05 89.647 3.39158 86.2554 7.5752 86.2554H32.4512V7.57572C32.4512 4.51189 34.2973 1.74917 37.1279 0.576694C39.9584 -0.595448 43.2165 0.0529879 45.3828 2.21927L118.94 75.7769V7.57572C118.94 3.39212 122.332 0.000522602 126.516 0.000522602C130.699 0.000522602 134.091 3.39212 134.091 7.57572V75.7769L207.649 2.21927ZM47.6016 173.175V248.755L118.94 177.417V110.757L47.6016 173.175ZM134.091 177.416L205.431 248.755V202.303C205.43 202.265 205.428 202.226 205.428 202.187C205.428 202.148 205.43 202.109 205.431 202.07V173.175L134.091 110.757V177.416ZM217.993 164.037C219.637 165.475 220.581 167.553 220.581 169.738V194.612H237.877V101.406H146.411L217.993 164.037ZM15.1504 194.612H32.4512V169.738C32.4512 167.553 33.3941 165.475 35.0381 164.037L106.621 101.406H15.1504V194.612ZM47.6016 86.2554H107.993L47.6016 25.8638V86.2554ZM145.04 86.2554H205.431V25.8638L145.04 86.2554Z" /></svg>
+          </div>
+          <div style="display:grid;grid-template-rows:auto 1fr auto;gap:var(--s-14);min-height:0;">
+            <div style="display:flex;flex-direction:column;gap:var(--s-14);">
+              <div class="social-hero">21.1<span class="unit">%</span></div>
+              <div class="social-deck">Ranks 2nd of nine deep-research systems on HLE. 12 points ahead of o3-mini, behind only OpenAI Deep Research.</div>
+            </div>
+            <div></div>
+            <div>
+              <div class="social-bars">
+                <div class="social-bar" style="height:118px;"><div class="social-bar-num">26.6</div></div>
+                <div class="social-bar hi" style="height:94px;"><div class="social-bar-num">21.1</div></div>
+                <div class="social-bar" style="height:58px;"><div class="social-bar-num">13.0</div></div>
+                <div class="social-bar" style="height:42px;"><div class="social-bar-num">9.4</div></div>
+                <div class="social-bar" style="height:40px;"><div class="social-bar-num">9.1</div></div>
+                <div class="social-bar" style="height:28px;"><div class="social-bar-num">6.2</div></div>
+                <div class="social-bar" style="height:19px;"><div class="social-bar-num">4.3</div></div>
+                <div class="social-bar" style="height:17px;"><div class="social-bar-num">3.8</div></div>
+                <div class="social-bar" style="height:15px;"><div class="social-bar-num">3.3</div></div>
+              </div>
+              <div class="social-bar-labels">
+                <div class="social-bar-label">OAI</div>
+                <div class="social-bar-label">PPLX</div>
+                <div class="social-bar-label">o3-m</div>
+                <div class="social-bar-label">DS</div>
+                <div class="social-bar-label">o1</div>
+                <div class="social-bar-label">Gem</div>
+                <div class="social-bar-label">Clde</div>
+                <div class="social-bar-label">Grok</div>
+                <div class="social-bar-label">4o</div>
+              </div>
+            </div>
+          </div>
+          <div class="social-footer-rule"><span>HLE · 2,500 expert questions</span><span>2026</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes">
+      <div class="notes-title">Notes</div>
+      <div class="notes-body"><b>Research</b> shows all nine values with shared y-axis (0–30%), tabular labels above each bar, and the Perplexity bar in accent. <b>Social</b> drops the y-axis entirely, leads with the hero stat (21.1%) in GT Canon Narrow, and uses the same 9-bar shape as a supporting motif under the headline. Same data, different anchor.</div>
+    </div>
+  </section>
+
+  <!-- =========== ROW 02 · SEARCH ARENA =========== -->
+  <section class="row">
+    <div class="row-meta">
+      <div class="row-num">02</div>
+      <div class="row-title-block">
+        <div class="row-title">Search Arena · Elo leaderboard</div>
+        <div class="row-source">perplexity.ai/hub · <a href="#">Sonar Dominates Search Arena</a></div>
+      </div>
+    </div>
+
+    <div class="pair">
+      <!-- research variant: lollipop ranking with bars -->
+      <div class="pair-col">
+        <div class="pair-tag"><span class="pair-tag-name">Research blog · ranked readout</span><span class="pair-tag-spec">740×420 inline · dark</span></div>
+        <div class="research">
+          <div class="research-head">
+            <div class="research-title">Search Arena Elo (top 5 of evaluated systems)</div>
+            <svg class="research-mark" viewBox="0 0 254 275" fill="currentColor"><path d="M207.649 2.21927C209.816 0.0528457 213.075 -0.595764 215.905 0.576694C218.736 1.74918 220.581 4.5119 220.581 7.57572V86.2554H245.452C249.636 86.2557 253.027 89.6472 253.027 93.8306V202.187C253.027 206.371 249.636 209.762 245.452 209.762H220.581V267.043C220.581 270.107 218.735 272.87 215.904 274.043C213.074 275.215 209.816 274.566 207.649 272.4L134.091 198.841V267.085C134.091 271.268 130.699 274.66 126.516 274.66C122.332 274.66 118.94 271.268 118.94 267.085V198.842L45.3828 272.4C43.2164 274.566 39.9585 275.215 37.1279 274.043C34.2973 272.87 32.4512 270.107 32.4512 267.043V209.762H7.5752C3.39155 209.762 2.88624e-05 206.371 0 202.187V93.8306C6.59711e-05 89.647 3.39158 86.2554 7.5752 86.2554H32.4512V7.57572C32.4512 4.51189 34.2973 1.74917 37.1279 0.576694C39.9584 -0.595448 43.2165 0.0529879 45.3828 2.21927L118.94 75.7769V7.57572C118.94 3.39212 122.332 0.000522602 126.516 0.000522602C130.699 0.000522602 134.091 3.39212 134.091 7.57572V75.7769L207.649 2.21927ZM47.6016 173.175V248.755L118.94 177.417V110.757L47.6016 173.175ZM134.091 177.416L205.431 248.755V202.303C205.43 202.265 205.428 202.226 205.428 202.187C205.428 202.148 205.43 202.109 205.431 202.07V173.175L134.091 110.757V177.416ZM217.993 164.037C219.637 165.475 220.581 167.553 220.581 169.738V194.612H237.877V101.406H146.411L217.993 164.037ZM15.1504 194.612H32.4512V169.738C32.4512 167.553 33.3941 165.475 35.0381 164.037L106.621 101.406H15.1504V194.612ZM47.6016 86.2554H107.993L47.6016 25.8638V86.2554ZM145.04 86.2554H205.431V25.8638L145.04 86.2554Z" /></svg>
+          </div>
+          <div class="research-body">
+            <div class="subplot">
+              <div class="subplot-title">Elo rating · head-to-head votes · n>10,000</div>
+              <div class="ranking-research">
+                <div class="rank-row">
+                  <div class="rank-num">01</div>
+                  <div class="rank-name">Gemini-2.5-Pro-Ground</div>
+                  <div class="rank-bar"><div class="rank-bar-fill" style="width:100%;"></div></div>
+                  <div class="rank-value">1142</div>
+                </div>
+                <div class="rank-row">
+                  <div class="rank-num">02</div>
+                  <div class="rank-name hi">Sonar-Reasoning-Pro-High</div>
+                  <div class="rank-bar"><div class="rank-bar-fill hi" style="width:93.2%;"></div></div>
+                  <div class="rank-value">1136</div>
+                </div>
+                <div class="rank-row">
+                  <div class="rank-num">03</div>
+                  <div class="rank-name">Sonar-Reasoning-Pro</div>
+                  <div class="rank-bar"><div class="rank-bar-fill" style="width:88.6%;"></div></div>
+                  <div class="rank-value">1132</div>
+                </div>
+                <div class="rank-row">
+                  <div class="rank-num">04</div>
+                  <div class="rank-name">Sonar-Reasoning</div>
+                  <div class="rank-bar"><div class="rank-bar-fill" style="width:69.3%;"></div></div>
+                  <div class="rank-value">1115</div>
+                </div>
+                <div class="rank-row">
+                  <div class="rank-num">05</div>
+                  <div class="rank-name">Gemini-2.0-Flash</div>
+                  <div class="rank-bar"><div class="rank-bar-fill" style="width:31.8%;"></div></div>
+                  <div class="rank-value">1082</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- social variant: wallet list 9:16-ish -->
+      <div class="pair-col">
+        <div class="pair-tag"><span class="pair-tag-name">Social · archetype F wallet list</span><span class="pair-tag-spec">1080×1920 · 9:16</span></div>
+        <div class="social-card size-916">
+          <div class="social-kicker-row">
+            <div>
+              <div class="social-kicker">Search Arena · Elo</div>
+              <div class="social-title" style="margin-top:6px;">Sonar models rank 1–4</div>
+            </div>
+            <svg class="social-mark" viewBox="0 0 254 275" fill="currentColor"><path d="M207.649 2.21927C209.816 0.0528457 213.075 -0.595764 215.905 0.576694C218.736 1.74918 220.581 4.5119 220.581 7.57572V86.2554H245.452C249.636 86.2557 253.027 89.6472 253.027 93.8306V202.187C253.027 206.371 249.636 209.762 245.452 209.762H220.581V267.043C220.581 270.107 218.735 272.87 215.904 274.043C213.074 275.215 209.816 274.566 207.649 272.4L134.091 198.841V267.085C134.091 271.268 130.699 274.66 126.516 274.66C122.332 274.66 118.94 271.268 118.94 267.085V198.842L45.3828 272.4C43.2164 274.566 39.9585 275.215 37.1279 274.043C34.2973 272.87 32.4512 270.107 32.4512 267.043V209.762H7.5752C3.39155 209.762 2.88624e-05 206.371 0 202.187V93.8306C6.59711e-05 89.647 3.39158 86.2554 7.5752 86.2554H32.4512V7.57572C32.4512 4.51189 34.2973 1.74917 37.1279 0.576694C39.9584 -0.595448 43.2165 0.0529879 45.3828 2.21927L118.94 75.7769V7.57572C118.94 3.39212 122.332 0.000522602 126.516 0.000522602C130.699 0.000522602 134.091 3.39212 134.091 7.57572V75.7769L207.649 2.21927ZM47.6016 173.175V248.755L118.94 177.417V110.757L47.6016 173.175ZM134.091 177.416L205.431 248.755V202.303C205.43 202.265 205.428 202.226 205.428 202.187C205.428 202.148 205.43 202.109 205.431 202.07V173.175L134.091 110.757V177.416ZM217.993 164.037C219.637 165.475 220.581 167.553 220.581 169.738V194.612H237.877V101.406H146.411L217.993 164.037ZM15.1504 194.612H32.4512V169.738C32.4512 167.553 33.3941 165.475 35.0381 164.037L106.621 101.406H15.1504V194.612ZM47.6016 86.2554H107.993L47.6016 25.8638V86.2554ZM145.04 86.2554H205.431V25.8638L145.04 86.2554Z" /></svg>
+          </div>
+          <div class="social-wallet wallet-916">
+            <div class="social-wallet-row lead">
+              <div class="social-wallet-rank">02</div>
+              <div class="social-wallet-name">Sonar-Reasoning<span class="name-soft">-Pro-High</span></div>
+              <div class="social-wallet-val">1136</div>
+            </div>
+            <div class="social-wallet-row">
+              <div class="social-wallet-rank">01</div>
+              <div class="social-wallet-name">Gemini-2.5-Pro-Ground</div>
+              <div class="social-wallet-val">1142</div>
+            </div>
+            <div class="social-wallet-row">
+              <div class="social-wallet-rank">03</div>
+              <div class="social-wallet-name">Sonar-Reasoning-Pro</div>
+              <div class="social-wallet-val">1132</div>
+            </div>
+            <div class="social-wallet-row">
+              <div class="social-wallet-rank">04</div>
+              <div class="social-wallet-name">Sonar-Reasoning</div>
+              <div class="social-wallet-val">1115</div>
+            </div>
+            <div class="social-wallet-row">
+              <div class="social-wallet-rank">05</div>
+              <div class="social-wallet-name">Gemini-2.0-Flash</div>
+              <div class="social-wallet-val">1082</div>
+            </div>
+          </div>
+          <div class="social-footer-rule"><span>10,000+ head-to-head votes</span><span>2026</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes">
+      <div class="notes-title">Notes</div>
+      <div class="notes-body"><b>Research</b> shows the full ordered list with Elo as the rightmost value; the relative bar fills give shape without being decorative. <b>Social</b> promotes the Sonar entry to the top regardless of rank order — "1136" reads as the hero in GT Canon Narrow, the rank "02" reads as a footnote. Two different optimizations: research = canonical order, social = narrative order.</div>
+    </div>
+  </section>
+
+  <!-- =========== ROW 03 · COST × ACCURACY (the strained one) =========== -->
+  <section class="row">
+    <div class="row-meta">
+      <div class="row-num">03</div>
+      <div class="row-title-block">
+        <div class="row-title">FRAMES · cost per query × accuracy (Fig 6)</div>
+        <div class="row-source">research.perplexity.ai · <a href="#">Advancing Search-Augmented LMs</a></div>
+      </div>
+    </div>
+
+    <div class="pair">
+      <!-- research variant: TRUE 2D scatter — the natural fit -->
+      <div class="pair-col">
+        <div class="pair-tag"><span class="pair-tag-name">Research blog · scatter</span><span class="pair-tag-spec">740×420 inline · dark</span></div>
+        <div class="research">
+          <div class="research-head">
+            <div class="research-title">Cost per query vs FRAMES accuracy at b=4</div>
+            <svg class="research-mark" viewBox="0 0 254 275" fill="currentColor"><path d="M207.649 2.21927C209.816 0.0528457 213.075 -0.595764 215.905 0.576694C218.736 1.74918 220.581 4.5119 220.581 7.57572V86.2554H245.452C249.636 86.2557 253.027 89.6472 253.027 93.8306V202.187C253.027 206.371 249.636 209.762 245.452 209.762H220.581V267.043C220.581 270.107 218.735 272.87 215.904 274.043C213.074 275.215 209.816 274.566 207.649 272.4L134.091 198.841V267.085C134.091 271.268 130.699 274.66 126.516 274.66C122.332 274.66 118.94 271.268 118.94 267.085V198.842L45.3828 272.4C43.2164 274.566 39.9585 275.215 37.1279 274.043C34.2973 272.87 32.4512 270.107 32.4512 267.043V209.762H7.5752C3.39155 209.762 2.88624e-05 206.371 0 202.187V93.8306C6.59711e-05 89.647 3.39158 86.2554 7.5752 86.2554H32.4512V7.57572C32.4512 4.51189 34.2973 1.74917 37.1279 0.576694C39.9584 -0.595448 43.2165 0.0529879 45.3828 2.21927L118.94 75.7769V7.57572C118.94 3.39212 122.332 0.000522602 126.516 0.000522602C130.699 0.000522602 134.091 3.39212 134.091 7.57572V75.7769L207.649 2.21927ZM47.6016 173.175V248.755L118.94 177.417V110.757L47.6016 173.175ZM134.091 177.416L205.431 248.755V202.303C205.43 202.265 205.428 202.226 205.428 202.187C205.428 202.148 205.43 202.109 205.431 202.07V173.175L134.091 110.757V177.416ZM217.993 164.037C219.637 165.475 220.581 167.553 220.581 169.738V194.612H237.877V101.406H146.411L217.993 164.037ZM15.1504 194.612H32.4512V169.738C32.4512 167.553 33.3941 165.475 35.0381 164.037L106.621 101.406H15.1504V194.612ZM47.6016 86.2554H107.993L47.6016 25.8638V86.2554ZM145.04 86.2554H205.431V25.8638L145.04 86.2554Z" /></svg>
+          </div>
+          <div class="research-body">
+            <div class="subplot">
+              <div class="subplot-title">3 models · USD per query (log) × accuracy (%)</div>
+              <div class="scatter-research">
+                <svg viewBox="0 0 720 320" preserveAspectRatio="xMidYMid meet">
+                  <g class="grid">
+                    <line x1="60" y1="40" x2="700" y2="40" />
+                    <line x1="60" y1="100" x2="700" y2="100" />
+                    <line x1="60" y1="160" x2="700" y2="160" />
+                    <line x1="60" y1="220" x2="700" y2="220" />
+                    <line x1="60" y1="280" x2="700" y2="280" />
+                    <line x1="60" y1="40" x2="60" y2="280" stroke="rgba(255,255,255,0.10)" />
+                    <line x1="220" y1="40" x2="220" y2="280" />
+                    <line x1="380" y1="40" x2="380" y2="280" />
+                    <line x1="540" y1="40" x2="540" y2="280" />
+                    <line x1="700" y1="40" x2="700" y2="280" />
+                  </g>
+                  <!-- y axis: 50% to 80%; 50=280, 80=40 -->
+                  <text class="y-tick" x="54" y="44">80%</text>
+                  <text class="y-tick" x="54" y="104">72.5</text>
+                  <text class="y-tick" x="54" y="164">65</text>
+                  <text class="y-tick" x="54" y="224">57.5</text>
+                  <text class="y-tick" x="54" y="284">50</text>
+
+                  <!-- x axis ticks (log scale): $0.01=60, $0.02=220, $0.05=380, $0.10=540, $0.20=700 -->
+                  <text class="axis-num" x="60" y="295" text-anchor="middle">$0.01</text>
+                  <text class="axis-num" x="220" y="295" text-anchor="middle">$0.02</text>
+                  <text class="axis-num" x="380" y="295" text-anchor="middle">$0.05</text>
+                  <text class="axis-num" x="540" y="295" text-anchor="middle">$0.10</text>
+                  <text class="axis-num" x="700" y="295" text-anchor="middle">$0.20</text>
+
+                  <!-- points -->
+                  <!-- Qwen 73.9% @ $0.020 → x=220 y=(80-73.9)/30 *240 +40 = 88.8 -->
+                  <circle class="point hi" cx="220" cy="88.8" r="7" />
+                  <text class="point-label hi" x="232" y="92">Qwen3.5-SFT-RL · 73.9%</text>
+
+                  <!-- GPT 67.8% @ $0.085 → x: log(0.085) between $0.05(380) and $0.10(540) → 0.085 is between 0.05 and 0.10; fraction = log(0.085/0.05)/log(0.10/0.05)=log(1.7)/log(2)=0.531/0.301... wait use log10: log10(0.085)=-1.071, log10(0.05)=-1.301, log10(0.10)=-1.0; fraction = (-1.071 - -1.301)/(-1.0 - -1.301) = 0.230/0.301 = 0.764. x = 380 + 0.764*160 = 502.2 -->
+                  <!-- y: (80-67.8)/30 *240 +40 = 137.6 -->
+                  <circle class="point" cx="502" cy="137.6" r="7" />
+                  <text class="point-label" x="514" y="141">GPT-5.4 · 67.8%</text>
+
+                  <!-- Sonnet 62.4% @ $0.153 → log10(0.153)=-0.815, between $0.10(540) and $0.20(700) → log10(0.10)=-1, log10(0.20)=-0.699; frac=(-0.815 - -1)/(-0.699 - -1)=0.185/0.301=0.615. x=540+0.615*160=638.4 -->
+                  <!-- y: (80-62.4)/30 *240 +40 = 180.8 -->
+                  <circle class="point" cx="638" cy="180.8" r="7" />
+                  <text class="point-label" x="626" y="200" text-anchor="end">Sonnet 4.6 · 62.4%</text>
+                </svg>
+              </div>
+              <div class="subplot-axis-x-label">USD/query</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- social variant: editorial stat with cost-efficiency multiple -->
+      <div class="pair-col">
+        <div class="pair-tag"><span class="pair-tag-name">Social · archetype E editorial stat</span><span class="pair-tag-spec">1080×1350 · 4:5</span></div>
+        <div class="social-card size-45">
+          <div class="social-kicker-row">
+            <div>
+              <div class="social-kicker">FRAMES · cost-efficiency</div>
+              <div class="social-title" style="margin-top:6px;">7.5× lower cost than Sonnet 4.6</div>
+            </div>
+            <svg class="social-mark" viewBox="0 0 254 275" fill="currentColor"><path d="M207.649 2.21927C209.816 0.0528457 213.075 -0.595764 215.905 0.576694C218.736 1.74918 220.581 4.5119 220.581 7.57572V86.2554H245.452C249.636 86.2557 253.027 89.6472 253.027 93.8306V202.187C253.027 206.371 249.636 209.762 245.452 209.762H220.581V267.043C220.581 270.107 218.735 272.87 215.904 274.043C213.074 275.215 209.816 274.566 207.649 272.4L134.091 198.841V267.085C134.091 271.268 130.699 274.66 126.516 274.66C122.332 274.66 118.94 271.268 118.94 267.085V198.842L45.3828 272.4C43.2164 274.566 39.9585 275.215 37.1279 274.043C34.2973 272.87 32.4512 270.107 32.4512 267.043V209.762H7.5752C3.39155 209.762 2.88624e-05 206.371 0 202.187V93.8306C6.59711e-05 89.647 3.39158 86.2554 7.5752 86.2554H32.4512V7.57572C32.4512 4.51189 34.2973 1.74917 37.1279 0.576694C39.9584 -0.595448 43.2165 0.0529879 45.3828 2.21927L118.94 75.7769V7.57572C118.94 3.39212 122.332 0.000522602 126.516 0.000522602C130.699 0.000522602 134.091 3.39212 134.091 7.57572V75.7769L207.649 2.21927ZM47.6016 173.175V248.755L118.94 177.417V110.757L47.6016 173.175ZM134.091 177.416L205.431 248.755V202.303C205.43 202.265 205.428 202.226 205.428 202.187C205.428 202.148 205.43 202.109 205.431 202.07V173.175L134.091 110.757V177.416ZM217.993 164.037C219.637 165.475 220.581 167.553 220.581 169.738V194.612H237.877V101.406H146.411L217.993 164.037ZM15.1504 194.612H32.4512V169.738C32.4512 167.553 33.3941 165.475 35.0381 164.037L106.621 101.406H15.1504V194.612ZM47.6016 86.2554H107.993L47.6016 25.8638V86.2554ZM145.04 86.2554H205.431V25.8638L145.04 86.2554Z" /></svg>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:var(--s-14);">
+            <div class="social-hero">73.9<span class="unit">%</span></div>
+            <div class="social-deck">Qwen3.5-SFT-RL beats Sonnet 4.6 by 11.5 points on FRAMES accuracy, at one seventh the cost per query.</div>
+          </div>
+          <div class="social-foot">
+            <div class="social-foot-cell">
+              <div class="social-foot-label">Cost / query</div>
+              <div class="social-foot-value">$0.02</div>
+            </div>
+            <div class="social-foot-cell">
+              <div class="social-foot-label">vs GPT-5.4</div>
+              <div class="social-foot-value">4<span class="u">×</span></div>
+            </div>
+            <div class="social-foot-cell">
+              <div class="social-foot-label">vs Sonnet</div>
+              <div class="social-foot-value">7.5<span class="u">×</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes">
+      <div class="notes-title">Notes</div>
+      <div class="notes-body">The 2D cost × accuracy relationship is the natural fit for the <b>research scatter</b> — log-x cost axis, linear-y accuracy, three labeled points, the Qwen point in accent. This is where the social card strained earlier: a scatter doesn't compress into a hero stat. The social variant solves this by picking the strongest comparison ("7.5× lower cost than Sonnet") as the title and treating the 2D-ness as a footer triad. Research carries the full relationship; social carries the takeaway.</div>
+    </div>
+  </section>
+
+  <!-- =========== ROW 04 · TOOL-CALL EFFICIENCY CURVE =========== -->
+  <section class="row">
+    <div class="row-meta">
+      <div class="row-num">04</div>
+      <div class="row-title-block">
+        <div class="row-title">Tool-call efficiency · 3 models × 7 budgets (Fig 5)</div>
+        <div class="row-source">research.perplexity.ai · <a href="#">Advancing Search-Augmented LMs</a></div>
+      </div>
+    </div>
+
+    <div class="pair">
+      <!-- research variant: TRUE multi-series line chart (their actual format) -->
+      <div class="pair-col">
+        <div class="pair-tag"><span class="pair-tag-name">Research blog · multi-line</span><span class="pair-tag-spec">740×420 inline · dark</span></div>
+        <div class="research">
+          <div class="research-head">
+            <div class="research-title">Accuracy vs max tool-call budget</div>
+            <svg class="research-mark" viewBox="0 0 254 275" fill="currentColor"><path d="M207.649 2.21927C209.816 0.0528457 213.075 -0.595764 215.905 0.576694C218.736 1.74918 220.581 4.5119 220.581 7.57572V86.2554H245.452C249.636 86.2557 253.027 89.6472 253.027 93.8306V202.187C253.027 206.371 249.636 209.762 245.452 209.762H220.581V267.043C220.581 270.107 218.735 272.87 215.904 274.043C213.074 275.215 209.816 274.566 207.649 272.4L134.091 198.841V267.085C134.091 271.268 130.699 274.66 126.516 274.66C122.332 274.66 118.94 271.268 118.94 267.085V198.842L45.3828 272.4C43.2164 274.566 39.9585 275.215 37.1279 274.043C34.2973 272.87 32.4512 270.107 32.4512 267.043V209.762H7.5752C3.39155 209.762 2.88624e-05 206.371 0 202.187V93.8306C6.59711e-05 89.647 3.39158 86.2554 7.5752 86.2554H32.4512V7.57572C32.4512 4.51189 34.2973 1.74917 37.1279 0.576694C39.9584 -0.595448 43.2165 0.0529879 45.3828 2.21927L118.94 75.7769V7.57572C118.94 3.39212 122.332 0.000522602 126.516 0.000522602C130.699 0.000522602 134.091 3.39212 134.091 7.57572V75.7769L207.649 2.21927ZM47.6016 173.175V248.755L118.94 177.417V110.757L47.6016 173.175ZM134.091 177.416L205.431 248.755V202.303C205.43 202.265 205.428 202.226 205.428 202.187C205.428 202.148 205.43 202.109 205.431 202.07V173.175L134.091 110.757V177.416ZM217.993 164.037C219.637 165.475 220.581 167.553 220.581 169.738V194.612H237.877V101.406H146.411L217.993 164.037ZM15.1504 194.612H32.4512V169.738C32.4512 167.553 33.3941 165.475 35.0381 164.037L106.621 101.406H15.1504V194.612ZM47.6016 86.2554H107.993L47.6016 25.8638V86.2554ZM145.04 86.2554H205.431V25.8638L145.04 86.2554Z" /></svg>
+          </div>
+          <div class="research-body">
+            <div class="subplot">
+              <div class="subplot-title">FRAMES accuracy (%) · budget b ∈ [1,7]</div>
+              <div class="lines-research">
+                <svg viewBox="0 0 760 320" preserveAspectRatio="xMidYMid meet">
+                  <g class="grid">
+                    <line x1="60" y1="40" x2="700" y2="40" />
+                    <line x1="60" y1="100" x2="700" y2="100" />
+                    <line x1="60" y1="160" x2="700" y2="160" />
+                    <line x1="60" y1="220" x2="700" y2="220" />
+                    <line x1="60" y1="280" x2="700" y2="280" />
+                  </g>
+                  <!-- y axis 50–80% -->
+                  <text class="y-tick" x="54" y="44">80%</text>
+                  <text class="y-tick" x="54" y="104">72.5</text>
+                  <text class="y-tick" x="54" y="164">65</text>
+                  <text class="y-tick" x="54" y="224">57.5</text>
+                  <text class="y-tick" x="54" y="284">50</text>
+
+                  <!-- x: budget 1..7 at x=120,213,307,400,493,587,680 step ~93 -->
+                  <text class="axis-num" x="120" y="295" text-anchor="middle">1</text>
+                  <text class="axis-num" x="213" y="295" text-anchor="middle">2</text>
+                  <text class="axis-num" x="307" y="295" text-anchor="middle">3</text>
+                  <text class="axis-num" x="400" y="295" text-anchor="middle">4</text>
+                  <text class="axis-num" x="493" y="295" text-anchor="middle">5</text>
+                  <text class="axis-num" x="587" y="295" text-anchor="middle">6</text>
+                  <text class="axis-num" x="680" y="295" text-anchor="middle">7</text>
+
+                  <!-- Qwen: 57.3, 64.0, 69.2, 73.9, 75.4, 75.9, 76.0 -->
+                  <!-- y = (80 - v)/30 *240 + 40 -->
+                  <!-- 57.3 → 221.6, 64.0 → 168, 69.2 → 126.4, 73.9 → 88.8, 75.4 → 76.8, 75.9 → 72.8, 76.0 → 72 -->
+                  <path class="line-path qwen" d="M120,221.6 L213,168 L307,126.4 L400,88.8 L493,76.8 L587,72.8 L680,72" />
+                  <circle class="endpoint qwen" cx="680" cy="72" r="4" />
+
+                  <!-- GPT-5.4: 51.6, 57.0, 62.5, 67.8, 69.0, 69.5, 69.8 → 226.4, 184, 140, 97.6, 88, 84, 81.6 -->
+                  <path class="line-path gpt" d="M120,226.4 L213,184 L307,140 L400,97.6 L493,88 L587,84 L680,81.6" />
+                  <circle class="endpoint gpt" cx="680" cy="81.6" r="4" />
+
+                  <!-- Sonnet 4.6: 52.6, 56.5, 60.0, 62.4, 63.3, 63.7, 63.9 → 219.2, 188, 160, 140.8, 133.6, 130.4, 128.8 -->
+                  <path class="line-path sonnet" d="M120,219.2 L213,188 L307,160 L400,140.8 L493,133.6 L587,130.4 L680,128.8" />
+                  <circle class="endpoint sonnet" cx="680" cy="128.8" r="4" />
+
+                  <!-- series labels at endpoints, left-anchored, with small offset -->
+                  <text class="series-label qwen" x="690" y="68" text-anchor="start">Qwen</text>
+                  <text class="series-label gpt" x="690" y="94" text-anchor="start">GPT-5.4</text>
+                  <text class="series-label sonnet" x="690" y="133" text-anchor="start">Sonnet</text>
+                </svg>
+              </div>
+              <div class="subplot-axis-x-label">Budget b</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- social variant: archetype D dot-matrix -->
+      <div class="pair-col">
+        <div class="pair-tag"><span class="pair-tag-name">Social · archetype D dot-matrix</span><span class="pair-tag-spec">1080×608 · 16:9</span></div>
+        <div class="social-card size-169" style="grid-template-rows:auto auto 1fr auto;">
+          <div class="social-kicker-row">
+            <div>
+              <div class="social-kicker">FRAMES · accuracy vs tool-call budget</div>
+              <div class="social-title" style="margin-top:6px;">Qwen-SFT-RL leads at every budget</div>
+            </div>
+            <svg class="social-mark" viewBox="0 0 254 275" fill="currentColor"><path d="M207.649 2.21927C209.816 0.0528457 213.075 -0.595764 215.905 0.576694C218.736 1.74918 220.581 4.5119 220.581 7.57572V86.2554H245.452C249.636 86.2557 253.027 89.6472 253.027 93.8306V202.187C253.027 206.371 249.636 209.762 245.452 209.762H220.581V267.043C220.581 270.107 218.735 272.87 215.904 274.043C213.074 275.215 209.816 274.566 207.649 272.4L134.091 198.841V267.085C134.091 271.268 130.699 274.66 126.516 274.66C122.332 274.66 118.94 271.268 118.94 267.085V198.842L45.3828 272.4C43.2164 274.566 39.9585 275.215 37.1279 274.043C34.2973 272.87 32.4512 270.107 32.4512 267.043V209.762H7.5752C3.39155 209.762 2.88624e-05 206.371 0 202.187V93.8306C6.59711e-05 89.647 3.39158 86.2554 7.5752 86.2554H32.4512V7.57572C32.4512 4.51189 34.2973 1.74917 37.1279 0.576694C39.9584 -0.595448 43.2165 0.0529879 45.3828 2.21927L118.94 75.7769V7.57572C118.94 3.39212 122.332 0.000522602 126.516 0.000522602C130.699 0.000522602 134.091 3.39212 134.091 7.57572V75.7769L207.649 2.21927ZM47.6016 173.175V248.755L118.94 177.417V110.757L47.6016 173.175ZM134.091 177.416L205.431 248.755V202.303C205.43 202.265 205.428 202.226 205.428 202.187C205.428 202.148 205.43 202.109 205.431 202.07V173.175L134.091 110.757V177.416ZM217.993 164.037C219.637 165.475 220.581 167.553 220.581 169.738V194.612H237.877V101.406H146.411L217.993 164.037ZM15.1504 194.612H32.4512V169.738C32.4512 167.553 33.3941 165.475 35.0381 164.037L106.621 101.406H15.1504V194.612ZM47.6016 86.2554H107.993L47.6016 25.8638V86.2554ZM145.04 86.2554H205.431V25.8638L145.04 86.2554Z" /></svg>
+          </div>
+          <div class="social-hero" style="font-size:60px;line-height:1;">+11.5<span class="unit">pp</span></div>
+          <div class="social-deck" style="margin-top:-12px;">Peak advantage at b=4. Diminishing returns above b=7.</div>
+          <div class="social-foot" style="grid-template-columns:repeat(7,1fr);gap:8px;">
+            <div class="social-foot-cell" style="align-items:center;text-align:center;">
+              <div class="social-foot-label">b=1</div>
+              <div style="font-family:'PPLX Mono',monospace;font-size:11px;color:var(--text-dark-1);">57</div>
+            </div>
+            <div class="social-foot-cell" style="align-items:center;text-align:center;">
+              <div class="social-foot-label">2</div>
+              <div style="font-family:'PPLX Mono',monospace;font-size:11px;color:var(--text-dark-1);">64</div>
+            </div>
+            <div class="social-foot-cell" style="align-items:center;text-align:center;">
+              <div class="social-foot-label">3</div>
+              <div style="font-family:'PPLX Mono',monospace;font-size:11px;color:var(--text-dark-1);">69</div>
+            </div>
+            <div class="social-foot-cell" style="align-items:center;text-align:center;">
+              <div class="social-foot-label">4</div>
+              <div style="font-family:'PPLX Mono',monospace;font-size:11px;color:var(--teal);font-weight:600;">74</div>
+            </div>
+            <div class="social-foot-cell" style="align-items:center;text-align:center;">
+              <div class="social-foot-label">5</div>
+              <div style="font-family:'PPLX Mono',monospace;font-size:11px;color:var(--text-dark-1);">75</div>
+            </div>
+            <div class="social-foot-cell" style="align-items:center;text-align:center;">
+              <div class="social-foot-label">6</div>
+              <div style="font-family:'PPLX Mono',monospace;font-size:11px;color:var(--text-dark-1);">76</div>
+            </div>
+            <div class="social-foot-cell" style="align-items:center;text-align:center;">
+              <div class="social-foot-label">7</div>
+              <div style="font-family:'PPLX Mono',monospace;font-size:11px;color:var(--text-dark-1);">76</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes">
+      <div class="notes-title">Notes</div>
+      <div class="notes-body">This is the row that pushed us to add a line-shape mode. <b>Research</b> is now showing what the blog actually publishes: three labeled lines, endpoint markers, axis-anchored, all 21 data points readable. <b>Social</b> compresses to one number — "+11.5pp peak advantage" — with the budget curve reduced to a 7-cell footer strip showing Qwen's values across budgets. The b=4 cell is the accent. Research preserves the comparison; social preserves the takeaway.</div>
+    </div>
+  </section>
+
+</div>
+<style id="theme-dark-overrides">
+/* Landing-embed dark theme: flips ONLY the META layer (page surround).
+   Cards stay dark as designed. */
+body.theme-dark{background:var(--paper-dark);color:var(--text-dark-1);}
+body.theme-dark .page-title{color:var(--text-dark-1);}
+body.theme-dark .page-deck{color:var(--text-dark-2);}
+body.theme-dark .kicker{color:var(--text-dark-2);}
+body.theme-dark .contract{background:rgba(255,255,255,0.02);border-color:var(--hairline-dark);}
+body.theme-dark .contract-title{color:var(--text-dark-3);}
+body.theme-dark .contract-rows{color:var(--text-dark-2);}
+body.theme-dark .contract-rows b{color:var(--text-dark-1);}
+body.theme-dark .section-head{border-top-color:var(--hairline-dark);}
+body.theme-dark .section-kicker{color:var(--text-dark-3);}
+body.theme-dark .section-title{color:var(--text-dark-1);}
+body.theme-dark .section-sub{color:var(--text-dark-2);}
+body.theme-dark .slot-tag{border-bottom-color:var(--hairline-dark);}
+body.theme-dark .slot-tag-name{color:var(--text-dark-1);}
+body.theme-dark .slot-tag-spec{color:var(--text-dark-3);}
+body.theme-dark .slot-meta{color:var(--text-dark-2);}
+body.theme-dark .slot-meta b{color:var(--text-dark-1);}
+body.theme-dark .findings{background:rgba(255,255,255,0.02);border-color:var(--hairline-dark);}
+body.theme-dark .findings-title{color:var(--text-dark-3);}
+body.theme-dark .findings-body{color:var(--text-dark-2);}
+body.theme-dark .findings-body b{color:var(--text-dark-1);}
+body.theme-dark .findings-body code{background:rgba(255,255,255,0.06);color:var(--text-dark-1);}
+body.theme-dark .notes{background:rgba(255,255,255,0.02);border-color:var(--hairline-dark);}
+body.theme-dark .notes-title{color:var(--text-dark-3);}
+body.theme-dark .notes-body{color:var(--text-dark-2);}
+body.theme-dark .notes-body b{color:var(--text-dark-1);}
+body.theme-dark .notes-body code{background:rgba(255,255,255,0.06);color:var(--text-dark-1);}
+body.theme-dark .rule{border-top-color:var(--hairline-dark);}
+/* Two-track META */
+body.theme-dark .row{border-bottom-color:var(--hairline-dark);}
+body.theme-dark .row-num{color:var(--text-dark-3);}
+body.theme-dark .row-title{color:var(--text-dark-1);}
+body.theme-dark .row-source{color:var(--text-dark-3);}
+body.theme-dark .row-source a{color:var(--text-dark-2);}
+body.theme-dark .pair-tag-name{color:var(--text-dark-2);}
+body.theme-dark .pair-tag-spec{color:var(--text-dark-3);}
+</style>
+<script>
+// Auto-apply dark theme when ?theme=dark in URL (used by embedded iframes)
+(function(){
+  try{
+    const params = new URLSearchParams(location.search);
+    if (params.get('theme') === 'dark') {
+      document.body.classList.add('theme-dark');
+    }
+  }catch(e){}
+})();
+</script>
+
+</body>
+</html>

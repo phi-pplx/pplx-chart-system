@@ -1,0 +1,768 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>v7 · Layout balancer · edge case stress test</title>
+<style>
+  @font-face {
+    font-family: 'GT Canon VF';
+    src: url('../03_system/assets/fonts/GT-Canon-VF.woff2') format('woff2-variations'),
+         url('../03_system/assets/fonts/GT-Canon-VF.woff2') format('woff2');
+    font-weight: 300 900; font-stretch: 37% 150%; font-style: normal; font-display: block;
+  }
+  @font-face {
+    font-family: 'PPLX Sans';
+    src: url('../03_system/assets/fonts/PPLX-Sans-Beta-v2-VF.woff2') format('woff2-variations');
+    font-weight: 100 900; font-display: block;
+  }
+  @font-face {
+    font-family: 'PPLX Mono';
+    src: url('../03_system/assets/fonts/PPLX-Mono-Beta-v0-VF.woff2') format('woff2-variations');
+    font-weight: 100 900; font-display: block;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #181815; color: #FBFAF4;
+    font-family: 'PPLX Sans', system-ui, sans-serif;
+    padding: 40px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------------- Sheet chrome ---------------- */
+  .sheet-head {
+    border-bottom: 1px solid rgba(251,250,244,0.15);
+    padding-bottom: 28px;
+    margin-bottom: 40px;
+  }
+  .sheet-kicker {
+    font-family: 'PPLX Mono';
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #8a8a8a;
+    margin-bottom: 10px;
+  }
+  .sheet-title {
+    font-family: 'PPLX Mono';
+    font-variation-settings: 'wght' 520;
+    font-size: 28px;
+    line-height: 1.15;
+    letter-spacing: -0.005em;
+  }
+  .sheet-deck {
+    font-size: 15px;
+    line-height: 1.55;
+    color: #9a9a9a;
+    max-width: 80ch;
+    margin-top: 12px;
+  }
+
+  /* ---------------- Edge-case rows ---------------- */
+  .edge {
+    margin-bottom: 56px;
+    border-top: 1px solid rgba(251,250,244,0.30);
+    padding-top: 28px;
+  }
+  .edge-head {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 24px;
+    align-items: baseline;
+    margin-bottom: 20px;
+  }
+  .edge-num {
+    font-family: 'PPLX Mono';
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    color: #9a9a9a;
+    text-transform: uppercase;
+  }
+  .edge-title {
+    font-family: 'PPLX Mono';
+    font-variation-settings: 'wght' 520;
+    font-size: 20px;
+    color: #FBFAF4;
+    letter-spacing: -0.005em;
+  }
+  .edge-deck {
+    grid-column: 2;
+    font-size: 14px;
+    color: #9a9a9a;
+    line-height: 1.55;
+    margin-top: 6px;
+    max-width: 90ch;
+  }
+  .edge-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+  .cell {
+    display: grid;
+    grid-template-rows: auto auto auto auto 1fr;
+    gap: 8px;
+  }
+  .cell .variant {
+    font-family: 'PPLX Mono';
+    font-size: 13px;
+    font-variation-settings: 'wght' 520;
+    color: #FBFAF4;
+    letter-spacing: -0.005em;
+  }
+  .cell .meta {
+    font-family: 'PPLX Mono';
+    font-size: 11px;
+    color: #9a9a9a;
+    letter-spacing: 0.04em;
+  }
+  .cell .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    background: #040A0D;
+    color: #FBFAF4;
+    font-family: 'PPLX Mono';
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    border-radius: 3px;
+  }
+  .cell .badge[data-strategy="amplify"]    { background: #2ca1ab; }
+  .cell .badge[data-strategy="distribute"] { background: #5a6878; }
+  .cell .badge[data-strategy="anchor"]     { background: #040A0D; border: 1px solid #FBFAF4; }
+  .cell .badge[data-strategy="pack"]       { background: #b07a3a; }
+  .cell .badge[data-strategy="compact"]    { background: #c64670; }
+  .cell .verdict {
+    font-family: 'PPLX Mono';
+    font-size: 11px;
+    color: #c8a2ff;
+    letter-spacing: 0.04em;
+  }
+  .cell .verdict[data-state="pass"] { color: #7fc8d2; }
+  .cell .verdict[data-state="fail"] { color: #ff8a8a; }
+  .cell .verdict[data-state="degrade"] { color: #f4cd87; }
+
+  /* ---------------- Card frames ---------------- */
+  /* Wrap previews to scale 1080-wide cards down to 270 (1:4) for the sheet */
+  .frame {
+    border: 1px solid rgba(251,250,244,0.15);
+    border-radius: 4px;
+    overflow: hidden;
+    background: #000;
+    width: 270px;
+  }
+  .frame.a { height: 270px; }   /* 1080x1080 → 270x270 */
+  .frame.b { height: 270px; }   /* 1080x1080 → 270x270 */
+  .frame.head { height: 270px; } /* 1080x1080 → 270x270 (use 1:1 to test header-only) */
+
+  /* ---------------- Locked tokens (surface-academic-dark) ---------------- */
+  :root {
+    --s-1:4px; --s-2:8px; --s-3:14px; --s-4:20px; --s-5:28px;
+    --s-6:40px; --s-7:56px; --s-8:80px; --s-9:112px;
+    --canvas: #000000; --hero: #FBFAF4; --baseline: #5a6878;
+    --text: #FBFAF4; --text-dim: #8a8a8a; --text-mute: #545454;
+    --rule: rgba(251,250,244,0.18); --rule-bright: rgba(251,250,244,0.70);
+    --baseline-axis: rgba(251,250,244,0.32);
+  }
+
+  [data-fit-card] {
+    --fit-hero-scale:   1;
+    --fit-row-pad:      1;
+    --fit-section-gap:  1;
+    --fit-aux-opacity:  1;
+  }
+
+  /* ---------------- Type ramp ---------------- */
+  .t-kicker {
+    font-family: 'PPLX Mono'; font-size: 14px; letter-spacing: 0.16em;
+    text-transform: uppercase; font-variation-settings: 'wght' 480;
+    color: var(--text-dim);
+  }
+  .t-title {
+    font-family: 'PPLX Mono'; font-variation-settings: 'wght' 520;
+    font-size: 28px; line-height: 1.18; letter-spacing: -0.005em;
+    color: var(--text);
+  }
+  .t-body {
+    font-family: 'PPLX Sans'; font-size: 18px; line-height: 1.55;
+    color: var(--text-dim);
+  }
+  .t-hero {
+    font-family: 'GT Canon VF', serif;
+    font-variation-settings: 'wdth' 75, 'wght' 500, 'opsz' 144;
+    font-feature-settings: "pnum" 1, "lnum" 1, "kern" 1;
+    line-height: 0.86; letter-spacing: -0.02em;
+  }
+  .t-hero .unit {
+    font-variation-settings: 'wdth' 75, 'wght' 650, 'opsz' 60;
+    font-size: 0.46em; line-height: 1; margin-left: 0.04em;
+    vertical-align: 0.34em; display: inline-block;
+  }
+  .t-footer { font-family: 'PPLX Mono'; font-size: 14px; letter-spacing: 0.10em; color: var(--text-dim); }
+
+  .pp-mark {
+    position: absolute; top: var(--s-7); right: var(--s-7);
+    width: 36px; height: 36px; color: var(--text);
+  }
+  .pp-mark svg { width: 100%; height: 100%; }
+
+  /* ======================================================================
+     EDGE 1 · A-card (1:1) — stat + bar chart with variable label length
+     ====================================================================== */
+  .a-card {
+    width: 1080px; height: 1080px;
+    background: var(--canvas); color: var(--text);
+    padding: var(--s-7); position: relative;
+    display: grid; grid-template-rows: 220px 1fr 80px;
+    transform: scale(0.25); transform-origin: 0 0;
+  }
+  .a-card .a-head {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    column-gap: var(--s-5);
+    row-gap: var(--s-3);
+    padding-right: var(--s-8);
+    padding-bottom: var(--s-3);
+    border-bottom: 1px solid var(--rule);
+  }
+  .a-card .a-head .t-kicker { grid-column: 1 / -1; }
+  .a-card .a-head .t-hero {
+    font-size: calc(144px * var(--fit-hero-scale, 1));
+    color: var(--text);
+    align-self: end;
+  }
+  .a-card .a-head .t-title {
+    max-width: 600px;
+    color: var(--text);
+    align-self: end;
+  }
+  .a-card .a-chart { padding-top: var(--s-3); position: relative; }
+  .a-card .a-foot {
+    padding-top: var(--s-3);
+    border-top: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    gap: var(--s-5);
+    color: var(--text-dim);
+  }
+  .a-card svg { width: 100%; height: 100%; display: block; }
+  .a-card .mc-grid { stroke: var(--rule); stroke-width: 1; }
+  .a-card .axis-line { stroke: var(--rule-bright); stroke-width: 1.5; }
+  .a-card .mc-tick {
+    font-family: 'PPLX Mono';
+    font-size: 16px;
+    fill: var(--text-mute);
+    letter-spacing: 0.04em;
+  }
+  .a-card .bar-baseline { fill: var(--baseline); }
+  .a-card .bar-hero { fill: var(--hero); }
+  .a-card .bar-label {
+    font-family: 'PPLX Mono'; font-size: 16px;
+    fill: var(--text-dim);
+    font-variation-settings: 'wght' 480;
+  }
+  .a-card .bar-label.hero { fill: var(--hero); font-variation-settings: 'wght' 560; }
+
+  /* ======================================================================
+     EDGE 2 · B-card (1:1) — pin spike with variable data density
+     ====================================================================== */
+  .b-card {
+    width: 1080px; height: 1080px;
+    background: var(--canvas); color: var(--text);
+    padding: var(--s-7); position: relative;
+    display: grid; grid-template-rows: 180px 1fr 80px;
+    transform: scale(0.25); transform-origin: 0 0;
+  }
+  .b-card .b-head { padding-right: var(--s-8); padding-bottom: var(--s-4); border-bottom: 1px solid var(--rule); }
+  .b-card .b-head .t-kicker { margin-bottom: var(--s-3); }
+  .b-card .b-head .t-title { max-width: 720px; }
+  .b-card .b-body {
+    padding: var(--s-5) 0;
+    display: grid; grid-template-rows: auto 1fr; row-gap: var(--s-5);
+    min-height: 0;
+  }
+  .b-card .b-body .t-hero {
+    font-size: calc(220px * var(--fit-hero-scale, 1));
+    color: var(--text);
+    line-height: 0.82;
+    margin-bottom: var(--s-3);
+  }
+  .b-pins {
+    position: relative;
+    display: grid; grid-template-columns: repeat(50, 1fr);
+    column-gap: 4px;
+    align-items: end;
+    height: 100%; min-height: 0;
+    padding-bottom: var(--s-3);
+    border-bottom: 1px solid var(--rule);
+  }
+  .b-pins .pin {
+    width: 100%; background: var(--baseline);
+    border-radius: 1px; opacity: 0.9;
+  }
+  .b-pins .pin.peak { background: var(--hero); opacity: 1; }
+  .b-card .b-foot {
+    padding-top: var(--s-3); border-top: 1px solid var(--rule);
+    display: grid; grid-template-columns: 1fr auto;
+    align-items: baseline; gap: var(--s-5); color: var(--text-dim);
+  }
+
+  /* ======================================================================
+     EDGE 3 · G-card · Editorial header card
+     Three sub-variants: display (GT Canon Narrow Medium, dramatic),
+     editorial (GT Canon Regular, paragraph-scale), quote (GT Canon Italic).
+     Mono is reserved for kicker/footer only. The title gets editorial type.
+     ====================================================================== */
+  .g-card {
+    width: 1080px; height: 1080px;
+    background: var(--canvas); color: var(--text);
+    padding: var(--s-7); position: relative;
+    display: grid;
+    /* head fills, foot pins to bottom. The head's flex-direction puts the
+       title vertically centered for display variant, top-aligned for editorial. */
+    grid-template-rows: 1fr auto;
+    transform: scale(0.25); transform-origin: 0 0;
+  }
+  .g-card .g-head {
+    display: flex;
+    flex-direction: column;
+    justify-content: var(--g-justify, center);
+    gap: var(--s-5);
+    padding-right: var(--s-8);
+    min-height: 0;
+  }
+  .g-card .g-head .t-kicker {
+    color: var(--text-dim);
+  }
+  /* Display sub-variant: GT Canon Narrow Medium, big & dramatic */
+  .g-card[data-variant="display"] {
+    --g-justify: center;
+  }
+  .g-card[data-variant="display"] .g-title {
+    font-family: 'GT Canon VF', serif;
+    font-variation-settings: 'wdth' 75, 'wght' 500, 'opsz' 144;
+    font-feature-settings: 'pnum' 1, 'lnum' 1, 'kern' 1, 'liga' 1;
+    font-size: calc(180px * var(--fit-title-scale, 1));
+    line-height: 0.96;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    max-width: 920px;
+    text-wrap: balance;
+    text-rendering: optimizeLegibility;
+  }
+  /* Editorial sub-variant: GT Canon Regular, paragraph-scale */
+  .g-card[data-variant="editorial"] {
+    --g-justify: flex-start;
+  }
+  .g-card[data-variant="editorial"] .g-head {
+    padding-top: var(--s-5);
+  }
+  .g-card[data-variant="editorial"] .g-title {
+    font-family: 'GT Canon VF', serif;
+    font-variation-settings: 'wdth' 100, 'wght' 500, 'opsz' 60;
+    font-feature-settings: 'pnum' 1, 'lnum' 1, 'kern' 1, 'liga' 1;
+    font-size: calc(60px * var(--fit-title-scale, 1));
+    line-height: 1.12;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    max-width: 920px;
+    text-wrap: balance;
+    text-rendering: optimizeLegibility;
+  }
+  .g-card[data-variant="editorial"] .g-deck {
+    font-family: 'PPLX Sans', sans-serif;
+    font-size: 22px;
+    line-height: 1.55;
+    color: var(--text-dim);
+    max-width: 800px;
+    /* Hairline rule above the deck to separate it from the title. */
+    padding-top: var(--s-4);
+    border-top: 1px solid var(--rule);
+    margin-top: var(--s-3);
+  }
+  /* Quote sub-variant: GT Canon Italic.
+     Spec-grade settings derived from font fvar inspection:
+     - opsz max is 60 (NOT 144 like upright); requesting higher was clamping
+     - wght 550 compensates for italic perceived lightness vs upright Regular
+     - hanging-punctuation: first lets the opening quote hang into the card padding
+       (a real typographic hang, not a negative text-indent overshoot)
+     - smart quotes + smart apostrophe via Unicode in the source
+     - text-wrap: balance prevents orphan lines on display titles */
+  .g-card[data-variant="quote"] {
+    --g-justify: center;
+  }
+  .g-card[data-variant="quote"] .g-head {
+    /* Hanging punctuation needs the head to have padding to hang INTO. */
+    padding-left: var(--s-4);
+    margin-left: calc(-1 * var(--s-4));
+  }
+  .g-card[data-variant="quote"] .g-title {
+    font-family: 'GT Canon VF', serif;
+    font-variation-settings: 'wdth' 100, 'wght' 550, 'opsz' 60;
+    font-feature-settings: 'pnum' 1, 'lnum' 1, 'kern' 1, 'liga' 1, 'dlig' 1;
+    font-style: italic;
+    font-size: calc(84px * var(--fit-title-scale, 1));
+    line-height: 1.14;
+    letter-spacing: -0.012em;
+    color: var(--text);
+    max-width: 920px;
+    hanging-punctuation: first;
+    text-wrap: balance;
+    text-rendering: optimizeLegibility;
+  }
+  .g-card[data-variant="quote"] .g-attribution {
+    font-family: 'PPLX Sans', sans-serif;
+    font-variation-settings: 'wght' 480;
+    font-size: 20px;
+    letter-spacing: 0.02em;
+    color: var(--text-dim);
+    margin-top: var(--s-6);
+  }
+  .g-card[data-variant="quote"] .g-attribution-rule {
+    /* A short rule above the cite, NYT book-review style. */
+    display: inline-block;
+    width: 48px;
+    height: 1px;
+    background: var(--rule-bright);
+    vertical-align: middle;
+    margin-right: var(--s-3);
+  }
+  /* Comparison: the WRONG variant for reference — Mono on the title.
+     Kept in the proof sheet so the contrast is visible. */
+  .g-card[data-variant="mono-wrong"] {
+    --g-justify: flex-start;
+  }
+  .g-card[data-variant="mono-wrong"] .g-head {
+    padding-top: var(--s-5);
+  }
+  .g-card[data-variant="mono-wrong"] .g-title {
+    font-family: 'PPLX Mono', monospace;
+    font-variation-settings: 'wght' 520;
+    font-size: 56px;
+    line-height: 1.15;
+    letter-spacing: -0.005em;
+    color: var(--text);
+    max-width: 880px;
+  }
+  .g-card .g-foot {
+    padding-top: var(--s-3);
+    border-top: 1px solid var(--rule);
+    display: grid; grid-template-columns: 1fr auto;
+    align-items: baseline; gap: var(--s-5);
+    color: var(--text-dim);
+  }
+</style>
+</head>
+<body>
+
+<header class="sheet-head">
+  <div class="sheet-kicker">Layout balancer · edge case stress test · v7</div>
+  <h1 class="sheet-title">Adversarial inputs vs. the three-knob contract.</h1>
+  <p class="sheet-deck">
+    Three edge cases that probe at the assumptions baked into <code>fit.js</code>: a long category label in A-card (horizontal-only failure mode),
+    a B-card with sparse data (visual-density vs. DOM-height mismatch), and a header-only card where the original test failed because the title used Mono (the third resolves into archetype G with proper editorial typography). Each row shows four variants of the same edge with the balancer
+    running live. Strategies and verdicts populate after fit.js runs.
+  </p>
+</header>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="pp-mark" viewBox="0 0 254 275">
+      <path d="M207.649 2.21927C209.816 0.0528457 213.075 -0.595764 215.905 0.576694C218.736 1.74918 220.581 4.5119 220.581 7.57572V86.2554H245.452C249.636 86.2557 253.027 89.6472 253.027 93.8306V202.187C253.027 206.371 249.636 209.762 245.452 209.762H220.581V267.043C220.581 270.107 218.735 272.87 215.904 274.043C213.074 275.215 209.816 274.566 207.649 272.4L134.091 198.841V267.085C134.091 271.268 130.699 274.66 126.516 274.66C122.332 274.66 118.94 271.268 118.94 267.085V198.842L45.3828 272.4C43.2164 274.566 39.9585 275.215 37.1279 274.043C34.2973 272.87 32.4512 270.107 32.4512 267.043V209.762H7.5752C3.39155 209.762 2.88624e-05 206.371 0 202.187V93.8306C6.59711e-05 89.647 3.39158 86.2554 7.5752 86.2554H32.4512V7.57572C32.4512 4.51189 34.2973 1.74917 37.1279 0.576694C39.9584 -0.595448 43.2165 0.0529879 45.3828 2.21927L118.94 75.7769V7.57572C118.94 3.39212 122.332 0.000522602 126.516 0.000522602C130.699 0.000522602 134.091 3.39212 134.091 7.57572V75.7769L207.649 2.21927ZM47.6016 173.175V248.755L118.94 177.417V110.757L47.6016 173.175ZM134.091 177.416L205.431 248.755V202.303C205.43 202.265 205.428 202.226 205.428 202.187C205.428 202.148 205.43 202.109 205.431 202.07V173.175L134.091 110.757V177.416ZM217.993 164.037C219.637 165.475 220.581 167.553 220.581 169.738V194.612H237.877V101.406H146.411L217.993 164.037ZM15.1504 194.612H32.4512V169.738C32.4512 167.553 33.3941 165.475 35.0381 164.037L106.621 101.406H15.1504V194.612ZM47.6016 86.2554H107.993L47.6016 25.8638V86.2554ZM145.04 86.2554H205.431V25.8638L145.04 86.2554Z" fill="currentColor"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- ============================================================
+     EDGE 1 · A-card · long category labels
+     ============================================================ -->
+<section class="edge" id="edge-1">
+  <div class="edge-head">
+    <div class="edge-num">Edge 01</div>
+    <div>
+      <div class="edge-title">A-card · long category labels</div>
+      <p class="edge-deck">Bar-chart category labels of increasing length: <strong>short</strong> (1.5K), <strong>medium</strong> (1.5K-tok), <strong>long</strong> (1.5K-tok budget),
+      <strong>extreme</strong> (Compressed reasoning at 1.5K-tok budget). Predicted failure: balancer sees no change in CCR (labels don't grow vertically) but
+      visual collisions with adjacent labels invisible to the balancer.</p>
+    </div>
+  </div>
+  <div class="edge-grid" id="edge-1-grid"></div>
+</section>
+
+<!-- ============================================================
+     EDGE 2 · B-card · sparse pin distribution
+     ============================================================ -->
+<section class="edge" id="edge-2">
+  <div class="edge-head">
+    <div class="edge-num">Edge 02</div>
+    <div>
+      <div class="edge-title">B-card · sparse pin distribution</div>
+      <p class="edge-deck">50-pin chart with varying density: <strong>50 active</strong> (normal), <strong>10 active</strong> (clustered),
+      <strong>3 active</strong> (sparse), <strong>1 active</strong> (lone peak). Predicted failure: hero number stays the same size, chart area becomes
+      visually empty even though DOM scrollHeight reports identical content.</p>
+    </div>
+  </div>
+  <div class="edge-grid" id="edge-2-grid"></div>
+</section>
+
+<!-- ============================================================
+     EDGE 3 · G-card · Editorial header card (resolves the degenerate failure)
+     ============================================================ -->
+<section class="edge" id="edge-3">
+  <div class="edge-head">
+    <div class="edge-num">Edge 03</div>
+    <div>
+      <div class="edge-title">G-card · editorial header (degenerate failure, resolved)</div>
+      <p class="edge-deck">The original test (header-only with PPLX Mono title) failed because Mono is utility type. On a card where the title IS the content, the title needs editorial display type. G-card uses GT Canon as title face. Three sub-variants by headline character: <strong>display</strong> (Narrow Medium, dramatic), <strong>editorial</strong> (Regular, paragraph-scale), <strong>quote</strong> (Italic, attributed). The fourth cell shows the original Mono-on-title mistake for comparison.</p>
+    </div>
+  </div>
+  <div class="edge-grid" id="edge-3-grid"></div>
+</section>
+
+<script>
+// ============================================================
+// Card builders for each edge
+// ============================================================
+
+function buildACard(label) {
+  // Same as production A-card, but the labels are variable.
+  // Bars at: 700, 1K, 1.5K, 2K, 2.5K, 3K, 4.5K
+  // 4th bar (2K) is the hero peak.
+  const labels = label === 'short' ? ['700','1K','1.5K','2K','2.5K','3K','4.5K']
+    : label === 'medium' ? ['700-tok','1K-tok','1.5K-tok','2K-tok','2.5K-tok','3K-tok','4.5K-tok']
+    : label === 'long'   ? ['700-tok budget','1K-tok budget','1.5K-tok budget','2K-tok budget','2.5K-tok budget','3K-tok budget','4.5K-tok budget']
+    : ['Compressed reasoning at 700-tok budget','Compressed reasoning at 1K-tok budget','Compressed reasoning at 1.5K-tok budget','Compressed reasoning at 2K-tok budget','Compressed reasoning at 2.5K-tok budget','Compressed reasoning at 3K-tok budget','Compressed reasoning at 4.5K-tok budget'];
+  const heights = [228, 285, 342, 342, 319, 313, 242];
+  const bars = heights.map((h, i) => {
+    const x = 106 + i * 122;
+    const y = 430 - h;
+    const isHero = i === 3;
+    const cls = isHero ? 'bar-hero' : 'bar-baseline';
+    const labelCls = isHero ? 'bar-label hero' : 'bar-label';
+    return `<rect class="${cls}" x="${x}" y="${y}" width="64" height="${h}"/>
+            <text class="bar-label" x="${x+32}" y="${y-12}" text-anchor="middle">${[94.1,95.1,95.7,95.7,95.5,95.4,94.4][i]}%</text>
+            <text class="${labelCls.replace('bar-label','mc-tick')}" x="${x+32}" y="470" text-anchor="middle">${labels[i]}</text>`;
+  }).join('');
+  return `
+    <section class="a-card" data-fit-card>
+      <span class="pp-mark"><svg><use href="#pp-mark"/></svg></span>
+      <header class="a-head" data-fit-content>
+        <div class="t-kicker">SIMPLEQA · ACCURACY</div>
+        <div class="t-hero">95.7<span class="unit">%</span></div>
+        <h2 class="t-title">Compressed reasoning peaks at the 2K-token tier.</h2>
+      </header>
+      <div class="a-chart" data-fit-content>
+        <svg viewBox="0 0 968 540" preserveAspectRatio="xMidYMid meet">
+          <line class="mc-grid" x1="0" y1="88"  x2="76" y2="88"/>
+          <line class="mc-grid" x1="0" y1="202" x2="76" y2="202"/>
+          <line class="mc-grid" x1="0" y1="316" x2="76" y2="316"/>
+          <line class="mc-grid" x1="0" y1="430" x2="76" y2="430"/>
+          ${bars}
+          <line class="axis-line" x1="100" y1="430" x2="930" y2="430"/>
+        </svg>
+      </div>
+      <footer class="a-foot t-footer">
+        <span>SimpleQA · 4,326 prompts · 2K tokens = Pareto frontier</span>
+        <span>Perplexity · 2026</span>
+      </footer>
+    </section>`;
+}
+
+function buildBCard(activeCount) {
+  const cols = 50;
+  const peakIdx = 24;
+  let heights;
+  if (activeCount === 50) {
+    heights = Array.from({length: cols}, (_, i) => {
+      const d = Math.abs(i - peakIdx);
+      if (d === 0) return 1.0;
+      const env = Math.max(0.18, 0.82 * Math.exp(-d/8));
+      const wobble = 0.65 + 0.35 * Math.sin(i * 1.6);
+      return env * wobble;
+    });
+  } else if (activeCount === 10) {
+    heights = Array.from({length: cols}, (_, i) => {
+      const d = Math.abs(i - peakIdx);
+      if (d === 0) return 1.0;
+      if (d > 5) return 0.04;
+      return Math.max(0.30, 0.82 * Math.exp(-d/3)) * (0.65 + 0.35 * Math.sin(i * 1.6));
+    });
+  } else if (activeCount === 3) {
+    heights = Array.from({length: cols}, (_, i) => {
+      if (i === peakIdx) return 1.0;
+      if (i === peakIdx - 2 || i === peakIdx + 2) return 0.45;
+      return 0.04;
+    });
+  } else { // 1
+    heights = Array.from({length: cols}, (_, i) => i === peakIdx ? 1.0 : 0.04);
+  }
+  const pins = heights.map((h, i) =>
+    `<div class="pin${i === peakIdx ? ' peak' : ''}" style="height: ${h*100}%"></div>`
+  ).join('');
+  return `
+    <section class="b-card" data-fit-card>
+      <span class="pp-mark"><svg><use href="#pp-mark"/></svg></span>
+      <header class="b-head" data-fit-content>
+        <div class="t-kicker">SIMPLEQA · Q3 PEAK</div>
+        <h2 class="t-title">Compressed reasoning surpassed every prior week.</h2>
+      </header>
+      <div class="b-body" data-fit-content>
+        <h2 class="t-hero">+18.4<span class="unit">pp</span></h2>
+        <div class="b-pins">${pins}</div>
+      </div>
+      <footer class="b-foot t-footer">
+        <span>50-week sample · compressed vs static-cache baseline</span>
+        <span>Perplexity · 2026</span>
+      </footer>
+    </section>`;
+}
+
+function buildGCard(variant) {
+  // Each sub-variant has its own content shape. The structure stays consistent:
+  // kicker (Mono), title (GT Canon), optional deck/attribution (Sans), foot (Mono).
+  if (variant === 'display') {
+    return `
+      <section class="g-card" data-variant="display" data-fit-card data-fit-archetype="G">
+        <span class="pp-mark"><svg><use href="#pp-mark"/></svg></span>
+        <header class="g-head" data-fit-content="head">
+          <div class="t-kicker">RESEARCH · Q3 2026</div>
+          <h2 class="g-title">Compressed reasoning wins.</h2>
+        </header>
+        <footer class="g-foot t-footer" data-fit-content="foot">
+          <span>SimpleQA · 5 benchmark suites</span>
+          <span>Perplexity · 2026</span>
+        </footer>
+      </section>`;
+  }
+  if (variant === 'editorial') {
+    return `
+      <section class="g-card" data-variant="editorial" data-fit-card data-fit-archetype="G">
+        <span class="pp-mark"><svg><use href="#pp-mark"/></svg></span>
+        <header class="g-head" data-fit-content="head">
+          <div class="t-kicker">RESEARCH NOTE · Q3 2026</div>
+          <h2 class="g-title">Compressed reasoning peaks at the 2K-token tier across seven budgets, matching frontier accuracy at 56% lower spend.</h2>
+          <p class="g-deck">Five benchmark suites. Same Perplexity-grade answer. No degradation on long-context tasks across a 12-week sample.</p>
+        </header>
+        <footer class="g-foot t-footer" data-fit-content="foot">
+          <span>SimpleQA · BrowseComp · Snippet bar · Frontier line · Exa Fast</span>
+          <span>Perplexity · 2026</span>
+        </footer>
+      </section>`;
+  }
+  if (variant === 'quote') {
+    // Smart quotes (“ ”) and smart apostrophe (’) in the source.
+    // Em-dash replaced with a typographic rule before the cite line.
+    return `
+      <section class="g-card" data-variant="quote" data-fit-card data-fit-archetype="G">
+        <span class="pp-mark"><svg><use href="#pp-mark"/></svg></span>
+        <header class="g-head" data-fit-content="head">
+          <div class="t-kicker">FIELD NOTE</div>
+          <h2 class="g-title">“The model didn’t just match the frontier. It rewrote what 2K tokens can do.”</h2>
+          <p class="g-attribution"><span class="g-attribution-rule"></span>Internal eval lead, Perplexity AI</p>
+        </header>
+        <footer class="g-foot t-footer" data-fit-content="foot">
+          <span>Q3 2026 · compressed reasoning</span>
+          <span>Perplexity · 2026</span>
+        </footer>
+      </section>`;
+  }
+  // The wrong variant: Mono on title. Kept for visual contrast.
+  return `
+    <section class="g-card" data-variant="mono-wrong" data-fit-card>
+      <span class="pp-mark"><svg><use href="#pp-mark"/></svg></span>
+      <header class="g-head" data-fit-content="head">
+        <div class="t-kicker">RESEARCH · Q3 2026</div>
+        <h2 class="g-title">Compressed reasoning peaks at the 2K-token tier across 7 budgets, matching frontier accuracy at 56% lower spend on five benchmark suites.</h2>
+      </header>
+      <footer class="g-foot t-footer" data-fit-content="foot">
+        <span>SimpleQA · 5 benchmark suites</span>
+        <span>Perplexity · 2026</span>
+      </footer>
+    </section>`;
+}
+
+// ============================================================
+// Render the three edge rows
+// ============================================================
+
+function cell(variantLabel, variantMeta, cardHtml, frameCls) {
+  return `
+    <div class="cell">
+      <div class="variant">${variantLabel}</div>
+      <div class="meta">${variantMeta}</div>
+      <div class="meta">CCR <span data-ccr>...</span> · <span class="badge" data-strategy>?</span></div>
+      <div class="verdict" data-verdict>measuring...</div>
+      <div class="frame ${frameCls}">${cardHtml}</div>
+    </div>`;
+}
+
+document.getElementById('edge-1-grid').innerHTML =
+  cell('short',   'labels: 1.5K',                       buildACard('short'),   'a') +
+  cell('medium',  'labels: 1.5K-tok',                   buildACard('medium'),  'a') +
+  cell('long',    'labels: 1.5K-tok budget',            buildACard('long'),    'a') +
+  cell('extreme', 'labels: Compressed reasoning at...', buildACard('extreme'), 'a');
+
+document.getElementById('edge-2-grid').innerHTML =
+  cell('50 active', 'normal distribution',  buildBCard(50), 'b') +
+  cell('10 active', 'clustered around peak', buildBCard(10), 'b') +
+  cell('3 active',  'sparse',                buildBCard(3),  'b') +
+  cell('1 active',  'lone peak',             buildBCard(1),  'b');
+
+document.getElementById('edge-3-grid').innerHTML =
+  cell('G-display',   'GT Canon Narrow Medium', buildGCard('display'),    'head') +
+  cell('G-editorial', 'GT Canon Regular',       buildGCard('editorial'),  'head') +
+  cell('G-quote',     'GT Canon Italic',        buildGCard('quote'),      'head') +
+  cell('Mono on title', 'wrong (for contrast)', buildGCard('mono-wrong'), 'head');
+</script>
+
+<script src="./fit.js"></script>
+
+<script>
+// After fit.js runs, write strategy + verdict per cell.
+// Verdicts are encoded based on empirical findings from this stress test:
+//   pass    — balancer call is correct AND visual result is acceptable
+//   degrade — visual issue exists but balancer cannot detect it (silent)
+//   fail    — balancer applies a strategy that makes things worse
+const VERDICTS = {
+  // edge 1: A-card label length — CCR is identical, balancer is blind
+  0: { state: 'pass',    text: 'baseline · as designed' },
+  1: { state: 'pass',    text: 'minor crowd · readable' },
+  2: { state: 'degrade', text: 'labels collide · balancer blind' },
+  3: { state: 'fail',    text: 'labels illegible · balancer reports anchor' },
+  // edge 2: B-card density — CCR is identical, hero grows on empty charts (wrong)
+  4: { state: 'pass',    text: 'baseline · as designed' },
+  5: { state: 'degrade', text: 'mid void · hero +8% inappropriate' },
+  6: { state: 'fail',    text: 'large void · hero amplifies emptiness' },
+  7: { state: 'fail',    text: 'card mostly void · strategy is wrong' },
+  // edge 3: G-card · the resolved degenerate failure
+  8: { state: 'pass',    text: 'editorial display · GT Canon Narrow Medium' },
+  9: { state: 'pass',    text: 'paragraph editorial · GT Canon Regular' },
+  10: { state: 'pass',    text: 'pull quote · GT Canon Italic + Sans cite' },
+  11: { state: 'fail',    text: 'Mono on title · wall of text, no display moment' },
+};
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.querySelectorAll('.cell').forEach((cell, i) => {
+      const card = cell.querySelector('[data-fit-card]');
+      if (!card) return;
+      const fit = card.dataset.fit;
+      const ccr = card.dataset.fitCcr;
+      cell.querySelector('[data-ccr]').textContent = ccr || '?';
+      const badge = cell.querySelector('[data-strategy]');
+      badge.textContent = fit || '?';
+      badge.setAttribute('data-strategy', fit || '');
+      const verdict = cell.querySelector('[data-verdict]');
+      const v = VERDICTS[i];
+      if (v) {
+        verdict.textContent = v.text;
+        verdict.setAttribute('data-state', v.state);
+      }
+    });
+  }, 600);
+});
+</script>
+
+</body>
+</html>
