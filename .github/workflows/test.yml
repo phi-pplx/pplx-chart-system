@@ -1,0 +1,33 @@
+name: Integration test
+
+# Runs the skill-authoring integration test on every push to main and
+# on every PR. Also runs nightly so we catch drift if the live manifest
+# or templates are edited out-of-band.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '17 8 * * *'  # daily at 08:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run integration test
+        run: node tests/integration.test.js
+        env:
+          NO_COLOR: '1'

@@ -119,6 +119,10 @@ https://phi-pplx.github.io/pplx-chart-system/manifest.json
 
 See the `skill_usage` block in `manifest.json` for the full fetch pattern.
 
+### Integration test
+
+The repo ships an end-to-end integration test at `tests/integration.test.js` that simulates exactly what a skill does: fetch `manifest.json`, iterate every archetype, fetch each `template_url`, substitute placeholders with synthetic fixtures, and check that (a) no placeholder is left unsubstituted, (b) the PPLX 2026 mark is present in the rendered HTML, and (c) every asset URL listed in the manifest returns 2xx. Run it with `npm test` (or `node tests/integration.test.js`). Zero dependencies, Node 18+. CI runs it on every push and nightly. If you're authoring a skill that consumes this system, this is the regression net you want to keep green.
+
 ---
 
 ## Deploying this repo

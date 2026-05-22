@@ -1,0 +1,12 @@
+{
+  "name": "pplx-chart-system",
+  "version": "7.1.0",
+  "private": true,
+  "description": "Perplexity Chart System v7 · Two surfaces, one rulebook.",
+  "scripts": {
+    "test": "node tests/integration.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
