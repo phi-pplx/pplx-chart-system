@@ -30,25 +30,39 @@
      fighting a flex/grid pass. */
 }
 
+/* ─── Spacing contract for hub-and-spokes ────────────────────────────────
+   Roles for system spacing tokens in schema layout:
+     - Canvas inset (leaf edge → canvas edge):  --s-7 at 16:9, --s-5 at 1:1
+     - Hub inner padding:    --s-4 vertical, --s-5 horizontal
+     - Leaf inner padding:   --s-3 vertical, --s-4 horizontal
+     - Edge label padding:   --s-1 vertical, --s-2 horizontal
+   Leaf positions are pinned by token offset, not percent, so spacing
+   reads identically across aspect ratios. */
 .surface[data-aspect="16:9"] .schema .canvas {
   position: relative;
   width: 100%;
   height: 100%;
-  min-height: 38cqi;          /* gives wires room at 16:9 */
+  min-height: 38cqi;
+  --canvas-inset: var(--s-7);
+}
+.surface[data-aspect="1:1"] .schema .canvas,
+.surface[data-aspect="4:5"] .schema .canvas {
+  --canvas-inset: var(--s-5);
 }
 
-/* Hub: bordered card, no fill weight, sits dead center */
+/* Hub: bordered card, no fill weight, sits dead center.
+   Inner padding follows contract: --s-4 vertical, --s-5 horizontal. */
 .s-hub {
   position: absolute;
   left: 50%;
   top:  50%;
   transform: translate(-50%, -50%);
   width: 22cqi;
-  min-width: 230px;
+  min-width: 240px;
   background: var(--surface-1);
   border: var(--stroke-2) solid var(--ink);
   border-radius: var(--r-card);
-  padding: var(--s-4) var(--s-4);
+  padding: var(--s-4) var(--s-5);
   display: grid;
   gap: var(--s-2);
   z-index: 2;
@@ -75,7 +89,7 @@
   font-size: var(--t-body);
   line-height: 1.45;
   color: var(--ink-2);
-  max-width: 22ch;
+  margin-top: var(--s-2);
 }
 
 /* Hub accent (focal — the announcement node) */
@@ -85,15 +99,16 @@
 .s-hub.accent .name { color: var(--accent); }
 .s-hub.accent .meta { color: var(--accent); }
 
-/* Leaf nodes: smaller cards positioned around hub by data-pos */
+/* Leaf nodes: smaller cards positioned around hub by data-pos.
+   Inner padding follows contract: --s-3 vertical, --s-4 horizontal. */
 .s-leaf {
   position: absolute;
   width: 18cqi;
-  min-width: 180px;
+  min-width: 220px;
   background: var(--surface-1);
   border: 1px solid var(--rule);
   border-radius: var(--r-card);
-  padding: var(--s-3) var(--s-3);
+  padding: var(--s-3) var(--s-4);
   display: grid;
   gap: 6px;
   z-index: 2;
@@ -121,29 +136,31 @@
   max-width: 24ch;
 }
 
-/* Cardinal positions for 4-leaf layout */
-.s-leaf[data-pos="N"]  { left: 50%; top:  3%;  transform: translateX(-50%); }
-.s-leaf[data-pos="E"]  { right: 1%; top: 50%; transform: translateY(-50%); }
-.s-leaf[data-pos="S"]  { left: 50%; bottom: 3%; transform: translateX(-50%); }
-.s-leaf[data-pos="W"]  { left: 1%;  top: 50%; transform: translateY(-50%); }
+/* Cardinal positions: leaf pinned --canvas-inset from its edge.
+   Token-based, identical across aspect ratios. */
+.s-leaf[data-pos="N"]  { left: 50%;                    top:    var(--canvas-inset); transform: translateX(-50%); }
+.s-leaf[data-pos="E"]  { right:    var(--canvas-inset); top: 50%;                    transform: translateY(-50%); }
+.s-leaf[data-pos="S"]  { left: 50%;                    bottom: var(--canvas-inset); transform: translateX(-50%); }
+.s-leaf[data-pos="W"]  { left:     var(--canvas-inset); top: 50%;                    transform: translateY(-50%); }
 
-/* Ordinal positions for 6-leaf layout (NE, SE, SW, NW + N, S) */
-.s-leaf[data-pos="NE"] { right: 4%; top:  6%; }
-.s-leaf[data-pos="SE"] { right: 4%; bottom: 6%; }
-.s-leaf[data-pos="SW"] { left:  4%; bottom: 6%; }
-.s-leaf[data-pos="NW"] { left:  4%; top:  6%; }
+/* Ordinal positions for 6-leaf layout */
+.s-leaf[data-pos="NE"] { right:    var(--canvas-inset); top:    var(--canvas-inset); }
+.s-leaf[data-pos="SE"] { right:    var(--canvas-inset); bottom: var(--canvas-inset); }
+.s-leaf[data-pos="SW"] { left:     var(--canvas-inset); bottom: var(--canvas-inset); }
+.s-leaf[data-pos="NW"] { left:     var(--canvas-inset); top:    var(--canvas-inset); }
 
-/* Edge labels — sit on the line between hub and leaf */
+/* Edge labels — sit on the line between hub and leaf. Knockout bg with
+   token-based padding so the label clears the wire predictably. */
 .s-edge-label {
   position: absolute;
   font-family: 'PPLX Mono';
   font-variation-settings: 'wght' 500, 'slnt' 0;
   font-size: var(--t-micro);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.10em;
   text-transform: uppercase;
-  color: var(--ink-3);
+  color: var(--accent);
   background: var(--bg);
-  padding: 0.2em 0.6em;
+  padding: var(--s-1) var(--s-2);
   z-index: 3;
   line-height: 1;
   white-space: nowrap;

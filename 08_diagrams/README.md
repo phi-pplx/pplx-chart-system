@@ -75,6 +75,21 @@ Bright variants used for graphical fills (≥3:1 required per WCAG 2.2 SC 1.4.11
 ### Spacing
 Locked scale: `4 · 8 · 14 · 20 · 28 · 40 · 56 · 80 · 112`.
 
+Every archetype defines its **spacing contract** — explicit token roles for the layout. The contract is documented in the archetype's CSS and is non-negotiable. Example (Schema):
+
+| Role | 16:9 | 1:1 / 4:5 |
+|---|---|---|
+| Canvas inset (node edge → canvas edge) | `--s-7` (56px) | `--s-5` (28px) |
+| Hub inner padding (vertical, horizontal) | `--s-4`, `--s-5` | same |
+| Leaf inner padding (vertical, horizontal) | `--s-3`, `--s-4` | same |
+| Edge label padding (vertical, horizontal) | `--s-1`, `--s-2` | same |
+
+**Spacing rules baked into every archetype:**
+1. **Never use percent for node positioning.** Always token-based offsets so spacing reads identically across aspect ratios.
+2. **Canvas inset is the floor for any node-to-edge distance.** A node sitting `3%` from the canvas edge at 1080px is 32px — below the spacing scale. Use `--s-5` or larger.
+3. **Inner padding always uses two distinct tokens.** Vertical and horizontal padding are usually different. Equal padding is the exception, not the default.
+4. **Edge labels need explicit clearance.** They sit on top of wires and need a knockout background with token-based padding so they clear cleanly.
+
 ### Type ramp (clamped)
 | Token | clamp() | Used for |
 |---|---|---|
