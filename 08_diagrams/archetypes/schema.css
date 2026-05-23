@@ -152,12 +152,11 @@
 /* ─── 1:1 vertical stack ─────────────────────────────────────────────────── */
 .surface[data-aspect="1:1"] .schema {
   grid-template-columns: 1fr;
-  grid-auto-rows: minmax(min-content, 1fr);
-  gap: var(--s-3);
-  align-content: stretch;
+  grid-auto-rows: max-content;
+  gap: var(--s-4);
+  align-content: center;
 }
 .surface[data-aspect="1:1"] .schema > .s-hub { align-self: start; }
-.surface[data-aspect="1:1"] .schema > .s-leaf { align-self: stretch; }
 .surface[data-aspect="1:1"] .schema .canvas {
   display: contents;
 }
@@ -174,21 +173,25 @@
   min-width: 0;
   display: grid;
   grid-template-columns: 9cqi 1fr;
-  align-items: center;
+  align-items: start;
+  align-content: start;
   gap: var(--s-3);
+  padding: var(--s-4) var(--s-3) var(--s-3);
+  position: relative;
 }
 .surface[data-aspect="1:1"] .s-leaf .sub {
   max-width: 100%;
 }
 .surface[data-aspect="1:1"] .s-leaf::before {
-  /* a small rule marking the connection back to the hub */
+  /* a small rule marking the connection back to the hub.
+     Anchored to the top edge of the band, not a row in the grid. */
   content: "";
-  display: block;
-  width: 100%;
+  position: absolute;
+  left: var(--s-3);
+  right: var(--s-3);
+  top: 0;
   height: 1px;
   background: var(--rule);
-  grid-column: 1 / -1;
-  margin-bottom: var(--s-2);
 }
 .surface[data-aspect="1:1"] .s-leaf:first-of-type::before { display: none; }
 .surface[data-aspect="1:1"] .s-edge-label {
