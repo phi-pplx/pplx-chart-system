@@ -1,0 +1,211 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Archetype C · Comparison (FT "deviation / ranking")
+   Six dimensions: score · rank · CI · delta · category · punchline.
+
+   Bar widths are exactly value/max — Lie Factor ≈ 1.0.
+   Position on common scale → Cleveland's most accurate encoding.
+   ───────────────────────────────────────────────────────────────────────── */
+
+.comparison {
+  display: grid;
+  gap: var(--s-5);
+  align-content: center;
+}
+
+/* 16:9: scale spans full width, rows stack vertically */
+.surface[data-aspect="16:9"] .comparison {
+  grid-template-columns: 1fr;
+}
+
+/* 1:1 / 4:5: same layout, just narrower */
+.surface[data-aspect="1:1"]  .comparison,
+.surface[data-aspect="4:5"]  .comparison {
+  grid-template-columns: 1fr;
+}
+
+/* ─── Header row (axis range + benchmark name) ───────────────────────────── */
+.c-axis {
+  display: grid;
+  grid-template-columns: 18cqi 1fr auto;
+  column-gap: var(--s-4);
+  align-items: baseline;
+  padding-bottom: var(--s-2);
+  border-bottom: 1px solid var(--rule);
+  font-family: 'PPLX Mono';
+  font-variation-settings: 'wght' 500, 'slnt' 0;
+  font-size: var(--t-micro);
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.c-axis .scale {
+  position: relative;
+  height: 14px;
+}
+.c-axis .scale .tick {
+  position: absolute;
+  top: 6px;
+  width: 1px;
+  height: 4px;
+  background: var(--rule-2);
+}
+.c-axis .scale .tick-label {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font-family: 'PPLX Mono';
+  font-size: var(--t-micro);
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+/* ─── Row body ───────────────────────────────────────────────────────────── */
+.c-rows {
+  display: grid;
+  gap: var(--s-4);
+}
+
+.c-row {
+  display: grid;
+  grid-template-columns: 18cqi 1fr auto;
+  column-gap: var(--s-4);
+  align-items: center;
+  position: relative;
+}
+
+/* Left cell: label stack with category and rank */
+.c-row .left {
+  display: grid;
+  gap: 4px;
+  text-align: right;
+}
+.c-row .name {
+  font-family: 'PPLX Sans';
+  font-variation-settings: 'wght' 600, 'slnt' 0;
+  font-size: var(--t-label);
+  color: var(--ink);
+  letter-spacing: -0.005em;
+  line-height: 1.2;
+}
+.c-row.accent .name { color: var(--accent); }
+.c-row .meta {
+  font-family: 'PPLX Mono';
+  font-size: var(--t-micro);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--s-2);
+  align-items: baseline;
+}
+.c-row .rank {
+  font-family: 'PPLX Mono';
+  font-variation-settings: 'wght' 500, 'slnt' 0;
+  font-size: var(--t-micro);
+  letter-spacing: 0;
+  color: var(--ink-3);
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+}
+.c-row.accent .rank { color: var(--accent); }
+
+/* Center cell: bar with CI ticks */
+.c-row .bar-track {
+  position: relative;
+  height: 14px;
+  display: grid;
+  align-items: center;
+}
+.c-row .bar {
+  position: relative;
+  height: 8px;
+  background: var(--rule);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.c-row .bar::after {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: calc(var(--v, 0) * 100%);
+  background: var(--ink-2);
+  border-radius: 2px;
+}
+.c-row.accent      .bar::after { background: var(--accent-fill); }
+.c-row.series-2    .bar::after { background: var(--series-2-fill); }
+.c-row.series-3    .bar::after { background: var(--series-3-fill); }
+
+/* Confidence interval — drawn as a thin range marker centered on the value */
+.c-row .ci {
+  position: absolute;
+  top: 50%;
+  height: 14px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+.c-row .ci::before,
+.c-row .ci::after {
+  content: '';
+  width: 1px;
+  height: 14px;
+  background: var(--ink-2);
+  opacity: 0.55;
+}
+.c-row .ci .span {
+  flex: 1;
+  height: 1px;
+  background: var(--ink-2);
+  opacity: 0.55;
+}
+.c-row.accent .ci::before,
+.c-row.accent .ci::after,
+.c-row.accent .ci .span { background: var(--accent); opacity: 0.75; }
+
+/* Right cell: value + delta */
+.c-row .right {
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+  min-width: 9cqi;
+}
+.c-row .value {
+  font-family: 'PPLX Sans';
+  font-variation-settings: 'wght' 600, 'slnt' 0;
+  font-size: var(--t-label);
+  color: var(--ink);
+  font-feature-settings: 'tnum' 1, 'lnum' 1, 'kern' 1;
+  line-height: 1;
+}
+.c-row.accent .value { color: var(--accent); }
+.c-row .value .unit {
+  font-variation-settings: 'wght' 400, 'slnt' 0;
+  color: var(--ink-2);
+  font-size: 0.7em;
+  margin-left: 0.1em;
+}
+.c-row .delta {
+  font-family: 'PPLX Mono';
+  font-size: var(--t-micro);
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+}
+.c-row .delta.positive { color: var(--accent); }
+.c-row .delta.negative { color: var(--warn); }
+
+/* Bottom annotation */
+.c-foot-note {
+  font-family: 'PPLX Mono';
+  font-size: var(--t-micro);
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--rule);
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-4);
+  text-transform: uppercase;
+}

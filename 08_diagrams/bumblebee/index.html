@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Bumblebee — Pipeline · Editorial · 16:9</title>
+<link rel="stylesheet" href="../system/tokens.css">
+<link rel="stylesheet" href="../system/base.css">
+<link rel="stylesheet" href="../archetypes/pipeline.css">
+</head>
+<body data-mode="editorial">
+<main id="target"></main>
+
+<script src="../system/render.js"></script>
+<script src="../system/wire-router.js"></script>
+<script>
+const data = {
+  aspect: '16:9',
+  mode: 'editorial',
+  kicker: 'Open source · Read only · macOS & Linux',
+  title: 'Bumblebee scanning pipeline',
+  inputs: {
+    label: '01 · Threat intel',
+    nodes: [
+      { id: 'n-pub',  icon: 'rss',    label: 'Public reports',     sub: 'Advisories · disclosures' },
+      { id: 'n-3p',   icon: 'shield', label: 'Third-party feeds',  sub: 'Vendor · research'        }
+    ],
+    assembler: { id: 'n-comp', icon: 'laptop', label: 'Perplexity Computer', sub: 'Builds threat_intel/*.json', pill: 'PR' }
+  },
+  core: {
+    id: 'n-bumb',
+    label: '02 · Bumblebee · one-shot read',
+    name: 'Bumblebee',
+    meta: 'Go 1.25 · static binary · zero deps',
+    deck: 'Reads lockfiles, package-manager metadata, MCP configs, and editor & browser extensions on the endpoint. No package-manager execution. No source-file reads.',
+    tiles: [
+      { icon: 'endpoint', label: 'Endpoint' },
+      { icon: 'doc',      label: 'Lockfiles' },
+      { icon: 'config',   label: 'MCP configs' },
+      { icon: 'ext',      label: 'Extensions' },
+      { icon: 'warn',     label: 'Match', flag: true }
+    ],
+    table: [
+      { k: 'Baseline', v: 'Common roots · extensions · MCP' },
+      { k: 'Project',  v: 'Configured dev directories' },
+      { k: 'Deep',     v: 'Explicit roots, on Computer trigger', accent: true }
+    ]
+  },
+  outputs: {
+    label: '03 · NDJSON output',
+    nodes: [
+      { id: 'n-pkg',  icon: 'box',   label: 'Package records', sub: 'Inventory per endpoint' },
+      { id: 'n-find', icon: 'warn',  label: 'Findings',        sub: 'Exact catalog match', accent: true },
+      { id: 'n-sum',  icon: 'lines', label: 'Scan summary',    sub: 'For state promotion' }
+    ]
+  },
+  footerLeft: 'github.com/perplexityai/bumblebee',
+  footerRight: 'Catalog refreshed by Computer when a new campaign is reported',
+  wires: [
+    { from: '.n-pub', fromSide: 'right', to: '.n-comp', toSide: 'right',
+      via: 'spine', spineGroup: 'feeds', style: 'neutral', arrow: false },
+    { from: '.n-3p',  fromSide: 'right', to: '.n-comp', toSide: 'right',
+      via: 'spine', spineGroup: 'feeds', style: 'neutral', arrow: false },
+    { from: '.n-comp', fromSide: 'right', to: '.n-bumb', toSide: 'left',  style: 'ink'     },
+    { from: '.n-bumb', fromSide: 'right', to: '.n-pkg',  toSide: 'left',  style: 'neutral' },
+    { from: '.n-bumb', fromSide: 'right', to: '.n-find', toSide: 'left',  style: 'accent'  },
+    { from: '.n-bumb', fromSide: 'right', to: '.n-sum',  toSide: 'left',  style: 'neutral' }
+  ]
+};
+
+const target = document.getElementById('target');
+const body = PPLXDiagram.renderPipeline(data, target);
+PPLXWires.route(body);
+</script>
+</body>
+</html>

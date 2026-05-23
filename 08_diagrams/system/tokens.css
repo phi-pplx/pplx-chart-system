@@ -1,0 +1,100 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   PPLX Announcement-Diagram System · Tokens v0.1
+   Updated Comet palette (Phi, 2026.05)
+   ───────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Spacing scale — locked */
+  --s-1: 4px;  --s-2: 8px;  --s-3: 14px; --s-4: 20px; --s-5: 28px;
+  --s-6: 40px; --s-7: 56px; --s-8: 80px; --s-9: 112px;
+
+  /* Container-query type ramp with clamp() floors so type never collapses.
+     --t-display sits between --t-mark and --t-title for subhero numbers /
+     loud-but-not-singular headlines (e.g. Stack archetype's layer counts). */
+  --t-mark:    clamp(38px, 5.0cqi, 220px);
+  --t-display: clamp(28px, 3.6cqi,  80px);
+  --t-title:   clamp(18px, 2.4cqi,  56px);
+  --t-deck:    clamp(13px, 1.55cqi, 32px);
+  --t-body:    clamp(11px, 1.30cqi, 24px);
+  --t-label:   clamp(11px, 1.20cqi, 22px);
+  --t-utility: clamp(10px, 1.05cqi, 19px);
+  --t-micro:   clamp( 9px, 0.92cqi, 16px);
+
+  /* Comet palette — v0.1 spec */
+  --teal-300:      #35bec8;
+  --teal-700:      #15797f;
+  --magenta-400:   #dd54ac;
+  --magenta-700:   #b03683;
+  --indigo-400:    #7284e6;
+  --indigo-700:    #3d4cb8;
+  --warm-grey:     #d4cdc1;
+  --warm-grey-700: #6b5648;
+
+  /* Radii + strokes */
+  --r-card: 6px;
+  --r-tile: 4px;
+  --r-pill: 3px;
+  --stroke-1: 1px;
+  --stroke-2: 1.5px;
+  --stroke-3: 2px;
+}
+
+/* ─── Editorial mode (light) ─────────────────────────────────────────────── */
+:root, [data-mode="editorial"] {
+  --bg:           #FBFAF4;
+  --surface-1:   #FFFFFF;
+  --surface-2:   #F5F2E8;
+  --ink:          #091717;
+  --ink-2:        #3D4A4A;
+  --ink-3:        #6B7575;
+  --rule:         #E5E0D2;
+  --rule-2:       #D4CFC0;
+
+  /* Editorial accent: bright Comet tones fail AA on cream as text.
+     Use -700 variants for text/values, bright variants for borders & fills
+     (≥3:1 is acceptable for non-text graphical components per WCAG 2.2). */
+  --accent:           var(--teal-700);      /* 4.93:1 AA */
+  --accent-border:    var(--teal-300);
+  --accent-fill:      var(--teal-300);
+  --warn:             var(--magenta-700);   /* 5.43:1 AA */
+  --warn-border:      var(--magenta-400);
+  --warn-fill:        var(--magenta-400);
+  --series-2:         var(--indigo-700);    /* 6.87:1 AA */
+  --series-2-fill:    var(--indigo-400);
+  --series-3:         var(--warm-grey-700); /* 5.62:1 AA */
+  --series-3-fill:    var(--warm-grey);
+
+  --wire:             #B5AE9D;
+  --wire-ink:         #091717;
+  --wire-accent:      var(--teal-700);
+  --mark-ink:         var(--ink);
+}
+
+/* ─── Branded mode (dark) ────────────────────────────────────────────────── */
+[data-mode="branded"] {
+  --bg:           #0A0A0A;
+  --surface-1:   #131313;
+  --surface-2:   #1A1A1A;
+  --ink:          #F4F1E4;
+  --ink-2:        #B5AE9D;
+  --ink-3:        #7A7466;
+  --rule:         #2A2A2A;
+  --rule-2:       #3A3A3A;
+
+  /* Branded mode: bright Comet tones all pass AA on near-black. */
+  --accent:           var(--teal-300);
+  --accent-border:    var(--teal-300);
+  --accent-fill:      var(--teal-300);
+  --warn:             var(--magenta-400);
+  --warn-border:      var(--magenta-400);
+  --warn-fill:        var(--magenta-400);
+  --series-2:         var(--indigo-400);
+  --series-2-fill:    var(--indigo-400);
+  --series-3:         var(--warm-grey);
+  --series-3-fill:    var(--warm-grey);
+
+  --wire:             #4A4A4A;
+  --wire-ink:         #F4F1E4;
+  --wire-accent:      var(--teal-300);
+  --mark-ink:         var(--ink);
+}

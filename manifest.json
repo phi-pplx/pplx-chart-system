@@ -1,12 +1,11 @@
 {
   "name": "PPLX Chart System",
-  "version": "7.1.0",
-  "description": "Perplexity's chart system for social posts and research-blog figures. Two surfaces, one rulebook.",
-  "updated": "2026-05-22",
+  "version": "0.1.0",
+  "description": "Perplexity's chart + diagram system. Two surfaces, one rulebook. Audited against Tufte and Bertin.",
+  "updated": "2026-05-23",
   "base_url": "https://phi-pplx.github.io/pplx-chart-system",
   "repo_url": "https://github.com/phi-pplx/pplx-chart-system",
   "license": "Internal · Perplexity",
-
   "principles": {
     "rhythm_contract": "Every card: head pins top, content pins above footer, footer pins bottom, breath lives in the middle 1fr slot (gap:4cqi enforced).",
     "one_accent_per_card": "Teal 300 is the punchline. Magenta 400 only for failure states. Indigo 400 only when a research multi-line plot needs a second series. Warm grey for the third series.",
@@ -14,76 +13,146 @@
     "type_scale_via_cqi": "Every type-size declaration uses cqi (container query inline units), never px. Cards must scale with their container.",
     "italic_opsz_cap": "GT Canon Italic opsz is capped at 60 (the variable font's actual design space). Pushing past it produces sloppy rendering.",
     "pplx_mark_position": "PPLX 2026 mark is 36×36 absolute top-right on every card. Color follows --text-dark-1 so it inverts cleanly across surfaces.",
-    "g_archetype_face": "G archetypes use GT Canon as title face, not Mono. Mono is utility chrome only."
+    "g_archetype_face": "G archetypes use GT Canon as title face, not Mono. Mono is utility chrome only.",
+    "ordered_data_uses_value_not_hue": "Per Bertin (Semiology of Graphics, pp. 85–91): ordered data must be encoded by value (lightness), not hue. Hue is nominal only. Bar magnitude ramps must use a single-hue value scale, not a multi-hue progression. Snippet bar v0.1 enforces this.",
+    "three_component_image_limit": "Per Bertin (Semiology of Graphics, p. 148): a graphic is read as a single image only when ≤3 retinal variables are active. Pipeline has Full (4+ variables, figuration) and Compact (1 variable, image) variants. Use Compact for social cards where overall-level reading in ≤3s matters."
   },
-
   "comet_palette": {
     "teal_300": {
-      "hex": "#0fb5b3",
+      "hex": "#35bec8",
       "role": "punchline",
       "use": "The leading accent. Highlighted bar, hero ranked entry, peak point, callout chip. Used once per card."
     },
     "magenta_400": {
-      "hex": "#cd2d7d",
+      "hex": "#dd54ac",
       "role": "warm_extreme",
       "use": "Failure states and warning strips. fit.js data-fit-warn uses it. Reserved — do not use decoratively."
     },
     "indigo_400": {
-      "hex": "#5b6cff",
+      "hex": "#7284e6",
       "role": "secondary_cool",
       "use": "Second series in research-variant multi-line plots only. Pairs with Teal 300 across a value axis."
     },
     "warm_grey": {
-      "hex": "#9a8074",
+      "hex": "#d4cdc1",
       "role": "neutral_baseline",
       "use": "Editorial-light surface baseline; third series in research multi-line plots. Reads quiet against ink."
+    },
+    "teal_700": {
+      "hex": "#15797f",
+      "role": "editorial_accent_text",
+      "use": "Use in editorial (cream) mode where the bright Teal 300 fails WCAG AA on cream (2.43:1). Hits 4.93:1 AA. Reserved for text and value labels; borders may still use the bright Teal 300 (graphical, ≥3:1 sufficient)."
+    },
+    "magenta_700": {
+      "hex": "#b03683",
+      "role": "editorial_warn_text",
+      "use": "AA-safe magenta for editorial-mode warning text. 5.43:1 on cream."
+    },
+    "indigo_700": {
+      "hex": "#3d4cb8",
+      "role": "editorial_series2_text",
+      "use": "AA-safe indigo for editorial-mode secondary-series text. 6.87:1 on cream."
+    },
+    "warm_grey_700": {
+      "hex": "#6b5648",
+      "role": "editorial_baseline_text",
+      "use": "AA-safe warm grey for editorial-mode neutral baseline text. 5.62:1 on cream."
     }
   },
-
   "spacing_scale": {
-    "values_px": [4, 8, 14, 20, 28, 40, 56, 80, 112],
+    "values_px": [
+      4,
+      8,
+      14,
+      20,
+      28,
+      40,
+      56,
+      80,
+      112
+    ],
     "card_padding": "6.2% on 1:1 and 4:5, 5.4% on 9:16, 3.6% on 16:9",
     "min_breath": "4cqi gap on body grid (enforced even if 1fr collapses)"
   },
-
   "type_ramp": {
     "hero": {
       "family": "GT Canon",
       "variation": "wdth 75, wght 500, opsz 60-144",
       "feature": "pnum lnum kern",
-      "sizes_cqi": { "r-11": 36, "r-45": 42, "r-916": 42, "r-169": 14 }
+      "sizes_cqi": {
+        "r-11": 36,
+        "r-45": 42,
+        "r-916": 42,
+        "r-169": 14
+      }
     },
     "deck": {
       "family": "PPLX Sans",
-      "sizes_cqi": { "r-11": 4, "r-45": 4.2, "r-916": 5, "r-169": 2.2 }
+      "sizes_cqi": {
+        "r-11": 4,
+        "r-45": 4.2,
+        "r-916": 5,
+        "r-169": 2.2
+      }
     },
     "h-kicker": {
       "family": "PPLX Mono",
       "letter_spacing": "0.14em",
       "text_transform": "uppercase",
-      "sizes_cqi": { "default": 2.8, "r-169": 1.6 }
+      "sizes_cqi": {
+        "default": 2.8,
+        "r-169": 1.6
+      }
     },
     "h-title": {
       "family": "PPLX Mono",
-      "sizes_cqi": { "default": 4, "r-169": 2.2 }
+      "sizes_cqi": {
+        "default": 4,
+        "r-169": 2.2
+      }
     },
     "foot": {
       "family": "PPLX Mono",
       "letter_spacing": "0.10em",
       "text_transform": "uppercase",
-      "sizes_cqi": { "default": 2.6, "r-169": 1.6 }
+      "sizes_cqi": {
+        "default": 2.6,
+        "r-169": 1.6
+      }
+    },
+    "display": {
+      "token": "--t-display",
+      "clamp": "clamp(28px, 3.6cqi, 80px)",
+      "use": "Subhero numbers — between hero mark and title. Reserved for Stack / Decision archetypes."
     }
   },
-
   "archetypes": {
     "A": {
       "name": "Stat + bar motif",
       "aspect_ratio": "1:1",
       "native_px": "1080×1080",
       "use_when": "One hero number plus a comparison ranking of 7-9 entries.",
-      "required_blocks": ["kicker", "title", "hero", "deck", "bars (3+)", "footer_left", "footer_right"],
+      "required_blocks": [
+        "kicker",
+        "title",
+        "hero",
+        "deck",
+        "bars (3+)",
+        "footer_left",
+        "footer_right"
+      ],
       "template_url": "https://phi-pplx.github.io/pplx-chart-system/templates/A.html",
-      "placeholders": ["kicker", "title", "hero", "hero_unit", "deck", "bar_count", "bars[]", "footer_left", "footer_right"],
+      "placeholders": [
+        "kicker",
+        "title",
+        "hero",
+        "hero_unit",
+        "deck",
+        "bar_count",
+        "bars[]",
+        "footer_left",
+        "footer_right"
+      ],
       "notes": "One bar gets class='bm-bar hi' — the focal entry. Other bars stay teal-dim."
     },
     "B": {
@@ -91,9 +160,21 @@
       "aspect_ratio": "1:1",
       "native_px": "1080×1080",
       "use_when": "Exactly 4 independent metrics. No hero stack — cells share the load.",
-      "required_blocks": ["kicker", "title", "4 cells (label, value, delta)", "footer_left", "footer_right"],
+      "required_blocks": [
+        "kicker",
+        "title",
+        "4 cells (label, value, delta)",
+        "footer_left",
+        "footer_right"
+      ],
       "template_url": "https://phi-pplx.github.io/pplx-chart-system/templates/B.html",
-      "placeholders": ["kicker", "title", "cell_1..4_{label,value,unit,delta}", "footer_left", "footer_right"],
+      "placeholders": [
+        "kicker",
+        "title",
+        "cell_1..4_{label,value,unit,delta}",
+        "footer_left",
+        "footer_right"
+      ],
       "notes": "Mark the leading cell with class='b-cell hi'."
     },
     "C": {
@@ -101,9 +182,30 @@
       "aspect_ratio": "1:1",
       "native_px": "1080×1080",
       "use_when": "Before/after, A vs B, two states with a delta.",
-      "required_blocks": ["kicker", "title", "hero (delta summary)", "deck", "left+right pair", "delta_caption", "footer"],
+      "required_blocks": [
+        "kicker",
+        "title",
+        "hero (delta summary)",
+        "deck",
+        "left+right pair",
+        "delta_caption",
+        "footer"
+      ],
       "template_url": "https://phi-pplx.github.io/pplx-chart-system/templates/C.html",
-      "placeholders": ["kicker", "title", "hero", "hero_unit", "deck", "left_label", "left_value", "right_label", "right_value", "delta_caption", "footer_left", "footer_right"],
+      "placeholders": [
+        "kicker",
+        "title",
+        "hero",
+        "hero_unit",
+        "deck",
+        "left_label",
+        "left_value",
+        "right_label",
+        "right_value",
+        "delta_caption",
+        "footer_left",
+        "footer_right"
+      ],
       "notes": "Right side gets teal accent. Hero summarizes the delta (e.g. '7.5×' or '+18pp')."
     },
     "D": {
@@ -111,9 +213,26 @@
       "aspect_ratio": "16:9",
       "native_px": "1920×1080",
       "use_when": "Multi-category rhythm where shape matters more than precision. 7+ columns.",
-      "required_blocks": ["kicker", "title", "hero (takeaway)", "deck (inline)", "columns[]", "footer"],
+      "required_blocks": [
+        "kicker",
+        "title",
+        "hero (takeaway)",
+        "deck (inline)",
+        "columns[]",
+        "footer"
+      ],
       "template_url": "https://phi-pplx.github.io/pplx-chart-system/templates/D.html",
-      "placeholders": ["kicker", "title", "hero", "hero_unit", "deck", "col_count", "columns[]", "footer_left", "footer_right"],
+      "placeholders": [
+        "kicker",
+        "title",
+        "hero",
+        "hero_unit",
+        "deck",
+        "col_count",
+        "columns[]",
+        "footer_left",
+        "footer_right"
+      ],
       "notes": "One column marked class='peak' contains a class='d-dot hi' (teal). Other dots are .d-dot or .d-dot.mid."
     },
     "E": {
@@ -121,9 +240,25 @@
       "aspect_ratio": "4:5",
       "native_px": "1080×1350",
       "use_when": "One hero number plus 3 supporting metrics. Hero dominates upper half, triad pins low.",
-      "required_blocks": ["kicker", "title", "hero", "deck", "3 triad cells", "footer"],
+      "required_blocks": [
+        "kicker",
+        "title",
+        "hero",
+        "deck",
+        "3 triad cells",
+        "footer"
+      ],
       "template_url": "https://phi-pplx.github.io/pplx-chart-system/templates/E.html",
-      "placeholders": ["kicker", "title", "hero", "hero_unit", "deck", "triad_1..3_{label,value,unit}", "footer_left", "footer_right"],
+      "placeholders": [
+        "kicker",
+        "title",
+        "hero",
+        "hero_unit",
+        "deck",
+        "triad_1..3_{label,value,unit}",
+        "footer_left",
+        "footer_right"
+      ],
       "notes": "4:5 gives more vertical authority than 1:1. Use for the strongest social cards."
     },
     "F": {
@@ -131,9 +266,25 @@
       "aspect_ratio": "9:16",
       "native_px": "1080×1920",
       "use_when": "Ranked list of 4-7 entries with one entry promoted to lead. Stories format.",
-      "required_blocks": ["kicker", "title", "lead row (lead_name + lead_value)", "supporting rows", "footer"],
+      "required_blocks": [
+        "kicker",
+        "title",
+        "lead row (lead_name + lead_value)",
+        "supporting rows",
+        "footer"
+      ],
       "template_url": "https://phi-pplx.github.io/pplx-chart-system/templates/F.html",
-      "placeholders": ["kicker", "title", "lead_rank", "lead_name", "lead_name_soft (optional)", "lead_value", "rows[]", "footer_left", "footer_right"],
+      "placeholders": [
+        "kicker",
+        "title",
+        "lead_rank",
+        "lead_name",
+        "lead_name_soft (optional)",
+        "lead_value",
+        "rows[]",
+        "footer_left",
+        "footer_right"
+      ],
       "notes": "Lead row is promoted regardless of canonical rank. Long names can use <span class='soft'> on the suffix."
     },
     "G-display": {
@@ -141,9 +292,18 @@
       "aspect_ratio": "1:1",
       "native_px": "1080×1080",
       "use_when": "Single dramatic statement. Newspaper-style headline.",
-      "required_blocks": ["kicker", "hero (headline)", "footer"],
+      "required_blocks": [
+        "kicker",
+        "hero (headline)",
+        "footer"
+      ],
       "template_url": "https://phi-pplx.github.io/pplx-chart-system/templates/G-display.html",
-      "placeholders": ["kicker", "hero", "footer_left", "footer_right"],
+      "placeholders": [
+        "kicker",
+        "hero",
+        "footer_left",
+        "footer_right"
+      ],
       "notes": "GT Canon Narrow Medium. Use text-wrap:balance for natural line breaks. 80 char max."
     },
     "G-editorial": {
@@ -151,9 +311,21 @@
       "aspect_ratio": "1:1",
       "native_px": "1080×1080",
       "use_when": "Essay opener or longer headline. Reads as editorial type.",
-      "required_blocks": ["kicker", "title", "rule glyph", "deck", "footer"],
+      "required_blocks": [
+        "kicker",
+        "title",
+        "rule glyph",
+        "deck",
+        "footer"
+      ],
       "template_url": "https://phi-pplx.github.io/pplx-chart-system/templates/G-editorial.html",
-      "placeholders": ["kicker", "title", "deck", "footer_left", "footer_right"],
+      "placeholders": [
+        "kicker",
+        "title",
+        "deck",
+        "footer_left",
+        "footer_right"
+      ],
       "notes": "GT Canon Regular for the title. Hairline rule glyph between title and deck. 240 char max for deck."
     },
     "G-quote": {
@@ -161,13 +333,24 @@
       "aspect_ratio": "1:1",
       "native_px": "1080×1080",
       "use_when": "Attributed pull quote with Sans cite line.",
-      "required_blocks": ["kicker", "quote", "rule glyph", "attribution", "footer"],
+      "required_blocks": [
+        "kicker",
+        "quote",
+        "rule glyph",
+        "attribution",
+        "footer"
+      ],
       "template_url": "https://phi-pplx.github.io/pplx-chart-system/templates/G-quote.html",
-      "placeholders": ["kicker", "quote", "attribution", "footer_left", "footer_right"],
-      "notes": "GT Canon Italic, opsz 60 (cap). Use smart quotes \u201c \u201d, not straight. 200 char max for quote. Rule glyph replaces em-dash before attribution."
+      "placeholders": [
+        "kicker",
+        "quote",
+        "attribution",
+        "footer_left",
+        "footer_right"
+      ],
+      "notes": "GT Canon Italic, opsz 60 (cap). Use smart quotes “ ”, not straight. 200 char max for quote. Rule glyph replaces em-dash before attribution."
     }
   },
-
   "decision_tree": {
     "single_hero_with_3_supporting": "E",
     "single_hero_with_comparison_ranking": "A",
@@ -178,9 +361,8 @@
     "claim_only_dramatic": "G-display",
     "claim_only_editorial": "G-editorial",
     "claim_only_quote": "G-quote",
-    "tiebreaker": "If two archetypes fit, pick the one whose aspect ratio matches the distribution channel. Stories \u2192 9:16. Feed posts \u2192 1:1 or 4:5. Twitter/X cards \u2192 16:9."
+    "tiebreaker": "If two archetypes fit, pick the one whose aspect ratio matches the distribution channel. Stories → 9:16. Feed posts → 1:1 or 4:5. Twitter/X cards → 16:9."
   },
-
   "assets": {
     "tokens_json": "https://phi-pplx.github.io/pplx-chart-system/tokens.json",
     "manifest_json": "https://phi-pplx.github.io/pplx-chart-system/manifest.json",
@@ -200,12 +382,54 @@
       "blog_rebuilds": "https://phi-pplx.github.io/pplx-chart-system/v7-blog-rebuilds.html?theme=dark"
     }
   },
-
   "skill_usage": {
     "fetch_pattern": "1. Fetch manifest.json once. 2. Use decision_tree to pick archetype. 3. Fetch that archetype's template_url. 4. Substitute placeholders. 5. Optionally fetch fit_js for validation.",
     "placeholder_syntax": "Double-brace: {{ name }}. Whitespace inside braces is tolerated.",
     "minimum_fetches": "manifest.json + one template_url (templates reference _base.css by absolute URL).",
     "validation": "Load fit.js after render. fit.js attaches data-fit-warn attributes on any element that breaks the archetype contract (horizontal-overflow, density-mismatch, missing-structure). Add class='fit-debug' on <body> to render a magenta strip on warning elements.",
     "stability": "Templates and base CSS are versioned via the version field above. The base_url is permanent; the version pins the schema. For frozen builds, fetch via the GitHub raw URL at a tagged commit instead of the Pages URL."
+  },
+  "diagrams": {
+    "system_path": "08_diagrams/",
+    "system_url": "https://phi-pplx.github.io/pplx-chart-system/08_diagrams/",
+    "description": "Announcement-diagram system. Companion to the chart system. Four archetypes built (Pipeline, Timeline, Stat Hero, Comparison), three pending (Stack, Grid, Decision).",
+    "archetypes": {
+      "P": {
+        "name": "Pipeline",
+        "ft_category": "flow",
+        "variants": [
+          "full",
+          "compact"
+        ],
+        "template_url": "https://phi-pplx.github.io/pplx-chart-system/08_diagrams/bumblebee/",
+        "notes": "Full encodes 4 retinal variables (size, value, color × 2). Compact strips to 1 (color accent only) for Bertin-image-grade reading."
+      },
+      "T": {
+        "name": "Timeline",
+        "ft_category": "chronology",
+        "template_url": "https://phi-pplx.github.io/pplx-chart-system/08_diagrams/timeline/",
+        "notes": "Vertical rail (1:1/4:5) or horizontal track (16:9). One milestone may be accented."
+      },
+      "H": {
+        "name": "Stat Hero",
+        "ft_category": "magnitude",
+        "template_url": "https://phi-pplx.github.io/pplx-chart-system/08_diagrams/stathero/",
+        "notes": "Hero number in ink (never accent). Supporting bars use position-on-common-scale per Cleveland #1. Lie Factor = 1.0."
+      },
+      "C": {
+        "name": "Comparison",
+        "ft_category": "deviation_ranking",
+        "template_url": "https://phi-pplx.github.io/pplx-chart-system/08_diagrams/comparison/",
+        "notes": "Sorted bars on common scale with CI. Bar widths exactly (value − scaleMin) / (scaleMax − scaleMin). Lie Factor = 1.0."
+      }
+    },
+    "audits": {
+      "tufte": "06_docs/audit-tufte-v01.md",
+      "bertin": "06_docs/audit-bertin-v01.md",
+      "tufte_research_brief": "06_docs/research-tufte-canon.md",
+      "bertin_research_brief": "06_docs/research-bertin-semiology.md",
+      "tufte_mapping": "06_docs/audit-tufte-mapping.md",
+      "type_audit": "06_docs/audit-type-v01.md"
+    }
   }
 }

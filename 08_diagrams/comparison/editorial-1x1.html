@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8" />
+<title>Comparison · editorial · 1x1</title>
+<link rel="stylesheet" href="../system/tokens.css">
+<link rel="stylesheet" href="../system/base.css">
+<link rel="stylesheet" href="../archetypes/comparison.css">
+</head><body data-mode="editorial">
+<main id="target"></main>
+<script src="../system/render.js"></script>
+<script src="./data.js"></script>
+<script>
+const data = Object.assign({}, COMPARISON_DATA, { aspect: '1:1', mode: 'editorial' });
+PPLXDiagram.renderComparison(data, document.getElementById('target'));
+window.__wiresReady = true;
+</script>
+</body></html>

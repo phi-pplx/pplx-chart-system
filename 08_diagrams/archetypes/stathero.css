@@ -1,0 +1,142 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Archetype H · Stat Hero
+   One large number + 2–4 supporting micro-stats.
+
+   Audit-driven design:
+   • The hero number is in ink, never in accent (per locked rule)
+   • Visual size of the hero is proportional to its claimed magnitude (Lie Factor)
+   • Supporting stats use position on a common scale — bars, not bubbles (Cleveland)
+   • Color is reserved for the smallest stat that lights up the punchline (delta)
+   ───────────────────────────────────────────────────────────────────────── */
+
+.stathero {
+  display: grid;
+  gap: var(--s-6);
+}
+
+/* ─── 16:9: hero left, supporting right ──────────────────────────────────── */
+.surface[data-aspect="16:9"] .stathero {
+  grid-template-columns: 1.4fr 1fr;
+  column-gap: var(--s-7);
+  align-items: stretch;
+}
+
+/* ─── 1:1 and 4:5: hero top, supporting bottom ──────────────────────────── */
+.surface[data-aspect="1:1"]  .stathero,
+.surface[data-aspect="4:5"]  .stathero {
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto;
+  row-gap: var(--s-6);
+}
+
+/* ─── Hero block ─────────────────────────────────────────────────────────── */
+.h-hero {
+  display: grid;
+  align-content: center;
+  gap: var(--s-3);
+  padding: var(--s-4) 0;
+}
+.h-hero .preamble {
+  font-family: 'PPLX Mono';
+  font-variation-settings: 'wght' 500, 'slnt' 0;
+  font-size: var(--t-utility);
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+/* Hero number is a display headline — GT Canon Narrow Medium.
+   opsz auto so optical size follows the rendered font-size (60–144). */
+.h-hero .number {
+  font-family: 'GT Canon', 'PPLX Sans', serif;
+  font-variation-settings: 'wdth' 75, 'wght' 500;
+  font-optical-sizing: auto;
+  font-size: var(--t-mark);
+  line-height: 0.92;
+  letter-spacing: -0.018em;
+  color: var(--ink);
+  font-feature-settings: 'pnum' 1, 'lnum' 1, 'kern' 1;
+}
+.h-hero .number .unit {
+  /* Unit sits at smaller opsz — cap manually since it's well below 60. */
+  font-family: 'GT Canon', 'PPLX Sans', serif;
+  font-variation-settings: 'wdth' 75, 'wght' 500, 'opsz' 60;
+  font-optical-sizing: none;
+  font-size: 0.45em;
+  color: var(--ink-2);
+  margin-left: 0.08em;
+  letter-spacing: -0.02em;
+}
+.h-hero .context {
+  font-family: 'PPLX Sans';
+  font-size: var(--t-deck);
+  line-height: 1.4;
+  color: var(--ink-2);
+  max-width: 28ch;
+}
+
+/* ─── Supporting bars (Cleveland: position on common scale) ─────────────── */
+.h-support {
+  display: grid;
+  align-content: center;
+  gap: var(--s-4);
+}
+.h-support .col-label {
+  font-family: 'PPLX Mono';
+  font-variation-settings: 'wght' 500, 'slnt' 0;
+  font-size: var(--t-micro);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  padding-bottom: var(--s-2);
+  border-bottom: 1px solid var(--rule);
+}
+.h-rows {
+  display: grid;
+  gap: var(--s-3);
+}
+.h-row {
+  display: grid;
+  grid-template-columns: minmax(8cqi, 14cqi) 1fr auto;
+  column-gap: var(--s-3);
+  align-items: baseline;
+}
+.h-row .lbl {
+  font-family: 'PPLX Sans';
+  font-variation-settings: 'wght' 500, 'slnt' 0;
+  font-size: var(--t-label);
+  color: var(--ink);
+  letter-spacing: -0.005em;
+}
+.h-row .bar {
+  position: relative;
+  height: 6px;
+  background: var(--rule);
+  border-radius: 3px;
+  align-self: center;
+  overflow: hidden;
+}
+.h-row .bar::after {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: calc(var(--v, 0.5) * 100%);
+  background: var(--ink-2);
+  border-radius: 3px;
+}
+.h-row.accent .bar::after { background: var(--accent-border); }
+.h-row .val {
+  font-family: 'PPLX Sans';
+  font-variation-settings: 'wght' 500, 'slnt' 0;
+  font-size: var(--t-body);
+  color: var(--ink);
+  font-feature-settings: 'tnum' 1, 'lnum' 1, 'kern' 1;
+}
+.h-row.accent .val { color: var(--accent); }
+.h-row .delta {
+  font-family: 'PPLX Mono';
+  font-size: var(--t-micro);
+  color: var(--ink-3);
+  letter-spacing: 0.02em;
+  grid-column: 2 / 4;
+  margin-top: -2px;
+}

@@ -1,0 +1,193 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Archetype T · Timeline
+   Dated milestones with payload.
+   16:9 → horizontal track (rail bottom, payload above)
+   1:1 / 4:5 → vertical rail (date left, dot, milestone right) per row
+   ───────────────────────────────────────────────────────────────────────── */
+
+.timeline {
+  position: relative;
+}
+
+/* ─── Vertical: one row per milestone ─────────────────────────────────────── */
+.timeline.vertical {
+  display: grid;
+  grid-template-columns: 10cqi 1fr;     /* date column · milestone column */
+  column-gap: calc(var(--s-5) + 12px);  /* room for the dot */
+  row-gap: var(--s-5);
+  position: relative;
+}
+
+/* Single continuous rail behind the dots (sits inside the column gap) */
+.timeline.vertical::before {
+  content: '';
+  position: absolute;
+  left: calc(10cqi + (var(--s-5) + 12px) / 2 - 0.5px);
+  top: 1.2cqi;
+  bottom: 1.2cqi;
+  width: 1px;
+  background: var(--rule);
+}
+
+.timeline.vertical .date {
+  font-family: 'PPLX Mono';
+  font-variation-settings: 'wght' 500, 'slnt' 0;
+  font-size: var(--t-utility);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  text-align: right;
+  padding-top: 1.2cqi;     /* baseline-align with card title */
+}
+.timeline.vertical .date.accent { color: var(--accent); }
+
+.timeline.vertical .milestone-wrap {
+  position: relative;
+}
+.timeline.vertical .milestone-wrap::before {
+  content: '';
+  position: absolute;
+  left: calc(-1 * (var(--s-5) + 12px) / 2 - 4.5px);
+  top: 1.6cqi;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1.5px solid var(--ink-2);
+  box-sizing: border-box;
+  z-index: 1;
+}
+.timeline.vertical .milestone-wrap.accent::before {
+  border-color: var(--accent-border);
+  background: var(--accent-border);
+}
+
+/* ─── Horizontal track (16:9) ────────────────────────────────────────────── */
+.timeline.horizontal {
+  display: grid;
+  grid-template-rows: 1fr auto auto;
+  row-gap: var(--s-4);
+}
+
+.timeline.horizontal .cards {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  column-gap: var(--s-4);
+  align-items: end;
+}
+/* No connecting line in horizontal mode. The dots encode position on a common
+   scale (Cleveland 1985 — the most accurate quantitative encoding), and a
+   connecting rule would be redundant data-ink (Tufte VDQI principle 4). */
+.timeline.horizontal .track {
+  position: relative;
+  height: 10px;
+}
+.timeline.horizontal .dots {
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  height: 12px;
+  align-items: center;
+}
+.timeline.horizontal .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1.5px solid var(--ink-2);
+  box-sizing: border-box;
+  justify-self: center;
+}
+.timeline.horizontal .dot.accent {
+  border-color: var(--accent-border);
+  background: var(--accent-border);
+}
+.timeline.horizontal .dates {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  column-gap: var(--s-4);
+}
+.timeline.horizontal .date {
+  font-family: 'PPLX Mono';
+  font-variation-settings: 'wght' 500, 'slnt' 0;
+  font-size: var(--t-utility);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  text-align: center;
+}
+
+/* ─── Milestone card (shared) ────────────────────────────────────────────── */
+.t-card {
+  background: var(--surface-1);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-card);
+  padding: var(--s-4);
+  display: grid;
+  gap: var(--s-2);
+}
+.t-card.accent {
+  border-color: var(--accent-border);
+}
+.t-card .title {
+  font-family: 'PPLX Sans';
+  font-variation-settings: 'wght' 600, 'slnt' 0;
+  font-size: var(--t-label);
+  line-height: 1.25;
+  color: var(--ink);
+  margin: 0;
+  max-width: none;
+  letter-spacing: -0.005em;
+}
+.t-card.accent .title {
+  color: var(--accent);
+}
+.t-card .body {
+  font-family: 'PPLX Sans';
+  font-size: var(--t-body);
+  line-height: 1.5;
+  color: var(--ink-2);
+  display: grid;
+  gap: var(--s-2);
+  position: relative;
+  min-height: 0;
+}
+.t-card .body ul {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--s-1);
+}
+.t-card .body li {
+  font-size: var(--t-body);
+  line-height: 1.5;
+  color: var(--ink-2);
+  padding-left: var(--s-3);
+  position: relative;
+}
+.t-card .body li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.7em;
+  width: 6px;
+  height: 1px;
+  background: var(--ink-3);
+}
+.t-card .meta {
+  font-family: 'PPLX Mono';
+  font-size: var(--t-micro);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  display: flex;
+  gap: var(--s-3);
+  align-items: center;
+}
+.t-card .meta .pill {
+  font-size: var(--t-micro);
+}

@@ -1,0 +1,251 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   PPLX Announcement-Diagram System · Base v0
+   Imports tokens. Defines fonts, reset, surface, head, foot, and
+   primitives shared by every archetype.
+   ───────────────────────────────────────────────────────────────────────── */
+
+@font-face {
+  font-family: 'PPLX Sans';
+  src: url('../fonts/PPLX-Sans-Beta-v2-VF.woff2') format('woff2-variations');
+  font-weight: 100 900; font-style: normal; font-display: block;
+}
+@font-face {
+  font-family: 'PPLX Mono';
+  src: url('../fonts/PPLX-Mono-Beta-v0-VF.woff2') format('woff2-variations');
+  font-weight: 100 900; font-style: normal; font-display: block;
+}
+
+/* GT Canon — design-space wdth 50–100, wght 100–900, opsz 60–144.
+   System rule: headlines use Narrow Medium (wdth 75, wght 500).
+   Optical size tracks rendered font size via font-optical-sizing: auto. */
+@font-face {
+  font-family: 'GT Canon';
+  src: url('../fonts/GT-Canon-VF.woff2') format('woff2-variations');
+  font-weight: 100 900; font-style: normal; font-display: block;
+}
+@font-face {
+  font-family: 'GT Canon';
+  src: url('../fonts/GT-Canon-Italic-VF.woff2') format('woff2-variations');
+  font-weight: 100 900; font-style: italic; font-display: block;
+}
+
+/* Headline class — GT Canon Narrow Medium, opsz auto.
+   Scoped to .head .title so card-level .title elements (e.g. .t-card .title
+   in Timeline) don't inherit the headline treatment. Labels stay Sans. */
+.head .title {
+  font-family: 'GT Canon', 'PPLX Sans', serif;
+  font-variation-settings: 'wdth' 75, 'wght' 500;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+.head .title.italic {
+  font-style: italic;
+  font-variation-settings: 'wdth' 75, 'wght' 500, 'opsz' 60;
+  font-optical-sizing: none;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+
+body {
+  font-family: 'PPLX Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-variation-settings: 'wght' 400, 'slnt' 0;
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+
+/* ─── Surface ────────────────────────────────────────────────────────────── */
+/* Container query unit reference. .surface is what cqi keys off. */
+.surface {
+  container-type: inline-size;
+  background: var(--bg);
+  color: var(--ink);
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  /* Generous floor — diagrams should breathe. */
+  padding: var(--s-6) var(--s-6) var(--s-5);
+  row-gap: var(--s-5);
+}
+
+.surface[data-aspect="1:1"]   { width: 1080px; height: 1080px; }
+.surface[data-aspect="4:5"]   { width: 1080px; height: 1350px; }
+.surface[data-aspect="16:9"]  { width: 1920px; height: 1080px; }
+
+/* Optional preview size (for system sheet rendering) */
+.surface.preview[data-aspect="1:1"]   { width: 540px; height: 540px; }
+.surface.preview[data-aspect="4:5"]   { width: 540px; height: 675px; }
+.surface.preview[data-aspect="16:9"]  { width: 960px; height: 540px; }
+
+/* ─── Head ───────────────────────────────────────────────────────────────── */
+.head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: var(--s-4);
+}
+.head .meta {
+  display: grid;
+  gap: var(--s-1);
+  min-width: 0;
+}
+.kicker {
+  font-family: 'PPLX Mono', monospace;
+  font-variation-settings: 'wght' 500, 'slnt' 0;
+  font-size: var(--t-utility);
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  line-height: 1;
+}
+/* Sizing, color, layout for .head .title — family + variation come from
+   the GT Canon Narrow Medium declaration above. */
+.head .title {
+  font-size: var(--t-title);
+  line-height: 1.04;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+  margin: 0;
+  max-width: 22ch;
+}
+.head .title em {
+  font-style: italic;
+  font-variation-settings: 'wdth' 75, 'wght' 500, 'opsz' 60;
+  color: var(--ink-2);
+}
+
+/* PPLX 2026 mark — 36×36 absolute top-right of head's right cell, in cqi */
+.mark {
+  width:  3.3cqi;
+  height: 3.3cqi;
+  min-width: 28px;
+  min-height: 28px;
+  color: var(--mark-ink);
+  display: grid;
+  place-items: center;
+}
+.mark svg { width: 100%; height: 100%; display: block; }
+
+/* ─── Foot ───────────────────────────────────────────────────────────────── */
+.foot {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  gap: var(--s-1) var(--s-4);
+  align-items: baseline;
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--rule);
+  font-family: 'PPLX Mono';
+  font-variation-settings: 'wght' 400, 'slnt' 0;
+  font-size: var(--t-utility);
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+  text-transform: uppercase;
+}
+.foot .right { color: var(--ink-2); text-align: right; }
+.foot .stamp {
+  grid-column: 1 / -1;
+  font-size: var(--t-micro);
+  color: var(--ink-3);
+  letter-spacing: 0.10em;
+  opacity: 0.7;
+}
+
+/* ─── Body region (each archetype provides its own .body layout) ─── */
+.body {
+  position: relative;
+  min-height: 0;
+  display: grid;
+  width: 100%;
+  align-content: center;       /* center the rows inside body */
+  align-self: stretch;
+}
+
+/* ─── Card primitives ────────────────────────────────────────────────────── */
+.card {
+  background: var(--surface-1);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-card);
+  padding: var(--s-4);
+  display: grid;
+  gap: var(--s-3);
+}
+.card-strong {
+  border-color: var(--ink);
+  border-width: var(--stroke-2);
+}
+.card-soft {
+  background: var(--surface-2);
+  border-color: var(--rule);
+}
+
+.card .label {
+  font-family: 'PPLX Sans';
+  font-variation-settings: 'wght' 500, 'slnt' 0;
+  font-size: var(--t-label);
+  line-height: 1.25;
+  color: var(--ink);
+}
+.card .sub {
+  font-family: 'PPLX Mono';
+  font-size: var(--t-micro);
+  letter-spacing: 0.02em;
+  color: var(--ink-3);
+  line-height: 1.3;
+}
+.card .deck {
+  font-family: 'PPLX Sans';
+  font-size: var(--t-body);
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+/* Inline icon slot */
+.icon {
+  width: 1.6cqi;
+  height: 1.6cqi;
+  min-width: 14px;
+  min-height: 14px;
+  color: currentColor;
+  display: grid; place-items: center;
+}
+.icon svg { width: 100%; height: 100%; display: block; }
+
+/* Pill */
+.pill {
+  font-family: 'PPLX Mono';
+  font-variation-settings: 'wght' 500, 'slnt' 0;
+  font-size: var(--t-micro);
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  border: 1px solid var(--rule-2);
+  border-radius: var(--r-pill);
+  padding: 0.35em 0.7em;
+  white-space: nowrap;
+}
+.pill.accent { color: var(--accent); border-color: var(--accent-border); }
+.pill.warn   { color: var(--warn);   border-color: var(--warn-border);   }
+
+/* Section column label */
+.col-label {
+  font-family: 'PPLX Mono';
+  font-variation-settings: 'wght' 500, 'slnt' 0;
+  font-size: var(--t-micro);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  padding-bottom: var(--s-2);
+  border-bottom: 1px solid var(--rule);
+}
+
+/* Wires overlay (positioned absolute in archetype .body) */
+.wires {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+.wires path { fill: none; }

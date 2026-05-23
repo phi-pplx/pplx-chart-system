@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8" />
+<title>Bumblebee Compact · editorial · 16:9</title>
+<link rel="stylesheet" href="../system/tokens.css">
+<link rel="stylesheet" href="../system/base.css">
+<link rel="stylesheet" href="../archetypes/pipeline.css">
+</head><body data-mode="editorial">
+<main id="target"></main>
+<script src="../system/render.js"></script>
+<script src="./data.js"></script>
+<script src="../system/wire-router.js"></script>
+<script>
+const isVertical = '16:9' !== '16:9';
+const data = Object.assign({}, BUMBLEBEE_DATA, {
+  aspect: '16:9',
+  mode: 'editorial',
+  compact: true,
+  wires: isVertical ? BUMBLEBEE_DATA.wiresVertical : BUMBLEBEE_DATA.wires,
+  stamp: 'PPLX · diagram-system v0.1 · pipeline compact · 2026.05'
+});
+const body = PPLXDiagram.renderPipeline(data, document.getElementById('target'));
+PPLXWires.route(body);
+</script>
+</body></html>

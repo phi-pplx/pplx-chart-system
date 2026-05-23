@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>PPLX Announcement-Diagram System v0.1 — Sheet</title>
+<style>
+  @font-face { font-family: 'PPLX Sans'; src: url('../fonts/PPLX-Sans-Beta-v2-VF.woff2') format('woff2-variations'); font-weight: 100 900; font-display: block; }
+  @font-face { font-family: 'PPLX Mono'; src: url('../fonts/PPLX-Mono-Beta-v0-VF.woff2') format('woff2-variations'); font-weight: 100 900; font-display: block; }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 64px 56px; background: #FBFAF4; font-family: 'PPLX Sans', sans-serif; color: #091717; }
+  .head { display: grid; gap: 6px; margin-bottom: 48px; max-width: 760px; }
+  .head .kicker { font-family: 'PPLX Mono'; font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase; color: #3D4A4A; }
+  .head h1 { font-size: 36px; font-weight: 700; margin: 0; letter-spacing: -0.014em; line-height: 1.05; }
+  .head .deck { font-size: 16px; line-height: 1.5; color: #3D4A4A; margin-top: 16px; max-width: 60ch; }
+
+  .legend { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 56px; padding: 20px 24px; background: #fff; border: 1px solid #E5E0D2; border-radius: 6px; }
+  .legend .item { display: grid; gap: 4px; }
+  .legend .item .k { font-family: 'PPLX Mono'; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #3D4A4A; }
+  .legend .item .v { font-size: 13px; color: #091717; }
+  .legend .swatch { display: inline-block; width: 12px; height: 12px; vertical-align: middle; margin-right: 8px; border-radius: 2px; }
+
+  .row-title { font-family: 'PPLX Mono'; font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase; color: #091717; margin: 48px 0 16px; display:flex; justify-content:space-between; align-items: baseline; }
+  .row-title .meta { color: #6B7575; font-size: 10px; }
+
+  .row { display: grid; grid-template-columns: 1.78fr 1.78fr 1fr 1fr; gap: 24px; align-items: stretch; }
+  .cell { display: grid; gap: 10px; }
+  .cell .lbl { font-family: 'PPLX Mono'; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #3D4A4A; }
+  .cell img { display: block; width: 100%; height: auto; border: 1px solid #E5E0D2; border-radius: 6px; }
+
+  .note { font-family: 'PPLX Mono'; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: #6B7575; margin-top: 64px; padding-top: 20px; border-top: 1px solid #E5E0D2; }
+</style>
+</head>
+<body>
+
+<header class="head">
+  <div class="kicker">PPLX · Announcement-Diagram System · v0.1</div>
+  <h1>Four archetypes, two modes, three aspects.</h1>
+  <div class="deck">v0.1 with updated Comet palette and the real PPLX 2026 mark. Each archetype audited against the 14-criterion Tufte framework; Comparison adds Lie Factor as a hard quantitative test. All accents WCAG AA on cream and AAA on near-black.</div>
+</header>
+
+<div class="legend">
+  <div class="item"><div class="k">Punchline</div><div class="v"><span class="swatch" style="background:#35bec8"></span>Teal 300 #35bec8</div></div>
+  <div class="item"><div class="k">Warn / extreme</div><div class="v"><span class="swatch" style="background:#dd54ac"></span>Magenta 400 #dd54ac</div></div>
+  <div class="item"><div class="k">Secondary cool</div><div class="v"><span class="swatch" style="background:#7284e6"></span>Indigo 400 #7284e6</div></div>
+  <div class="item"><div class="k">Neutral baseline</div><div class="v"><span class="swatch" style="background:#d4cdc1"></span>Warm grey #d4cdc1</div></div>
+</div>
+
+<div class="row-title"><div>P · Pipeline</div><div class="meta">Flow · inputs → core → outputs</div></div>
+<div class="row">
+  <div class="cell"><div class="lbl">Editorial · 16:9</div><img src="../bumblebee/renders/editorial-16x9.jpg"></div>
+  <div class="cell"><div class="lbl">Branded · 16:9</div><img src="../bumblebee/renders/branded-16x9.jpg"></div>
+  <div class="cell"><div class="lbl">Editorial · 1:1</div><img src="../bumblebee/renders/editorial-1x1.jpg"></div>
+  <div class="cell"><div class="lbl">Branded · 1:1</div><img src="../bumblebee/renders/branded-1x1.jpg"></div>
+</div>
+
+<div class="row-title"><div>T · Timeline</div><div class="meta">Chronology · dated milestones</div></div>
+<div class="row">
+  <div class="cell"><div class="lbl">Editorial · 16:9</div><img src="../timeline/renders/editorial-16x9.jpg"></div>
+  <div class="cell"><div class="lbl">Branded · 16:9</div><img src="../timeline/renders/branded-16x9.jpg"></div>
+  <div class="cell"><div class="lbl">Editorial · 1:1</div><img src="../timeline/renders/editorial-1x1.jpg"></div>
+  <div class="cell"><div class="lbl">Branded · 1:1</div><img src="../timeline/renders/branded-1x1.jpg"></div>
+</div>
+
+<div class="row-title"><div>H · Stat Hero</div><div class="meta">Magnitude · hero number + supporting bars</div></div>
+<div class="row">
+  <div class="cell"><div class="lbl">Editorial · 16:9</div><img src="../stathero/renders/editorial-16x9.jpg"></div>
+  <div class="cell"><div class="lbl">Branded · 16:9</div><img src="../stathero/renders/branded-16x9.jpg"></div>
+  <div class="cell"><div class="lbl">Editorial · 1:1</div><img src="../stathero/renders/editorial-1x1.jpg"></div>
+  <div class="cell"><div class="lbl">Branded · 1:1</div><img src="../stathero/renders/branded-1x1.jpg"></div>
+</div>
+
+<div class="row-title"><div>C · Comparison</div><div class="meta">Deviation · ranking · bars on common scale with CI</div></div>
+<div class="row">
+  <div class="cell"><div class="lbl">Editorial · 16:9</div><img src="../comparison/renders/editorial-16x9.jpg"></div>
+  <div class="cell"><div class="lbl">Branded · 16:9</div><img src="../comparison/renders/branded-16x9.jpg"></div>
+  <div class="cell"><div class="lbl">Editorial · 1:1</div><img src="../comparison/renders/editorial-1x1.jpg"></div>
+  <div class="cell"><div class="lbl">Branded · 1:1</div><img src="../comparison/renders/branded-1x1.jpg"></div>
+</div>
+
+<div class="note">v0.1 · 4 of 7 archetypes built · updated Comet palette · real PPLX 2026 mark · 3 remaining (stack, grid, decision)</div>
+
+</body>
+</html>

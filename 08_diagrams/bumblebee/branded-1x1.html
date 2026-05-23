@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8" />
+<title>Bumblebee · Branded · 1:1</title>
+<link rel="stylesheet" href="../system/tokens.css">
+<link rel="stylesheet" href="../system/base.css">
+<link rel="stylesheet" href="../archetypes/pipeline.css">
+</head><body data-mode="branded">
+<main id="target"></main>
+<script src="../system/render.js"></script>
+<script src="./data.js"></script>
+<script src="../system/wire-router.js"></script>
+<script>
+const data = Object.assign({}, BUMBLEBEE_DATA, { aspect: '1:1', mode: 'branded', wires: BUMBLEBEE_DATA.wiresVertical });
+const body = PPLXDiagram.renderPipeline(data, document.getElementById('target'));
+PPLXWires.route(body);
+</script>
+</body></html>

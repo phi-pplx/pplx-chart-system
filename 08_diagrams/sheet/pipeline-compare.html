@@ -1,0 +1,74 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<title>Pipeline · Full vs Compact</title>
+<style>
+@font-face { font-family: 'PPLX Sans'; src: url('../fonts/PPLX-Sans-Beta-v2-VF.woff2') format('woff2-variations'); font-weight: 100 900; font-display: block; }
+@font-face { font-family: 'PPLX Mono'; src: url('../fonts/PPLX-Mono-Beta-v0-VF.woff2') format('woff2-variations'); font-weight: 100 900; font-display: block; }
+*{box-sizing:border-box;}
+body{margin:0;padding:48px 56px;background:#FBFAF4;font-family:'PPLX Sans',sans-serif;color:#091717;}
+.head{max-width:780px;margin-bottom:36px;}
+.kicker{font-family:'PPLX Mono';font-size:11px;letter-spacing:0.10em;text-transform:uppercase;color:#3D4A4A;margin-bottom:6px;}
+h1{font-size:34px;font-weight:700;margin:0;letter-spacing:-0.014em;line-height:1.05;}
+.deck{font-size:15px;line-height:1.5;color:#3D4A4A;margin-top:14px;max-width:62ch;}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:32px;}
+.cell{display:grid;gap:12px;}
+.cell .meta{display:flex;justify-content:space-between;align-items:baseline;font-family:'PPLX Mono';font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#3D4A4A;padding-bottom:10px;border-bottom:1px solid #E5E0D2;}
+.cell .meta b{color:#091717;letter-spacing:0;text-transform:none;font-size:14px;font-weight:600;}
+.cell .meta b em{font-style:normal;color:#15797f;}
+.cell img{display:block;width:100%;height:auto;border:1px solid #E5E0D2;border-radius:6px;}
+.audit{padding:16px 18px;background:#fff;border:1px solid #E5E0D2;border-radius:6px;font-family:'PPLX Mono';font-size:11px;color:#091717;line-height:1.6;}
+.audit .lbl{color:#3D4A4A;letter-spacing:0.06em;text-transform:uppercase;font-size:10px;display:block;margin-bottom:4px;}
+.audit .pass{color:#15797f;}
+.audit .fail{color:#b03683;}
+</style></head>
+<body>
+
+<header class="head">
+<div class="kicker">Bertin fix · Pipeline image limit</div>
+<h1>Two Pipelines · one question · different limits.</h1>
+<div class="deck">Full Pipeline encodes 4 retinal variables (size, value, color × 2) for documentation density. Bertin's image rule allows 1 for single-glance reading. Compact strips back to the limit so the diagram becomes an image instead of a figuration.</div>
+</header>
+
+<div class="row">
+  <div class="cell">
+    <div class="meta"><b>Full Pipeline</b><span>documentation density</span></div>
+    <img src="../bumblebee/renders/editorial-16x9.jpg" alt="">
+    <div class="audit">
+      <span class="lbl">Active retinal variables</span>
+      plane + size (wire weight) + value (sparkline peak) + color (accent) + color (warn)
+      <br><br>
+      <span class="lbl">Bertin verdict</span>
+      <span class="fail">FAIL · 4 active variables · figuration, not image</span>
+      <br><br>
+      <span class="lbl">Reading level</span>
+      Intermediate · requires sequential scan to parse the full story
+    </div>
+  </div>
+  <div class="cell">
+    <div class="meta"><b>Pipeline <em>Compact</em></b><span>image-grade · social card</span></div>
+    <img src="../bumblebee/renders/compact-editorial-16x9.jpg" alt="">
+    <div class="audit">
+      <span class="lbl">Active retinal variables</span>
+      plane + color (accent on Findings)
+      <br><br>
+      <span class="lbl">Bertin verdict</span>
+      <span class="pass">PASS · 1 active variable · within image limit</span>
+      <br><br>
+      <span class="lbl">Reading level</span>
+      Overall · the punchline (Findings) lands in ≤3 seconds
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="cell">
+    <div class="meta"><b>Full · 1:1 branded</b><span>blog embed</span></div>
+    <img src="../bumblebee/renders/branded-1x1.jpg" alt="">
+  </div>
+  <div class="cell">
+    <div class="meta"><b>Compact · 1:1 branded</b><span>X / LinkedIn card</span></div>
+    <img src="../bumblebee/renders/compact-branded-1x1.jpg" alt="">
+  </div>
+</div>
+
+</body></html>
