@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8" />
+<title>Schema · Editorial · 16:9</title>
+<link rel="stylesheet" href="../system/tokens.css">
+<link rel="stylesheet" href="../system/base.css">
+<link rel="stylesheet" href="../archetypes/schema.css">
+</head><body data-mode="editorial">
+<main id="target"></main>
+<script src="../system/render.js"></script>
+<script src="./data.js"></script>
+<script>
+const data = Object.assign({}, PPLX_PRODUCT_SURFACE, { aspect: '16:9', mode: 'editorial' });
+PPLXDiagram.renderSchema(data, document.getElementById('target'));
+</script>
+</body></html>

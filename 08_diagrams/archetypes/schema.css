@@ -1,0 +1,216 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Archetype S · Schema / Network
+   A bounded set of nodes with named relationships. Used for product
+   surface maps, system topology, dependency overviews.
+
+   Bertin posture:
+     - Position carries the structure (planar variables xy).
+     - Value (border weight / fill darkness) separates hub from leaf.
+     - One nominal variable: accent on the focal node (the announcement).
+     - No color-by-category. No size-by-traffic. No edge thickness gradients.
+       Total active retinal variables ≤ 3.
+
+   At 16:9 → hub-and-spokes layout, hub centered, 4 leaves on cardinal points
+            (or 6 around the rim if data demands).
+   At 1:1  → vertical stack of node bands, with rule lines as relations.
+   ───────────────────────────────────────────────────────────────────────── */
+
+.schema {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  position: relative;
+}
+
+/* ─── 16:9 hub-and-spokes ────────────────────────────────────────────────── */
+.surface[data-aspect="16:9"] .schema {
+  /* Single positioning surface. Children use absolute placement so the
+     wires layer can sit underneath and connect node centers without
+     fighting a flex/grid pass. */
+}
+
+.surface[data-aspect="16:9"] .schema .canvas {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 38cqi;          /* gives wires room at 16:9 */
+}
+
+/* Hub: bordered card, no fill weight, sits dead center */
+.s-hub {
+  position: absolute;
+  left: 50%;
+  top:  50%;
+  transform: translate(-50%, -50%);
+  width: 22cqi;
+  min-width: 230px;
+  background: var(--surface-1);
+  border: var(--stroke-2) solid var(--ink);
+  border-radius: var(--r-card);
+  padding: var(--s-4) var(--s-4);
+  display: grid;
+  gap: var(--s-2);
+  z-index: 2;
+  text-align: left;
+}
+.s-hub .name {
+  font-family: 'PPLX Sans';
+  font-variation-settings: 'wght' 700, 'slnt' 0;
+  font-size: calc(var(--t-title) * 0.84);
+  letter-spacing: -0.014em;
+  color: var(--ink);
+  line-height: 1.02;
+}
+.s-hub .meta {
+  font-family: 'PPLX Mono';
+  font-size: var(--t-micro);
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  line-height: 1;
+}
+.s-hub .deck {
+  font-family: 'PPLX Sans';
+  font-size: var(--t-body);
+  line-height: 1.45;
+  color: var(--ink-2);
+  max-width: 22ch;
+}
+
+/* Hub accent (focal — the announcement node) */
+.s-hub.accent {
+  border-color: var(--accent-border);
+}
+.s-hub.accent .name { color: var(--accent); }
+.s-hub.accent .meta { color: var(--accent); }
+
+/* Leaf nodes: smaller cards positioned around hub by data-pos */
+.s-leaf {
+  position: absolute;
+  width: 18cqi;
+  min-width: 180px;
+  background: var(--surface-1);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-card);
+  padding: var(--s-3) var(--s-3);
+  display: grid;
+  gap: 6px;
+  z-index: 2;
+}
+.s-leaf .name {
+  font-family: 'PPLX Sans';
+  font-variation-settings: 'wght' 600, 'slnt' 0;
+  font-size: var(--t-label);
+  color: var(--ink);
+  line-height: 1.15;
+}
+.s-leaf .meta {
+  font-family: 'PPLX Mono';
+  font-size: var(--t-micro);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  line-height: 1;
+}
+.s-leaf .sub {
+  font-family: 'PPLX Sans';
+  font-size: var(--t-utility);
+  color: var(--ink-2);
+  line-height: 1.35;
+  max-width: 24ch;
+}
+
+/* Cardinal positions for 4-leaf layout */
+.s-leaf[data-pos="N"]  { left: 50%; top:  3%;  transform: translateX(-50%); }
+.s-leaf[data-pos="E"]  { right: 1%; top: 50%; transform: translateY(-50%); }
+.s-leaf[data-pos="S"]  { left: 50%; bottom: 3%; transform: translateX(-50%); }
+.s-leaf[data-pos="W"]  { left: 1%;  top: 50%; transform: translateY(-50%); }
+
+/* Ordinal positions for 6-leaf layout (NE, SE, SW, NW + N, S) */
+.s-leaf[data-pos="NE"] { right: 4%; top:  6%; }
+.s-leaf[data-pos="SE"] { right: 4%; bottom: 6%; }
+.s-leaf[data-pos="SW"] { left:  4%; bottom: 6%; }
+.s-leaf[data-pos="NW"] { left:  4%; top:  6%; }
+
+/* Edge labels — sit on the line between hub and leaf */
+.s-edge-label {
+  position: absolute;
+  font-family: 'PPLX Mono';
+  font-variation-settings: 'wght' 500, 'slnt' 0;
+  font-size: var(--t-micro);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  background: var(--bg);
+  padding: 0.2em 0.6em;
+  z-index: 3;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* ─── 1:1 vertical stack ─────────────────────────────────────────────────── */
+.surface[data-aspect="1:1"] .schema {
+  grid-template-columns: 1fr;
+  grid-auto-rows: minmax(min-content, 1fr);
+  gap: var(--s-3);
+  align-content: stretch;
+}
+.surface[data-aspect="1:1"] .schema > .s-hub { align-self: start; }
+.surface[data-aspect="1:1"] .schema > .s-leaf { align-self: stretch; }
+.surface[data-aspect="1:1"] .schema .canvas {
+  display: contents;
+}
+.surface[data-aspect="1:1"] .s-hub {
+  position: static;
+  transform: none;
+  width: 100%;
+  min-width: 0;
+}
+.surface[data-aspect="1:1"] .s-leaf {
+  position: static;
+  transform: none;
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 9cqi 1fr;
+  align-items: center;
+  gap: var(--s-3);
+}
+.surface[data-aspect="1:1"] .s-leaf .sub {
+  max-width: 100%;
+}
+.surface[data-aspect="1:1"] .s-leaf::before {
+  /* a small rule marking the connection back to the hub */
+  content: "";
+  display: block;
+  width: 100%;
+  height: 1px;
+  background: var(--rule);
+  grid-column: 1 / -1;
+  margin-bottom: var(--s-2);
+}
+.surface[data-aspect="1:1"] .s-leaf:first-of-type::before { display: none; }
+.surface[data-aspect="1:1"] .s-edge-label {
+  position: static;
+  background: transparent;
+  padding: 0;
+  font-size: var(--t-micro);
+  color: var(--accent);
+  margin-top: 4px;
+}
+
+/* Edges drawn in wires SVG; default stroke */
+.s-wires {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+.s-wires path {
+  fill: none;
+  stroke: var(--wire);
+  stroke-width: var(--stroke-2);
+  stroke-linecap: round;
+}
+.s-wires path.accent { stroke: var(--accent-border); }

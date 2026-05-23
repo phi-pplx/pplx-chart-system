@@ -10,7 +10,7 @@ Audit documents live in [`../06_docs/`](../06_docs/).
 
 ---
 
-## Four archetypes built
+## Six archetypes built
 
 | Letter | Name | FT Visual Vocabulary | Real use |
 |---|---|---|---|
@@ -18,8 +18,10 @@ Audit documents live in [`../06_docs/`](../06_docs/).
 | **T** | Timeline | Chronology | Comet security journey · launch sequences · changelog narrative |
 | **H** | Stat Hero | Magnitude | BrowseSafe benchmark size · "200M queries" cards · Stripe Press-style numbers |
 | **C** | Comparison | Deviation / Ranking | BrowseComp · SimpleQA · FRAMES leaderboards · latency tables |
+| **S** | Schema | Network | Product surface map · system topology · dependency overview |
+| **D** | Decision | Branching logic | Computer task routing · triage tree · state machine |
 
-Three more planned, not yet built: **S** Stack (layered architecture · Comet four-layer defense), **G** Grid (capability matrix · connector catalog), **D** Decision (conditional flow · routing logic).
+Grid (G) intentionally omitted — categorical × categorical matrices fold into Comparison.
 
 ---
 
@@ -145,10 +147,13 @@ In Compact mode, the renderer strips all `weight` values before routing, so all 
 | Timeline | 14 pass · 1 N/A | Passes all 15 tests |
 | Stat Hero | 14 pass · 1 N/A | Passes all 15 tests |
 | Comparison | 14 pass · 2 N/A | Passes all 15 tests |
+| Schema (v0.2) | not yet | 13 pass · 1 partial · 2 N/A |
+| Decision (v0.2) | not yet | 14 pass · 1 N/A |
 
 Full audit documents:
-- [`audit-tufte-v01.md`](../06_docs/audit-tufte-v01.md) — 14-criterion framework + per-archetype grades
-- [`audit-bertin-v01.md`](../06_docs/audit-bertin-v01.md) — 15-criterion framework + per-archetype grades
+- [`audit-tufte-v01.md`](../06_docs/audit-tufte-v01.md) — 14-criterion framework + per-archetype grades for P/T/H/C
+- [`audit-bertin-v01.md`](../06_docs/audit-bertin-v01.md) — 15-criterion framework + per-archetype grades for P/T/H/C
+- [`audit-bertin-v02.md`](../06_docs/audit-bertin-v02.md) — Bertin audit for S and D
 - [`audit-tufte-mapping.md`](../06_docs/audit-tufte-mapping.md) — research → decisions traceability
 - [`audit-type-v01.md`](../06_docs/audit-type-v01.md) — computed-style type audit
 

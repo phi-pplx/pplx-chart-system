@@ -1,6 +1,6 @@
 {
   "name": "PPLX Chart System",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Perplexity's chart + diagram system. Two surfaces, one rulebook. Audited against Tufte and Bertin.",
   "updated": "2026-05-23",
   "base_url": "https://phi-pplx.github.io/pplx-chart-system",
@@ -392,7 +392,7 @@
   "diagrams": {
     "system_path": "08_diagrams/",
     "system_url": "https://phi-pplx.github.io/pplx-chart-system/08_diagrams/",
-    "description": "Announcement-diagram system. Companion to the chart system. Four archetypes built (Pipeline, Timeline, Stat Hero, Comparison), three pending (Stack, Grid, Decision).",
+    "description": "Announcement-diagram system. Companion to the chart system. Six archetypes built (Pipeline, Timeline, Stat Hero, Comparison, Schema, Decision). Grid (G) intentionally omitted — overlaps with Comparison.",
     "archetypes": {
       "P": {
         "name": "Pipeline",
@@ -421,11 +421,24 @@
         "ft_category": "deviation_ranking",
         "template_url": "https://phi-pplx.github.io/pplx-chart-system/08_diagrams/comparison/",
         "notes": "Sorted bars on common scale with CI. Bar widths exactly (value − scaleMin) / (scaleMax − scaleMin). Lie Factor = 1.0."
+      },
+      "S": {
+        "name": "Schema",
+        "ft_category": "network",
+        "template_url": "https://phi-pplx.github.io/pplx-chart-system/08_diagrams/schema/",
+        "notes": "Hub-and-spokes (16:9) or vertical relation stack (1:1). Edges drawn by wire-router, clipped to node rect edges. One accent on the focal hub only."
+      },
+      "D": {
+        "name": "Decision",
+        "ft_category": "branching_logic",
+        "template_url": "https://phi-pplx.github.io/pplx-chart-system/08_diagrams/decision/",
+        "notes": "Three columns: start | rail of binary checks | outcome. Chosen branches full opacity, alternates dimmed to 0.5. No hue-coded paths."
       }
     },
     "audits": {
       "tufte": "06_docs/audit-tufte-v01.md",
       "bertin": "06_docs/audit-bertin-v01.md",
+      "bertin_v02": "06_docs/audit-bertin-v02.md",
       "tufte_research_brief": "06_docs/research-tufte-canon.md",
       "bertin_research_brief": "06_docs/research-bertin-semiology.md",
       "tufte_mapping": "06_docs/audit-tufte-mapping.md",

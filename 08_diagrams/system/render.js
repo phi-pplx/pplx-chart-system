@@ -422,12 +422,231 @@
     return body;
   }
 
+  // ─── Schema / Network archetype ─────────────────────────────────────────
+  function renderSchema(data, target) {
+    target.innerHTML = '';
+    const surface = el('div', {
+      class: 'surface' + (data.preview ? ' preview' : ''),
+      'data-aspect': data.aspect || '16:9',
+      'data-mode': data.mode || 'editorial'
+    });
+    surface.appendChild(buildHead(data));
+
+    const body = el('div', { class: 'body schema' });
+    const aspect = data.aspect || '16:9';
+
+    if (aspect === '16:9') {
+      // hub-and-spokes layout
+      const canvas = el('div', { class: 'canvas' });
+
+      // SVG wires layer (drawn after layout via wire-router; we attach data attrs)
+      const wires = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      wires.setAttribute('class', 's-wires');
+      wires.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      wires.setAttribute('preserveAspectRatio', 'none');
+      canvas.appendChild(wires);
+
+      // Hub
+      const hub = el('div', { class: 's-hub' + (data.hub?.accent ? ' accent' : '') });
+      if (data.hub?.id) hub.dataset.nodeId = data.hub.id;
+      hub.appendChild(el('div', { class: 'name' }, data.hub?.name || ''));
+      if (data.hub?.meta) hub.appendChild(el('div', { class: 'meta' }, data.hub.meta));
+      if (data.hub?.deck) hub.appendChild(el('div', { class: 'deck' }, data.hub.deck));
+      canvas.appendChild(hub);
+
+      // Leaves
+      (data.leaves || []).forEach(l => {
+        const leaf = el('div', { class: 's-leaf' });
+        leaf.setAttribute('data-pos', l.pos || 'N');
+        if (l.id) leaf.dataset.nodeId = l.id;
+        leaf.appendChild(el('div', { class: 'name' }, l.name || ''));
+        if (l.meta) leaf.appendChild(el('div', { class: 'meta' }, l.meta));
+        if (l.sub)  leaf.appendChild(el('div', { class: 'sub' },  l.sub));
+        canvas.appendChild(leaf);
+      });
+
+      body.appendChild(canvas);
+
+      // Route wires hub↔leaf after layout settles
+      requestAnimationFrame(() => routeSchemaWires(canvas, hub, data));
+    } else {
+      // 1:1 vertical stack
+      const hub = el('div', { class: 's-hub' + (data.hub?.accent ? ' accent' : '') });
+      hub.appendChild(el('div', { class: 'name' }, data.hub?.name || ''));
+      if (data.hub?.meta) hub.appendChild(el('div', { class: 'meta' }, data.hub.meta));
+      if (data.hub?.deck) hub.appendChild(el('div', { class: 'deck' }, data.hub.deck));
+      body.appendChild(hub);
+
+      (data.leaves || []).forEach(l => {
+        const leaf = el('div', { class: 's-leaf' });
+        const labelCol = el('div');
+        labelCol.appendChild(el('div', { class: 'name' }, l.name || ''));
+        if (l.meta) labelCol.appendChild(el('div', { class: 'meta' }, l.meta));
+        if (l.edgeLabel) labelCol.appendChild(el('div', { class: 's-edge-label' }, l.edgeLabel));
+        const subCol = el('div');
+        if (l.sub) subCol.appendChild(el('div', { class: 'sub' }, l.sub));
+        leaf.appendChild(labelCol);
+        leaf.appendChild(subCol);
+        body.appendChild(leaf);
+      });
+    }
+
+    surface.appendChild(body);
+    surface.appendChild(buildFoot(data));
+    target.appendChild(surface);
+    return body;
+  }
+
+  function routeSchemaWires(canvas, hub, data) {
+    const svg = canvas.querySelector('svg.s-wires');
+    if (!svg) return;
+    const cRect = canvas.getBoundingClientRect();
+    svg.setAttribute('viewBox', `0 0 ${cRect.width} ${cRect.height}`);
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+    const hubRect = hub.getBoundingClientRect();
+    const hubCx = hubRect.left + hubRect.width / 2 - cRect.left;
+    const hubCy = hubRect.top  + hubRect.height / 2 - cRect.top;
+
+    (data.leaves || []).forEach(l => {
+      const leaf = canvas.querySelector(`.s-leaf[data-pos="${l.pos}"]`);
+      if (!leaf) return;
+      const lRect = leaf.getBoundingClientRect();
+      const lcx = lRect.left + lRect.width / 2 - cRect.left;
+      const lcy = lRect.top  + lRect.height / 2 - cRect.top;
+
+      // Compute attachment points on hub & leaf edges along the line.
+      const hAttach = clipToRect(hubCx, hubCy, lcx, lcy, hubRect, cRect);
+      const lAttach = clipToRect(lcx, lcy, hubCx, hubCy, lRect, cRect);
+
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      const d = `M ${hAttach.x} ${hAttach.y} L ${lAttach.x} ${lAttach.y}`;
+      path.setAttribute('d', d);
+      if (data.hub?.accent) path.setAttribute('class', 'accent');
+      svg.appendChild(path);
+
+      // Edge label centered on the line
+      if (l.edgeLabel) {
+        const midx = (hAttach.x + lAttach.x) / 2;
+        const midy = (hAttach.y + lAttach.y) / 2;
+        const lbl = el('div', { class: 's-edge-label' }, l.edgeLabel);
+        lbl.style.position = 'absolute';
+        lbl.style.left = midx + 'px';
+        lbl.style.top  = midy + 'px';
+        lbl.style.transform = 'translate(-50%, -50%)';
+        canvas.appendChild(lbl);
+      }
+    });
+
+    window.__wiresReady = true;
+  }
+
+  // Geometry: clip a line from (x1,y1) toward (x2,y2) at the edge of the
+  // rect's perimeter (in canvas coordinates).
+  function clipToRect(x1, y1, x2, y2, rect, canvasRect) {
+    const left   = rect.left   - canvasRect.left;
+    const top    = rect.top    - canvasRect.top;
+    const right  = left + rect.width;
+    const bottom = top  + rect.height;
+    const dx = x2 - x1, dy = y2 - y1;
+    if (dx === 0 && dy === 0) return { x: x1, y: y1 };
+
+    // Parametric line from (x1,y1) outward; find smallest t in [0,1] hitting an edge.
+    const ts = [];
+    if (dx !== 0) {
+      ts.push((left   - x1) / dx);
+      ts.push((right  - x1) / dx);
+    }
+    if (dy !== 0) {
+      ts.push((top    - y1) / dy);
+      ts.push((bottom - y1) / dy);
+    }
+    // Only consider intersections that land on the rectangle, not its extended lines.
+    let best = null;
+    for (const t of ts) {
+      if (t <= 0 || t > 1.5) continue;
+      const x = x1 + dx * t;
+      const y = y1 + dy * t;
+      if (x < left - 0.5 || x > right + 0.5)  continue;
+      if (y < top  - 0.5 || y > bottom + 0.5) continue;
+      if (best == null || t < best.t) best = { t, x, y };
+    }
+    return best ? { x: best.x, y: best.y } : { x: x1, y: y1 };
+  }
+
+  // ─── Decision archetype ─────────────────────────────────────────────────
+  function renderDecision(data, target) {
+    target.innerHTML = '';
+    const surface = el('div', {
+      class: 'surface' + (data.preview ? ' preview' : ''),
+      'data-aspect': data.aspect || '16:9',
+      'data-mode': data.mode || 'editorial'
+    });
+    surface.appendChild(buildHead(data));
+
+    const body = el('div', { class: 'body decision' });
+
+    // Start
+    const start = el('div', { class: 'd-start' });
+    if (data.start?.metaLabel || data.startLabel) {
+      start.appendChild(el('div', { class: 'col-label' }, data.startLabel || 'Start'));
+    } else {
+      start.appendChild(el('div', { class: 'col-label' }, 'Start'));
+    }
+    start.appendChild(el('div', { class: 'name' }, data.start?.name || ''));
+    if (data.start?.deck) start.appendChild(el('div', { class: 'deck' }, data.start.deck));
+    if (data.start?.meta) start.appendChild(el('div', { class: 'meta' }, data.start.meta));
+    body.appendChild(start);
+
+    // Rail of checks
+    const rail = el('div', { class: 'd-rail' });
+    rail.appendChild(el('div', { class: 'col-label' }, data.railLabel || 'Decisions'));
+    const checksWrap = el('div', { class: 'd-checks' });
+    (data.checks || []).forEach(check => {
+      const c = el('div', { class: 'd-check' });
+      c.appendChild(el('div', { class: 'q' }, check.q || ''));
+      const branches = el('div', { class: 'd-branches' });
+      (check.branches || []).forEach(b => {
+        const cls = ['d-branch'];
+        if (b.side === check.chosen) cls.push('chosen');
+        else cls.push('alt');
+        const bn = el('div', { class: cls.join(' ') });
+        if (b.tag) bn.appendChild(el('div', { class: 'tag' }, b.tag));
+        bn.appendChild(el('div', { class: 'lbl' }, b.lbl || ''));
+        if (b.sub) bn.appendChild(el('div', { class: 'sub' }, b.sub));
+        branches.appendChild(bn);
+      });
+      c.appendChild(branches);
+      checksWrap.appendChild(c);
+    });
+    rail.appendChild(checksWrap);
+    body.appendChild(rail);
+
+    // End
+    const end = el('div', { class: 'd-end' });
+    end.appendChild(el('div', { class: 'col-label' }, data.endLabel || 'Outcome'));
+    const outcome = el('div', { class: 'd-outcome' + (data.end?.accent ? ' accent' : '') });
+    outcome.appendChild(el('div', { class: 'name' }, data.end?.name || ''));
+    if (data.end?.meta) outcome.appendChild(el('div', { class: 'meta' }, data.end.meta));
+    if (data.end?.deck) outcome.appendChild(el('div', { class: 'deck' }, data.end.deck));
+    end.appendChild(outcome);
+    body.appendChild(end);
+
+    surface.appendChild(body);
+    surface.appendChild(buildFoot(data));
+    target.appendChild(surface);
+    window.__wiresReady = true;
+    return body;
+  }
+
   // Public
   window.PPLXDiagram = {
     renderPipeline,
     renderTimeline,
     renderStatHero,
     renderComparison,
+    renderSchema,
+    renderDecision,
     ICONS
   };
 })();

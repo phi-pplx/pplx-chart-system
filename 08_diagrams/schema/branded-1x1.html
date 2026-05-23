@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8" />
+<title>Schema · Branded · 1:1</title>
+<link rel="stylesheet" href="../system/tokens.css">
+<link rel="stylesheet" href="../system/base.css">
+<link rel="stylesheet" href="../archetypes/schema.css">
+</head><body data-mode="branded">
+<main id="target"></main>
+<script src="../system/render.js"></script>
+<script src="./data.js"></script>
+<script>
+const data = Object.assign({}, PPLX_PRODUCT_SURFACE, { aspect: '1:1', mode: 'branded' });
+PPLXDiagram.renderSchema(data, document.getElementById('target'));
+window.__wiresReady = true;
+</script>
+</body></html>

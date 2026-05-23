@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8" />
+<title>Decision · Branded · 1:1</title>
+<link rel="stylesheet" href="../system/tokens.css">
+<link rel="stylesheet" href="../system/base.css">
+<link rel="stylesheet" href="../archetypes/decision.css">
+</head><body data-mode="branded">
+<main id="target"></main>
+<script src="../system/render.js"></script>
+<script src="./data.js"></script>
+<script>
+const data = Object.assign({}, PPLX_COMPUTER_ROUTING, { aspect: '1:1', mode: 'branded' });
+PPLXDiagram.renderDecision(data, document.getElementById('target'));
+</script>
+</body></html>
