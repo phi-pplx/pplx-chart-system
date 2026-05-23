@@ -10,9 +10,21 @@
      - No color-by-category. No size-by-traffic. No edge thickness gradients.
        Total active retinal variables ≤ 3.
 
-   At 16:9 → hub-and-spokes layout, hub centered, 4 leaves on cardinal points
-            (or 6 around the rim if data demands).
-   At 1:1  → vertical stack of node bands, with rule lines as relations.
+   ─── Spatial grid contract ───────────────────────────────────────────────
+   The hub-and-spokes layout uses a 3×3 CSS Grid as its canvas.
+   The grid GAP is the channel — the air between hub and leaves.
+   This is the most important spacing decision in the archetype.
+
+     Grid columns:  [leaf-zone] [hub-zone] [leaf-zone]
+     Grid rows:     [leaf-zone] [hub-zone] [leaf-zone]
+     Grid gap:      --s-8 (80px) — non-negotiable channel
+     Outer padding: --s-7 (56px) — leaf-zone to canvas edge floor
+
+   Leaves slot into the perimeter cells. Hub sits in the center cell.
+   No manual top/left math. The grid gap guarantees uniform channels.
+
+   At 16:9 → standard 3×3 grid with E and W zones widest
+   At 1:1 → vertical stack: hub band on top, leaves stacked below
    ───────────────────────────────────────────────────────────────────────── */
 
 .schema {
@@ -20,61 +32,46 @@
   width: 100%;
   height: 100%;
   min-height: 0;
-  position: relative;
 }
 
-/* ─── 16:9 hub-and-spokes ────────────────────────────────────────────────── */
-.surface[data-aspect="16:9"] .schema {
-  /* Single positioning surface. Children use absolute placement so the
-     wires layer can sit underneath and connect node centers without
-     fighting a flex/grid pass. */
-}
-
-/* ─── Spacing contract for hub-and-spokes ────────────────────────────────
-   Roles for system spacing tokens in schema layout:
-     - Canvas inset (leaf edge → canvas edge):  --s-7 at 16:9, --s-5 at 1:1
-     - Hub inner padding:    --s-4 vertical, --s-5 horizontal
-     - Leaf inner padding:   --s-3 vertical, --s-4 horizontal
-     - Edge label padding:   --s-1 vertical, --s-2 horizontal
-   Leaf positions are pinned by token offset, not percent, so spacing
-   reads identically across aspect ratios. */
+/* ─── 16:9 hub-and-spokes via 3×3 grid ───────────────────────────────────── */
 .surface[data-aspect="16:9"] .schema .canvas {
-  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 22cqi 1fr;
+  grid-template-rows:    1fr auto    1fr;
+  grid-template-areas:
+    "nw  n   ne"
+    "w   hub e "
+    "sw  s   se";
+  gap: var(--s-8) var(--s-8);
+  padding: var(--s-6);
   width: 100%;
   height: 100%;
-  min-height: 38cqi;
-  --canvas-inset: var(--s-7);
-}
-.surface[data-aspect="1:1"] .schema .canvas,
-.surface[data-aspect="4:5"] .schema .canvas {
-  --canvas-inset: var(--s-5);
+  min-height: 52cqi;
 }
 
-/* Hub: bordered card, no fill weight, sits dead center.
-   Inner padding follows contract: --s-4 vertical, --s-5 horizontal. */
+/* Slot the hub into the center cell */
 .s-hub {
-  position: absolute;
-  left: 50%;
-  top:  50%;
-  transform: translate(-50%, -50%);
-  width: 22cqi;
-  min-width: 240px;
+  grid-area: hub;
   background: var(--surface-1);
   border: var(--stroke-2) solid var(--ink);
   border-radius: var(--r-card);
   padding: var(--s-4) var(--s-5);
   display: grid;
   gap: var(--s-2);
+  align-content: center;
   z-index: 2;
-  text-align: left;
+  min-width: 0;
+  max-width: 100%;
 }
+
 .s-hub .name {
   font-family: 'PPLX Sans';
   font-variation-settings: 'wght' 700, 'slnt' 0;
   font-size: calc(var(--t-title) * 0.84);
   letter-spacing: -0.014em;
   color: var(--ink);
-  line-height: 1.02;
+  line-height: 1.05;
 }
 .s-hub .meta {
   font-family: 'PPLX Mono';
@@ -83,6 +80,7 @@
   text-transform: uppercase;
   color: var(--ink-2);
   line-height: 1;
+  margin-top: var(--s-1);
 }
 .s-hub .deck {
   font-family: 'PPLX Sans';
@@ -90,27 +88,24 @@
   line-height: 1.45;
   color: var(--ink-2);
   margin-top: var(--s-2);
+  max-width: 32ch;
 }
 
-/* Hub accent (focal — the announcement node) */
-.s-hub.accent {
-  border-color: var(--accent-border);
-}
+.s-hub.accent { border-color: var(--accent-border); }
 .s-hub.accent .name { color: var(--accent); }
 .s-hub.accent .meta { color: var(--accent); }
 
-/* Leaf nodes: smaller cards positioned around hub by data-pos.
-   Inner padding follows contract: --s-3 vertical, --s-4 horizontal. */
+/* Slot leaves into the cardinal cells.
+   Each leaf gets its own grid cell — sized to its content. */
 .s-leaf {
-  position: absolute;
-  width: 18cqi;
-  min-width: 220px;
   background: var(--surface-1);
   border: 1px solid var(--rule);
   border-radius: var(--r-card);
   padding: var(--s-3) var(--s-4);
   display: grid;
   gap: 6px;
+  align-content: center;
+  min-width: 0;
   z-index: 2;
 }
 .s-leaf .name {
@@ -118,12 +113,12 @@
   font-variation-settings: 'wght' 600, 'slnt' 0;
   font-size: var(--t-label);
   color: var(--ink);
-  line-height: 1.15;
+  line-height: 1.2;
 }
 .s-leaf .meta {
   font-family: 'PPLX Mono';
   font-size: var(--t-micro);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.10em;
   text-transform: uppercase;
   color: var(--ink-3);
   line-height: 1;
@@ -132,25 +127,29 @@
   font-family: 'PPLX Sans';
   font-size: var(--t-utility);
   color: var(--ink-2);
-  line-height: 1.35;
-  max-width: 24ch;
+  line-height: 1.4;
+  margin-top: 2px;
 }
 
-/* Cardinal positions: leaf pinned --canvas-inset from its edge.
-   Token-based, identical across aspect ratios. */
-.s-leaf[data-pos="N"]  { left: 50%;                    top:    var(--canvas-inset); transform: translateX(-50%); }
-.s-leaf[data-pos="E"]  { right:    var(--canvas-inset); top: 50%;                    transform: translateY(-50%); }
-.s-leaf[data-pos="S"]  { left: 50%;                    bottom: var(--canvas-inset); transform: translateX(-50%); }
-.s-leaf[data-pos="W"]  { left:     var(--canvas-inset); top: 50%;                    transform: translateY(-50%); }
+/* Cardinal slot mapping. Each leaf takes one grid cell. */
+.s-leaf[data-pos="N"]  { grid-area: n;  justify-self: center; }
+.s-leaf[data-pos="E"]  { grid-area: e;  align-self: center; justify-self: start; }
+.s-leaf[data-pos="S"]  { grid-area: s;  justify-self: center; }
+.s-leaf[data-pos="W"]  { grid-area: w;  align-self: center; justify-self: end; }
 
-/* Ordinal positions for 6-leaf layout */
-.s-leaf[data-pos="NE"] { right:    var(--canvas-inset); top:    var(--canvas-inset); }
-.s-leaf[data-pos="SE"] { right:    var(--canvas-inset); bottom: var(--canvas-inset); }
-.s-leaf[data-pos="SW"] { left:     var(--canvas-inset); bottom: var(--canvas-inset); }
-.s-leaf[data-pos="NW"] { left:     var(--canvas-inset); top:    var(--canvas-inset); }
+/* For 6-leaf layouts, the four corners get used; N/S/E/W cells are no-ops */
+.s-leaf[data-pos="NW"] { grid-area: nw; align-self: end;   justify-self: end;   }
+.s-leaf[data-pos="NE"] { grid-area: ne; align-self: end;   justify-self: start; }
+.s-leaf[data-pos="SW"] { grid-area: sw; align-self: start; justify-self: end;   }
+.s-leaf[data-pos="SE"] { grid-area: se; align-self: start; justify-self: start; }
 
-/* Edge labels — sit on the line between hub and leaf. Knockout bg with
-   token-based padding so the label clears the wire predictably. */
+/* Sized leaves: cap width so they don't grow past their zone */
+.surface[data-aspect="16:9"] .s-leaf[data-pos="N"],
+.surface[data-aspect="16:9"] .s-leaf[data-pos="S"]  { width: 26cqi; max-width: 320px; }
+.surface[data-aspect="16:9"] .s-leaf[data-pos="E"],
+.surface[data-aspect="16:9"] .s-leaf[data-pos="W"]  { width: 20cqi; max-width: 280px; }
+
+/* Edge labels: sit on the connector line in the channel zone */
 .s-edge-label {
   position: absolute;
   font-family: 'PPLX Mono';
@@ -164,63 +163,10 @@
   z-index: 3;
   line-height: 1;
   white-space: nowrap;
+  border-radius: 2px;
 }
 
-/* ─── 1:1 vertical stack ─────────────────────────────────────────────────── */
-.surface[data-aspect="1:1"] .schema {
-  grid-template-columns: 1fr;
-  grid-auto-rows: max-content;
-  gap: var(--s-4);
-  align-content: center;
-}
-.surface[data-aspect="1:1"] .schema > .s-hub { align-self: start; }
-.surface[data-aspect="1:1"] .schema .canvas {
-  display: contents;
-}
-.surface[data-aspect="1:1"] .s-hub {
-  position: static;
-  transform: none;
-  width: 100%;
-  min-width: 0;
-}
-.surface[data-aspect="1:1"] .s-leaf {
-  position: static;
-  transform: none;
-  width: 100%;
-  min-width: 0;
-  display: grid;
-  grid-template-columns: 9cqi 1fr;
-  align-items: start;
-  align-content: start;
-  gap: var(--s-3);
-  padding: var(--s-4) var(--s-3) var(--s-3);
-  position: relative;
-}
-.surface[data-aspect="1:1"] .s-leaf .sub {
-  max-width: 100%;
-}
-.surface[data-aspect="1:1"] .s-leaf::before {
-  /* a small rule marking the connection back to the hub.
-     Anchored to the top edge of the band, not a row in the grid. */
-  content: "";
-  position: absolute;
-  left: var(--s-3);
-  right: var(--s-3);
-  top: 0;
-  height: 1px;
-  background: var(--rule);
-}
-.surface[data-aspect="1:1"] .s-leaf:first-of-type::before { display: none; }
-.surface[data-aspect="1:1"] .s-edge-label {
-  position: static;
-  background: transparent;
-  padding: 0;
-  font-size: var(--t-micro);
-  color: var(--accent);
-  margin-top: 4px;
-}
-
-/* Edges drawn in wires SVG; default stroke */
+/* Wires layer — absolute over the canvas grid */
 .s-wires {
   position: absolute;
   inset: 0;
@@ -234,3 +180,79 @@
   stroke-linecap: round;
 }
 .s-wires path.accent { stroke: var(--accent-border); }
+
+.surface[data-aspect="16:9"] .schema .canvas {
+  position: relative;  /* anchor for absolute wires + labels */
+}
+
+/* ─── 1:1 / 4:5 vertical stack ────────────────────────────────────────────
+   Different geometry from 16:9: hub becomes a top band, leaves stack as
+   bordered cards below. The canvas itself owns the stack layout. */
+.surface[data-aspect="1:1"] .schema .canvas,
+.surface[data-aspect="4:5"] .schema .canvas {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto;
+  grid-template-areas: none;
+  grid-auto-rows: max-content;
+  gap: var(--s-3);
+  align-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 0;
+}
+.surface[data-aspect="1:1"] .s-hub,
+.surface[data-aspect="1:1"] .s-leaf,
+.surface[data-aspect="4:5"] .s-hub,
+.surface[data-aspect="4:5"] .s-leaf {
+  grid-area: auto;
+  justify-self: stretch;
+  align-self: auto;
+}
+
+.surface[data-aspect="1:1"] .s-hub,
+.surface[data-aspect="4:5"] .s-hub {
+  width: 100%;
+  padding: var(--s-4) var(--s-5);
+  display: grid;
+  gap: var(--s-1);
+  align-content: center;
+  margin-bottom: var(--s-3);
+}
+.surface[data-aspect="1:1"] .s-hub .deck,
+.surface[data-aspect="4:5"] .s-hub .deck { max-width: 100%; }
+
+.surface[data-aspect="1:1"] .s-leaf,
+.surface[data-aspect="4:5"] .s-leaf {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 14cqi 1fr;
+  align-items: start;
+  column-gap: var(--s-4);
+  row-gap: var(--s-1);
+  padding: var(--s-4) var(--s-4);
+  position: relative;
+  justify-self: stretch;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-card);
+  background: var(--surface-1);
+}
+.surface[data-aspect="1:1"] .s-leaf .name,
+.surface[data-aspect="4:5"] .s-leaf .name { line-height: 1.2; }
+.surface[data-aspect="1:1"] .s-leaf .sub,
+.surface[data-aspect="4:5"] .s-leaf .sub { max-width: 100%; padding-top: 2px; }
+
+.surface[data-aspect="1:1"] .s-leaf::before,
+.surface[data-aspect="4:5"] .s-leaf::before { display: none; }
+
+.surface[data-aspect="1:1"] .s-edge-label,
+.surface[data-aspect="4:5"] .s-edge-label {
+  position: static;
+  background: transparent;
+  padding: 0;
+  font-size: var(--t-micro);
+  color: var(--accent);
+  margin-top: var(--s-1);
+  letter-spacing: 0.10em;
+}

@@ -470,12 +470,14 @@
       // Route wires hub↔leaf after layout settles
       requestAnimationFrame(() => routeSchemaWires(canvas, hub, data));
     } else {
-      // 1:1 vertical stack
+      // 1:1 / 4:5 vertical stack — same canvas wrapper as 16:9 so CSS
+      // targets the same selector chain.
+      const canvas = el('div', { class: 'canvas' });
       const hub = el('div', { class: 's-hub' + (data.hub?.accent ? ' accent' : '') });
       hub.appendChild(el('div', { class: 'name' }, data.hub?.name || ''));
       if (data.hub?.meta) hub.appendChild(el('div', { class: 'meta' }, data.hub.meta));
       if (data.hub?.deck) hub.appendChild(el('div', { class: 'deck' }, data.hub.deck));
-      body.appendChild(hub);
+      canvas.appendChild(hub);
 
       (data.leaves || []).forEach(l => {
         const leaf = el('div', { class: 's-leaf' });
@@ -487,8 +489,9 @@
         if (l.sub) subCol.appendChild(el('div', { class: 'sub' }, l.sub));
         leaf.appendChild(labelCol);
         leaf.appendChild(subCol);
-        body.appendChild(leaf);
+        canvas.appendChild(leaf);
       });
+      body.appendChild(canvas);
     }
 
     surface.appendChild(body);

@@ -75,20 +75,25 @@ Bright variants used for graphical fills (≥3:1 required per WCAG 2.2 SC 1.4.11
 ### Spacing
 Locked scale: `4 · 8 · 14 · 20 · 28 · 40 · 56 · 80 · 112`.
 
-Every archetype defines its **spacing contract** — explicit token roles for the layout. The contract is documented in the archetype's CSS and is non-negotiable. Example (Schema):
+Every archetype defines its **spacing contract** — explicit token roles for the layout. The contract is documented in the archetype's CSS and is non-negotiable. Example (Schema, 16:9):
 
-| Role | 16:9 | 1:1 / 4:5 |
+| Role | Token | Value |
 |---|---|---|
-| Canvas inset (node edge → canvas edge) | `--s-7` (56px) | `--s-5` (28px) |
-| Hub inner padding (vertical, horizontal) | `--s-4`, `--s-5` | same |
-| Leaf inner padding (vertical, horizontal) | `--s-3`, `--s-4` | same |
-| Edge label padding (vertical, horizontal) | `--s-1`, `--s-2` | same |
+| Hub↔leaf channel (the air a wire crosses) | `--s-8` | 80px |
+| Canvas outer padding | `--s-6` | 40px |
+| Hub inner padding (v, h) | `--s-4`, `--s-5` | 20px, 28px |
+| Leaf inner padding (v, h) | `--s-3`, `--s-4` | 14px, 20px |
+| Edge label padding (v, h) | `--s-1`, `--s-2` | 4px, 8px |
+
+**Layout strategy: use CSS Grid for spatial structure, not absolute positioning.** Schema 16:9 uses a 3×3 grid with `grid-template-areas` for cardinal positions. The grid `gap` IS the channel, which guarantees uniform spacing on all sides. No manual `top/left/right/bottom` calculations.
 
 **Spacing rules baked into every archetype:**
-1. **Never use percent for node positioning.** Always token-based offsets so spacing reads identically across aspect ratios.
-2. **Canvas inset is the floor for any node-to-edge distance.** A node sitting `3%` from the canvas edge at 1080px is 32px — below the spacing scale. Use `--s-5` or larger.
-3. **Inner padding always uses two distinct tokens.** Vertical and horizontal padding are usually different. Equal padding is the exception, not the default.
-4. **Edge labels need explicit clearance.** They sit on top of wires and need a knockout background with token-based padding so they clear cleanly.
+1. **Never use percent for inter-node positioning.** Percent of canvas height varies with aspect ratio. Use grid gaps or token-based offsets.
+2. **The channel (hub↔leaf gap) is the most important spacing decision.** It must be visible, consistent on all sides, and large enough that wires read as connectors not ticks. Floor: `--s-8` (80px).
+3. **Canvas outer padding is a separate token from the channel.** The leaf-to-canvas-edge distance is its own concern; don't conflate it with the channel.
+4. **Inner padding always uses two distinct tokens.** Vertical and horizontal padding usually differ. Equal padding is the exception, not the default.
+5. **Edge labels need explicit clearance.** They sit on top of wires; use knockout background with token-based padding so they clear the wire cleanly.
+6. **Hub footprint must allow the channel to exist.** If hub width + 2×(channel + leaf width) > canvas width, the channel collapses. Cap hub width at `~22cqi` and leaves at `~18cqi` at 16:9.
 
 ### Type ramp (clamped)
 | Token | clamp() | Used for |
