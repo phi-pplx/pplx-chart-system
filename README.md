@@ -57,6 +57,12 @@ SVG of the symbol. Always 36×36 absolute top-right on data cards.
 ### `07_research-blog-refs/` — source figures
 The actual research.perplexity.ai chart figures we modeled the research variant on. Source: "Advancing Search-Augmented Language Models", April 2026.
 
+### `08_diagrams/` — announcement diagram archetypes
+Six diagram archetypes built on the same spacing contract as the charts: Pipeline, Timeline, Stat Hero, Comparison, Schema, Decision. Each has editorial + branded variants at 16:9 and 1:1. Audited against Tufte and Bertin.
+
+### `09_toolkit/` — research toolkit landing page
+A simple landing page for anyone at Perplexity making charts. Covers why the system exists, what bad looks like (with side-by-side before/after of real shipped work), four core rules from Tufte and Bertin, the three starting templates, and the audit harness that catches sub-floor spacing. Lives at [phi-pplx.github.io/pplx-chart-system/09_toolkit/](https://phi-pplx.github.io/pplx-chart-system/09_toolkit/).
+
 ---
 
 ## How to use this

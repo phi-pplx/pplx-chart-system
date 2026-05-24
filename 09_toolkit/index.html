@@ -1,0 +1,739 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chart toolkit · Perplexity</title>
+<meta name="description" content="Honest defaults for the charts you put in research blog posts, decks, and launch pages. Built so nobody has to become a data-viz expert to ship something decent.">
+
+<style>
+/* ====================================================================
+   Page inherits the chart-base contract.
+   Same spacing scale, same Comet palette, same fonts, same grid-stack.
+   The only difference: section→section rhythm is --s-7 (page) instead
+   of --s-5 (chart). Page rhythm is slower than chart rhythm.
+   ==================================================================== */
+
+:root {
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 14px;
+  --s-4: 20px;   /* FLOOR for layout gaps */
+  --s-5: 28px;
+  --s-6: 40px;
+  --s-7: 56px;
+  --s-8: 80px;
+  --s-9: 112px;
+
+  --bg: #000000;
+  --surface: #0a0a0a;
+  --border: #1f1f1f;
+  --rule: #1a1a1a;
+  --text: #e8e8e8;
+  --text-dim: #8a8a8a;
+  --text-muted: #6a6a6a;
+
+  --hero:    #35bec8;   /* teal 300 */
+  --extreme: #dd54ac;   /* magenta 400 */
+  --cool:    #7284e6;   /* indigo 400 */
+  --neutral: #d4cdc1;   /* warm grey */
+}
+
+@font-face {
+  font-family: 'PPLX Sans';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: block;
+  font-synthesis: none;
+  src: url('../04_brand/fonts/PPLX-Sans-Beta-v2-VF.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'PPLX Mono';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: block;
+  font-synthesis: none;
+  src: url('../04_brand/fonts/PPLX-Mono-Beta-v0-VF.woff2') format('woff2');
+}
+
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+}
+body {
+  font-family: 'PPLX Sans', -apple-system, system-ui, sans-serif;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+  line-height: 1.5;
+}
+
+/* ────── Page · grid-stack, same pattern as .frame ────── */
+.page {
+  max-width: 1316px;
+  margin: 0 auto;
+  padding: var(--s-9) var(--s-6) var(--s-7);
+  display: grid;
+  row-gap: var(--s-9);
+}
+
+/* ────── Hero ────── */
+.hero {
+  display: grid;
+  row-gap: var(--s-5);
+}
+.eyebrow {
+  font-family: 'PPLX Mono', ui-monospace, monospace;
+  font-size: 14px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin: 0;
+}
+.h1 {
+  font-family: 'PPLX Mono', ui-monospace, monospace;
+  font-variation-settings: 'wght' 520, 'slnt' 0;
+  font-size: 44px;
+  line-height: 1.1;
+  letter-spacing: -0.012em;
+  color: var(--text);
+  margin: 0;
+  max-width: 24ch;
+}
+.h1 .accent { color: var(--hero); }
+.lede {
+  font-size: 20px;
+  line-height: 1.5;
+  color: var(--text-dim);
+  margin: 0;
+  max-width: 56ch;
+}
+
+/* ────── Section heading ────── */
+.section {
+  display: grid;
+  row-gap: var(--s-6);
+}
+/* Section-head bottom rule is constrained to a reading-width so it
+   doesn't run all the way across at full viewport. The rule sits
+   visually anchored to the content it introduces. */
+.section-head {
+  display: grid;
+  row-gap: var(--s-4);
+  padding-bottom: var(--s-4);
+  position: relative;
+}
+.section-head::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--rule);
+  max-width: 960px;
+}
+.section-tag {
+  font-family: 'PPLX Mono', ui-monospace, monospace;
+  font-size: 14px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0;
+}
+.h2 {
+  font-family: 'PPLX Mono', ui-monospace, monospace;
+  font-variation-settings: 'wght' 520, 'slnt' 0;
+  font-size: 28px;
+  line-height: 1.15;
+  letter-spacing: -0.005em;
+  color: var(--text);
+  margin: 0;
+}
+
+/* Body prose */
+.prose { display: grid; row-gap: var(--s-4); max-width: 72ch; }
+.prose p { margin: 0; font-size: 17px; line-height: 1.6; color: var(--text); }
+.prose p.dim { color: var(--text-dim); }
+.prose strong { color: var(--text); font-variation-settings: 'wght' 600, 'slnt' 0; }
+.prose code, code.inline {
+  font-family: 'PPLX Mono', ui-monospace, monospace;
+  font-size: 0.92em;
+  background: var(--surface);
+  padding: 2px 8px;
+  border-radius: 3px;
+  color: var(--neutral);
+  border: 1px solid var(--border);
+}
+.prose a, a.inline {
+  color: var(--hero);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(53, 190, 200, 0.3);
+}
+.prose a:hover { border-bottom-color: var(--hero); }
+
+/* ────── Before/after pair · 2-col with --s-6 column-gap ────── */
+.pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: var(--s-6);
+  row-gap: var(--s-5);
+}
+.pair-card { display: grid; row-gap: var(--s-4); }
+.pair-card.full { grid-column: 1 / -1; }
+.pair-label {
+  font-family: 'PPLX Mono', ui-monospace, monospace;
+  font-size: 14px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.pair-label.bad  { color: var(--extreme); }
+.pair-label.good { color: var(--hero); }
+.pair-label::before {
+  content: "";
+  width: 8px; height: 8px;
+  border-radius: 1px;
+  background: currentColor;
+}
+.pair-img {
+  width: 100%;
+  display: block;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+}
+.pair-caption {
+  font-family: 'PPLX Mono', ui-monospace, monospace;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-dim);
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+
+/* ────── Four-rules grid · 2x2 ────── */
+.rules {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: var(--s-6);
+  row-gap: var(--s-6);
+}
+.rule {
+  display: grid;
+  row-gap: var(--s-4);
+  padding: var(--s-5);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  border-left: 3px solid var(--hero);
+}
+.rule:nth-child(2) { border-left-color: var(--cool); }
+.rule:nth-child(3) { border-left-color: var(--neutral); }
+.rule:nth-child(4) { border-left-color: var(--extreme); }
+.rule-num {
+  font-family: 'PPLX Mono', ui-monospace, monospace;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0;
+}
+.rule-h {
+  font-family: 'PPLX Mono', ui-monospace, monospace;
+  font-variation-settings: 'wght' 520, 'slnt' 0;
+  font-size: 19px;
+  line-height: 1.25;
+  color: var(--text);
+  margin: 0;
+}
+.rule-body {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text-dim);
+  margin: 0;
+}
+.rule-source {
+  font-family: 'PPLX Mono', ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ────── Chart catalog · 3 cards ────── */
+.catalog {
+  display: grid;
+  grid-template-columns: 1fr;
+  row-gap: var(--s-6);
+}
+.cat-card {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  column-gap: var(--s-6);
+  align-items: center;   /* center the text column vertically vs the chart image */
+  padding: var(--s-5);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.cat-img {
+  width: 100%;
+  border-radius: 4px;
+  display: block;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+.cat-meta { display: grid; row-gap: var(--s-4); align-content: start; }
+.cat-name {
+  font-family: 'PPLX Mono', ui-monospace, monospace;
+  font-variation-settings: 'wght' 520, 'slnt' 0;
+  font-size: 22px;
+  color: var(--text);
+  margin: 0;
+}
+.cat-use {
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text-dim);
+  margin: 0;
+}
+.cat-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-4);
+  margin-top: var(--s-2);
+}
+.cat-links a {
+  font-family: 'PPLX Mono', ui-monospace, monospace;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: var(--text);
+  text-decoration: none;
+  padding: var(--s-2) var(--s-4);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+}
+.cat-links a:hover {
+  border-color: var(--hero);
+  color: var(--hero);
+}
+
+/* ────── Audit verdict block ────── */
+.verdict {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: var(--s-6);
+  display: grid;
+  row-gap: var(--s-4);
+}
+.verdict-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto auto;
+  column-gap: var(--s-5);
+  align-items: center;
+  padding: var(--s-3) 0;
+  font-family: 'PPLX Mono', ui-monospace, monospace;
+  font-size: 15px;
+}
+.verdict-row + .verdict-row { border-top: 1px solid var(--rule); }
+.verdict-row.head {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.verdict-name { color: var(--text); }
+.verdict-pass { color: var(--hero); }
+.verdict-zero { color: var(--hero); }
+.verdict-warn { color: var(--text-dim); }
+.verdict-num  { color: var(--text); }
+
+/* ────── Footer ────── */
+.footer {
+  padding-top: var(--s-5);
+  border-top: 1px solid var(--rule);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: var(--s-6);
+  row-gap: var(--s-4);
+  font-family: 'PPLX Mono', ui-monospace, monospace;
+  font-size: 14px;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+}
+.footer-col { display: grid; row-gap: var(--s-4); }
+.footer-col .label {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.footer-col a {
+  color: var(--text-dim);
+  text-decoration: none;
+}
+.footer-col a:hover { color: var(--hero); }
+
+/* Paths · 3-card column */
+.paths {
+  display: grid;
+  grid-template-columns: 1fr;
+  row-gap: var(--s-5);
+}
+.path {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  column-gap: var(--s-6);
+  align-items: baseline;
+  padding: var(--s-5);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  border-left: 3px solid var(--hero);
+}
+.path:nth-child(2) { border-left-color: var(--cool); }
+.path:nth-child(3) { border-left-color: var(--neutral); }
+.path-tag {
+  font-family: 'PPLX Mono', ui-monospace, monospace;
+  font-size: 14px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0;
+  align-self: start;
+  padding-top: 2px;
+}
+.path-h {
+  font-family: 'PPLX Mono', ui-monospace, monospace;
+  font-variation-settings: 'wght' 520, 'slnt' 0;
+  font-size: 18px;
+  color: var(--text);
+  margin: 0 0 var(--s-3) 0;
+  line-height: 1.3;
+  grid-column: 2;
+  grid-row: 1;
+}
+.path-body {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text-dim);
+  margin: 0;
+  grid-column: 2;
+  grid-row: 2;
+}
+.path-body code {
+  font-family: 'PPLX Mono', ui-monospace, monospace;
+  font-size: 0.92em;
+  background: var(--bg);
+  padding: 1px 6px;
+  border-radius: 3px;
+  color: var(--neutral);
+  border: 1px solid var(--border);
+}
+
+/* Mark in top right */
+.mark {
+  position: fixed;
+  top: var(--s-6);
+  right: var(--s-6);
+  width: 36px;
+  height: 36px;
+  color: var(--text-dim);
+  z-index: 100;
+}
+.mark svg { width: 100%; height: 100%; display: block; }
+
+/* Small responsive — collapse pair and rules to single column on narrow viewports.
+   The internal cards still hold their grid contracts. */
+@media (max-width: 880px) {
+  .pair { grid-template-columns: 1fr; }
+  .rules { grid-template-columns: 1fr; }
+  .cat-card { grid-template-columns: 1fr; }
+  .h1 { font-size: 32px; }
+  .h2 { font-size: 22px; }
+  .page { padding: var(--s-7) var(--s-5) var(--s-6); row-gap: var(--s-7); }
+}
+</style>
+</head>
+<body>
+
+<svg class="mark" viewBox="0 0 254 275" xmlns="http://www.w3.org/2000/svg" aria-label="Perplexity">
+  <path d="M207.649 2.21927C209.816 0.0528457 213.075 -0.595764 215.905 0.576694C218.736 1.74918 220.581 4.5119 220.581 7.57572V86.2554H245.452C249.636 86.2557 253.027 89.6472 253.027 93.8306V202.187C253.027 206.371 249.636 209.762 245.452 209.762H220.581V267.043C220.581 270.107 218.735 272.87 215.904 274.043C213.074 275.215 209.816 274.566 207.649 272.4L134.091 198.841V267.085C134.091 271.268 130.699 274.66 126.516 274.66C122.332 274.66 118.94 271.268 118.94 267.085V198.842L45.3828 272.4C43.2164 274.566 39.9585 275.215 37.1279 274.043C34.2973 272.87 32.4512 270.107 32.4512 267.043V209.762H7.5752C3.39155 209.762 2.88624e-05 206.371 0 202.187V93.8306C6.59711e-05 89.647 3.39158 86.2554 7.5752 86.2554H32.4512V7.57572C32.4512 4.51189 34.2973 1.74917 37.1279 0.576694C39.9584 -0.595448 43.2165 0.0529879 45.3828 2.21927L118.94 75.7769V7.57572C118.94 3.39212 122.332 0.000522602 126.516 0.000522602C130.699 0.000522602 134.091 3.39212 134.091 7.57572V75.7769L207.649 2.21927ZM47.6016 173.175V248.755L118.94 177.417V110.757L47.6016 173.175ZM134.091 177.416L205.431 248.755V202.303C205.43 202.265 205.428 202.226 205.428 202.187C205.428 202.148 205.43 202.109 205.431 202.07V173.175L134.091 110.757V177.416ZM217.993 164.037C219.637 165.475 220.581 167.553 220.581 169.738V194.612H237.877V101.406H146.411L217.993 164.037ZM15.1504 194.612H32.4512V169.738C32.4512 167.553 33.3941 165.475 35.0381 164.037L106.621 101.406H15.1504V194.612ZM47.6016 86.2554H107.993L47.6016 25.8638V86.2554ZM145.04 86.2554H205.431V25.8638L145.04 86.2554Z" fill="currentColor"/>
+</svg>
+
+<main class="page">
+
+  <!-- ─────────── HERO ─────────── -->
+  <section class="hero">
+    <p class="eyebrow">Chart toolkit · for anyone making charts at Perplexity</p>
+    <h1 class="h1">Charts that <span class="accent">don't embarrass us</span> when we ship them.</h1>
+    <p class="lede">A small set of charts and diagrams, designed against Tufte and Bertin, with the spacing audit baked in. Use them. Remix them. If something's broken, tell me and I'll fix the system.</p>
+  </section>
+
+  <!-- ─────────── WHY ─────────── -->
+  <section class="section">
+    <header class="section-head">
+      <p class="section-tag">01 · Why this exists</p>
+      <h2 class="h2">Most chart mistakes are repeatable. Most are also invisible to the person making them.</h2>
+    </header>
+    <div class="prose">
+      <p>We ship a lot of charts. Blog posts, social cards, decks, launch pages. Until last week the chart on each one was a one-off built from scratch, which meant whoever made it had to re-decide every visual question from zero. Some of those decisions went well. Many didn't. Hue-coded sequential data, color carrying both category and intensity, four retinal variables stacked on one diagram, spacing that wandered between five and eighteen pixels with no consistent reason.</p>
+      <p>None of this is malicious. The rules that catch it live in books most of us haven't read. So the goal of this page isn't to teach you Tufte or Bertin. It's to take what's in their books, what we've learned shipping real work, and turn it into defaults you can grab without becoming a data-viz expert.</p>
+      <p class="dim">Three charts, six diagrams, two audit frameworks. That's the system today. It's not finished. But it's enough to keep us from shipping the same five mistakes over and over.</p>
+    </div>
+  </section>
+
+  <!-- ─────────── BAD GRAPHS ─────────── -->
+  <section class="section">
+    <header class="section-head">
+      <p class="section-tag">02 · What bad looks like</p>
+      <h2 class="h2">You can't avoid mistakes you can't name. So here are the ones we've actually made.</h2>
+    </header>
+
+    <div class="prose">
+      <p>Each pair below is a real chart we shipped (or almost shipped) and the corrected version. The point isn't to dunk on the original. The point is that the failure modes are <strong>structural</strong>, not aesthetic. Once you see them, you can't unsee them.</p>
+    </div>
+
+    <!-- ============ Pair 1: Bumblebee ============ -->
+    <div class="pair">
+      <div class="pair-card">
+        <p class="pair-label bad">Before · shipped on launch day</p>
+        <img class="pair-img" src="assets/bumblebee.original.jpg" alt="Original Bumblebee pipeline diagram with crowded steps and unclear flow">
+        <p class="pair-caption">The original. Five steps cluttered into a single horizontal band. No clear hierarchy between the action (scanning) and the outcome (the block). Bertin: 4 retinal variables active at once (color, size, position, and outline weight), which exceeds the image limit of 3.</p>
+      </div>
+      <div class="pair-card">
+        <p class="pair-label good">After · same data, rebuilt</p>
+        <img class="pair-img" src="assets/bumblebee.rebuilt.jpg" alt="Rebuilt Bumblebee pipeline diagram with clear vertical flow and one accent">
+        <p class="pair-caption">The rebuild. Position carries the flow (left to right is time). Value (border weight) separates the live step from the rest. One accent (teal) marks the punchline. That's three retinal variables. The story reads in one glance.</p>
+      </div>
+    </div>
+
+    <!-- ============ Pair 2: Snippet bar — hue ramp ============ -->
+    <div class="pair">
+      <div class="pair-card full">
+        <p class="pair-label bad">Before · ordered data encoded with hue</p>
+        <img class="pair-img" src="assets/snippet-bar.annotated.png" alt="Snippet bar chart with ten spacing violations marked in red">
+        <p class="pair-caption">The audit harness found ten places where the spacing was below the 20px floor. That's not a taste issue. It's a math issue. Margins collapsed, sub-floor gaps fought for the same eight pixels, the chart read as cramped without anyone being able to point to why.</p>
+      </div>
+    </div>
+
+    <!-- ============ Pair 3: Frontier line ============ -->
+    <div class="pair">
+      <div class="pair-card full">
+        <p class="pair-label bad">Same chart family, same audit</p>
+        <img class="pair-img" src="assets/frontier-line.annotated.png" alt="Frontier line chart with seven spacing violations marked in red">
+        <p class="pair-caption">Seven violations on the frontier chart. Same root cause. A chain of <code>margin-top</code> and <code>margin-bottom</code> declarations across the section stack means the actual gap between any two elements is the result of margin collapse, which is unreliable across nested containers, browsers, and zoom levels.</p>
+      </div>
+    </div>
+
+    <div class="prose">
+      <p>The fix in both cases is the same. Stop using margins to space sections. Use a <code>display: grid</code> container with a single <code>row-gap</code> token. The gap is the contract. There's nothing to compute or collapse.</p>
+    </div>
+  </section>
+
+  <!-- ─────────── THE FOUR RULES ─────────── -->
+  <section class="section">
+    <header class="section-head">
+      <p class="section-tag">03 · The four rules</p>
+      <h2 class="h2">If you only remember four things, remember these.</h2>
+    </header>
+
+    <div class="prose">
+      <p>Pulled from Bertin's <em>Semiology of Graphics</em> and Tufte's <em>Visual Display of Quantitative Information</em>. We read both books so you don't have to. The full research briefs are linked at the bottom of each rule if you want the source.</p>
+    </div>
+
+    <div class="rules">
+      <article class="rule">
+        <p class="rule-num">Rule 01</p>
+        <h3 class="rule-h">One accent. Pick the punchline.</h3>
+        <p class="rule-body">Every chart has one thing the reader should take away. Color that. Leave everything else neutral. If three bars are teal, two are magenta, and one is indigo, you've encoded nothing. You've just made noise. Reserve hue for the moment that earns it.</p>
+        <p class="rule-source">Bertin pp. 85–91 · selective vs associative variables</p>
+      </article>
+
+      <article class="rule">
+        <p class="rule-num">Rule 02</p>
+        <h3 class="rule-h">Length on a common scale wins.</h3>
+        <p class="rule-body">When comparing quantities, position-on-aligned-scale (bar length, point position on a shared axis) is more accurate than every other encoding by a wide margin. Cleveland and McGill ranked it #1 across forty years of perception experiments. Use bars or aligned dot plots. Resist the urge to reach for pie, area, or angle.</p>
+        <p class="rule-source">Cleveland & McGill 1984 · perceptual accuracy ranking</p>
+      </article>
+
+      <article class="rule">
+        <p class="rule-num">Rule 03</p>
+        <h3 class="rule-h">Hue is for categories. Value is for order.</h3>
+        <p class="rule-body">If your data has an order (low to high, before to after, worst to best), encode that with value: a single-hue ramp from light to dark. Multiple hues to encode ordered data is a construction error. The reader has to learn a color-to-number mapping that the chart is hiding from them. This is the most common mistake I see, and it's the one we fixed on the snippet bar last week.</p>
+        <p class="rule-source">Bertin pp. 85–91 · the construction error</p>
+      </article>
+
+      <article class="rule">
+        <p class="rule-num">Rule 04</p>
+        <h3 class="rule-h">The channel between elements is the most important spacing decision.</h3>
+        <p class="rule-body">Whether it's a wire between two nodes, a gap between bars, or padding around a chart's data area, the channel is what makes the relationship legible. Pick one token from the spacing scale and use it everywhere. Don't let any channel collapse below 20 pixels. The system below catches you when you do.</p>
+        <p class="rule-source">Tufte chapter 5 · data-ink ratio and the small-multiples grid</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ─────────── CATALOG · START FROM THESE ─────────── -->
+  <section class="section">
+    <header class="section-head">
+      <p class="section-tag">04 · Start from these</p>
+      <h2 class="h2">Three chart starting points. Take any of them, swap your data in, ship.</h2>
+    </header>
+
+    <div class="prose">
+      <p>Each one has been audited end to end. The HTML is single-file, no build step. Copy it into your blog post or deck export, edit the <code>data</code> object near the bottom of the file, you're done. If your chart doesn't fit any of these patterns, that's a real signal. Tell me and we'll add a fourth.</p>
+    </div>
+
+    <div class="catalog">
+
+      <article class="cat-card">
+        <img class="cat-img" src="assets/snippet-bar.png" alt="Snippet bar chart, horizontal bars showing change in tokens per snippet">
+        <div class="cat-meta">
+          <h3 class="cat-name">Snippet bar</h3>
+          <p class="cat-use"><strong>Use it when</strong> you have a handful of named categories and a single quantity per category, and the story is the spread between them. Negative and positive on the same axis works fine. The bar with the punchline gets the accent; everything else goes neutral.</p>
+          <div class="cat-links">
+            <a href="assets/snippet-bar.html" target="_blank">Open live</a>
+            <a href="assets/snippet-bar.html" target="_blank">View source</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="cat-card">
+        <img class="cat-img" src="assets/frontier-line.png" alt="Frontier line chart, accuracy versus context tokens across model variants">
+        <div class="cat-meta">
+          <h3 class="cat-name">Frontier line</h3>
+          <p class="cat-use"><strong>Use it when</strong> you're showing a tradeoff curve. Two continuous axes, two to four lines, and the story is which line sits higher and to the left. The hero variant gets a solid line; reference baselines go dashed in warm grey. Markers stay sparse so the curve reads as a curve.</p>
+          <div class="cat-links">
+            <a href="assets/frontier-line.html" target="_blank">Open live</a>
+            <a href="assets/frontier-line.html" target="_blank">View source</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="cat-card">
+        <img class="cat-img" src="assets/ranked-scorecard.png" alt="Ranked scorecard, frontier model leaderboard with accuracy bars">
+        <div class="cat-meta">
+          <h3 class="cat-name">Ranked scorecard</h3>
+          <p class="cat-use"><strong>Use it when</strong> you have a leaderboard. Small set of named entities (six to ten), multiple comparable metrics, and the reader's job is to scan the ranking. The top row gets the accent; the reference row uses warm grey; the trailing row gets magenta. The accuracy bar is length-on-common-scale, which is what's doing the actual perceptual work.</p>
+          <div class="cat-links">
+            <a href="assets/ranked-scorecard.html" target="_blank">Open live</a>
+            <a href="audit/" target="_blank">Audit scripts</a>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ─────────── THE SYSTEM CATCHES YOU ─────────── -->
+  <section class="section">
+    <header class="section-head">
+      <p class="section-tag">05 · The audit catches you</p>
+      <h2 class="h2">There's a script that measures every gap in your chart and tells you if any of them are below floor.</h2>
+    </header>
+
+    <div class="prose">
+      <p>It's called <code>measure.cjs</code>. It opens your HTML in a headless browser, reads the computed styles and bounding rectangles of every element, and classifies every gap against the spacing scale. Anything below 20 pixels (the <code>--s-4</code> floor) is flagged as a violation. Anything between scale tokens is flagged as off-scale. Everything else passes.</p>
+      <p>Here's what the verdict looks like on the three charts above. Each ran through the harness with zero sub-floor violations. The numbers are real measurements, not claims.</p>
+    </div>
+
+    <div class="verdict">
+      <div class="verdict-row head">
+        <span class="verdict-name">Chart</span>
+        <span>On scale</span>
+        <span>Off scale</span>
+        <span>Sub-floor</span>
+        <span>Intra-label</span>
+      </div>
+      <div class="verdict-row">
+        <span class="verdict-name">Snippet bar</span>
+        <span class="verdict-num">13</span>
+        <span class="verdict-warn">0</span>
+        <span class="verdict-zero">0</span>
+        <span class="verdict-warn">—</span>
+      </div>
+      <div class="verdict-row">
+        <span class="verdict-name">Frontier line</span>
+        <span class="verdict-num">12</span>
+        <span class="verdict-warn">0</span>
+        <span class="verdict-zero">0</span>
+        <span class="verdict-warn">—</span>
+      </div>
+      <div class="verdict-row">
+        <span class="verdict-name">Ranked scorecard</span>
+        <span class="verdict-num">20</span>
+        <span class="verdict-warn">1</span>
+        <span class="verdict-zero">0</span>
+        <span class="verdict-warn">2</span>
+      </div>
+    </div>
+
+    <div class="prose">
+      <p class="dim">The scorecard's one off-scale value is the title-text-end to mark-start gap (44 pixels), which is content-driven whitespace, not a layout decision. The two intra-label gaps are the model-name to org-label stack and the delta-arrow to delta-number gap. Both are inside a single visual unit where tight stacking is correct. The harness tracks these separately so the verdict stays honest.</p>
+      <p>If you're remixing one of the templates and you change a margin, run the harness before you ship. It catches mistakes you wouldn't catch by eye.</p>
+    </div>
+  </section>
+
+  <!-- ─────────── HOW TO USE ─────────── -->
+  <section class="section">
+    <header class="section-head">
+      <p class="section-tag">06 · How to use this</p>
+      <h2 class="h2">Three paths, depending on how much customization you need.</h2>
+    </header>
+
+    <div class="paths">
+      <article class="path">
+        <p class="path-tag">Path A</p>
+        <h3 class="path-h">Copy a template, swap your data.</h3>
+        <p class="path-body">Open one of the three live links in section 04. Save the HTML. Edit the <code>data</code> array near the bottom of the file. Open the file in a browser, screenshot it, embed it in your post. No build step.</p>
+      </article>
+      <article class="path">
+        <p class="path-tag">Path B</p>
+        <h3 class="path-h">Embed the live HTML directly.</h3>
+        <p class="path-body">If your blog supports raw HTML embeds, drop the chart in. Fonts and colors are self-contained. The frame fits a 1316-pixel column at full resolution and scales down responsively below 880 pixels.</p>
+      </article>
+      <article class="path">
+        <p class="path-tag">Path C</p>
+        <h3 class="path-h">Request a new pattern.</h3>
+        <p class="path-body">If your data doesn't fit any of the three existing patterns, that's information. It means there's a real chart type missing from the system. Tell me what you're trying to show and I'll add it. The point of this is to absorb the next bottleneck, not to be the bottleneck.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ─────────── FOOTER ─────────── -->
+  <footer class="footer">
+    <div class="footer-col">
+      <p class="label">Research briefs</p>
+      <a href="../06_docs/research-tufte-canon.md">Tufte canon · research brief</a>
+      <a href="../06_docs/research-bertin-semiology.md">Bertin semiology · research brief</a>
+    </div>
+    <div class="footer-col">
+      <p class="label">Audit frameworks</p>
+      <a href="../06_docs/audit-tufte-v01.md">Tufte audit · 14 criteria</a>
+      <a href="../06_docs/audit-bertin-v01.md">Bertin audit · 15 criteria</a>
+      <a href="../06_docs/audit-type-v01.md">Type audit</a>
+    </div>
+    <div class="footer-col">
+      <p class="label">Diagrams (system family)</p>
+      <a href="../08_diagrams/">All six archetypes</a>
+      <a href="../08_diagrams/README.md">Diagram system README</a>
+    </div>
+    <div class="footer-col">
+      <p class="label">Repo &amp; contact</p>
+      <a href="https://github.com/phi-pplx/pplx-chart-system">github.com/phi-pplx/pplx-chart-system</a>
+      <a href="mailto:phi@perplexity.ai">phi@perplexity.ai · flag what's not working</a>
+    </div>
+  </footer>
+
+</main>
+
+</body>
+</html>
