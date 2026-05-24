@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Snippet composition: change in tokens per snippet · spacing-corrected</title>
+<style>
+/* === Spacing scale (matches diagram system) === */
+:root {
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 14px;
+  --s-4: 20px;   /* FLOOR — never use anything smaller for layout gaps */
+  --s-5: 28px;
+  --s-6: 40px;
+  --s-7: 56px;
+  --s-8: 80px;
+  --s-9: 112px;
+}
+
+/* === Comet palette (unchanged) === */
+:root {
+  --bg: #000000;
+  --border: #1f1f1f;
+  --rule: #1a1a1a;
+  --grid: #161616;
+  --grid-zero: #2a2a2a;
+  --text: #e8e8e8;
+  --text-dim: #8a8a8a;
+  --text-muted: #7a7a7a;
+  --inset: #0b0b0b;
+  --accent-hero:          #35bec8;
+  --accent-cool-2:        #7284e6;
+  --accent-warm:          #dd54ac;
+  --accent-neutral-light: #d4cdc1;
+  --bar-1: #c8d0f6;
+  --bar-2: #a7b3f0;
+  --bar-3: #8a98e9;
+  --bar-4: #7284e6;
+  --bar-5: #5468cb;
+  --c-neutral:  var(--accent-neutral-light);
+  --c-positive: var(--accent-hero);
+}
+
+@font-face {
+  font-family: 'PPLX Sans';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: block;
+  font-synthesis: none;
+  src: url('../../04_brand/fonts/PPLX-Sans-Beta-v2-VF.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'PPLX Mono';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: block;
+  font-synthesis: none;
+  src: url('../../04_brand/fonts/PPLX-Mono-Beta-v0-VF.woff2') format('woff2');
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); }
+body {
+  font-family: 'PPLX Sans', -apple-system, system-ui, sans-serif;
+  font-variation-settings: 'wght' 400, 'slnt' 0;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+
+/* ────── Frame · grid-based vertical stack ──────
+   Replaces the previous flex+margin chain. Every inter-section gap is
+   a single grid row-gap token. No margins on children. */
+.frame {
+  width: 1316px;
+  height: 1645px;
+  margin: 0 auto;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+
+  /* Inner padding: all four sides at --s-6 (40px) for clearance to border */
+  padding: var(--s-6);
+
+  /* Stack: header | section-label | chart-wrap (chart+xaxis+xlabel) | footer */
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  row-gap: var(--s-5);  /* --s-5 (28px) between major blocks */
+  position: relative;
+}
+
+/* ────── Header ──────
+   padding-bottom raised 18px → --s-4 (20px) */
+.header {
+  position: relative;
+  display: block;
+  padding: 0 var(--s-8) var(--s-4) 0;  /* right --s-8 for mark clearance, bottom --s-4 floor */
+  border-bottom: 1px solid var(--rule);
+  min-height: 56px;
+}
+
+.title {
+  display: block;
+  margin: 0;
+  font-family: 'PPLX Mono', ui-monospace, SFMono-Regular, monospace;
+  font-variation-settings: 'wght' 520, 'slnt' 0;
+  font-size: 28px;
+  line-height: 1.18;
+  font-weight: 520;
+  letter-spacing: -0.005em;
+  color: var(--text);
+}
+
+.mark {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 36px;
+  height: 36px;
+  display: block;
+  color: var(--text);
+}
+.mark svg { width: 36px; height: 36px; display: block; }
+
+/* ────── Section label ──────
+   Margins removed — spacing handled by frame grid row-gap. */
+.section-label {
+  font-family: 'PPLX Mono', ui-monospace, SFMono-Regular, monospace;
+  font-variation-settings: 'wght' 500, 'slnt' 0;
+  font-size: 18px;
+  line-height: 1.25;
+  letter-spacing: 0.16em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* ────── Chart wrapper · also a grid stack ──────
+   chart | xaxis | xlabel · gap = --s-4 (20px), the floor token. */
+.chart-wrap {
+  position: relative;
+  display: grid;
+  grid-template-rows: 1fr auto auto;
+  row-gap: var(--s-4);  /* was 8px + 12px chain → uniform --s-4 */
+  margin: 0;
+}
+
+.chart { position: relative; }
+
+.row {
+  display: grid;
+  grid-template-columns: 270px 1fr;
+  align-items: center;
+  height: 160px;
+  position: relative;
+}
+.row .cat {
+  font-family: 'PPLX Mono';
+  font-variation-settings: 'wght' 500, 'slnt' 0;
+  font-size: 18px;
+  color: var(--text);
+  text-align: right;
+  padding-right: var(--s-5);  /* --s-5 (28px), was 28px — now token-aligned */
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.row .cat.dim { color: var(--text-dim); }
+
+.plot {
+  position: relative;
+  height: 100%;
+}
+
+.grid-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.gridline {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--grid);
+}
+.gridline.zero { background: var(--grid-zero); }
+
+.barwrap {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 64px;
+}
+.bar {
+  height: 100%;
+  border-radius: 2px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+.bar.neg { justify-content: flex-start; }
+.bar.pos { justify-content: flex-end; }
+
+/* Value label inset bumped 16px → --s-4 (20px) */
+.value {
+  font-family: 'PPLX Mono';
+  font-variation-settings: 'wght' 500, 'slnt' 0;
+  font-size: 19px;
+  color: var(--inset);
+  padding: 0 var(--s-4);  /* was 16px, now --s-4 */
+  white-space: nowrap;
+}
+.value.light { color: #f5f5f5; }
+
+.divider {
+  position: absolute;
+  left: 0; right: 0;
+  top: 0;
+  height: 1px;
+  background: var(--rule);
+}
+
+/* ────── X-axis · no margins, grid row-gap above handles spacing ──────
+   Tick offset raised 10px → --s-4 (20px) so number labels don't crowd
+   the axis line. */
+.xaxis {
+  position: relative;
+  height: 38px;
+  margin-left: 270px;
+  margin-top: 0;  /* was 8px — handled by chart-wrap row-gap */
+}
+.tick {
+  position: absolute;
+  top: var(--s-4);   /* was 10px — raised to floor */
+  transform: translateX(-50%);
+  font-family: 'PPLX Mono';
+  font-variation-settings: 'wght' 400, 'slnt' 0;
+  font-size: 18px;
+  color: var(--text-dim);
+  letter-spacing: 0.02em;
+}
+
+.xlabel {
+  text-align: center;
+  margin: 0;
+  margin-left: 270px;
+  font-family: 'PPLX Mono';
+  font-variation-settings: 'wght' 500, 'slnt' 0;
+  font-size: 18px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+/* ────── Footer · padding-top raised 14px → --s-4 (20px) ────── */
+.footer {
+  padding-top: var(--s-4);  /* was 14px, now floor */
+  border-top: 1px solid var(--rule);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--s-5);  /* was 24px → --s-5 (28px), token-aligned */
+  font-family: 'PPLX Mono', ui-monospace, SFMono-Regular, monospace;
+  font-variation-settings: 'wght' 400, 'slnt' 0;
+  font-size: 17px;
+  line-height: 1.25;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+/* ===== Animation styles (unchanged) ===== */
+.barwrap { will-change: width, left; }
+.barwrap.animating {
+  transition: left 1000ms cubic-bezier(0.16, 1, 0.3, 1),
+              width 1000ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.value {
+  opacity: 0;
+  transform: scale(0.85);
+  transform-origin: center;
+  transition: opacity 400ms cubic-bezier(0.4, 0, 0.2, 1),
+              transform 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.value.show { opacity: 1; transform: scale(1); }
+
+
+/* ────── Light theme overlay ──────
+   Surfaces flip to warm whites. Text inverts. Accents stay identical so
+   the punchline/extreme/cool/neutral roles remain consistent across themes. */
+[data-theme="light"] {
+  --bg:        #faf7f1;   /* warm white, matches PPLX paper */
+  --surface:   #f0ece2;
+  --border:    #e0d9c8;
+  --rule:      #d6cebd;
+  --grid:      #e8e2d4;
+  --grid-axis: #c8bfac;
+  --grid-zero: #b4a994;
+  --text:      #1a1a1a;
+  --text-dim:  #5a5a5a;
+  --text-muted:#7a7a7a;
+  --inset:     #faf7f1;
+  --bar-rest:  #d6cebd;
+}
+[data-theme="light"] .value.light { color: #1a1a1a; }
+
+
+/* ────── 1:1 social aspect ──────
+   Frame becomes square. Type sizes scale up so the chart reads on a phone
+   in a feed. Footer collapses to a single line where applicable. */
+[data-aspect="1x1"] .frame {
+  width: 1080px;
+  height: 1080px;
+  padding: var(--s-7);   /* tighter outer padding at 1:1 */
+}
+[data-aspect="1x1"] .title {
+  font-size: 26px;
+}
+[data-aspect="1x1"] .section-label {
+  font-size: 16px;
+}
+[data-aspect="1x1"] .footer {
+  font-size: 14px;
+  gap: var(--s-4);
+}
+/* Snippet bar specifics — shorter category column at 1:1 */
+[data-aspect="1x1"] .row {
+  grid-template-columns: 180px 1fr;
+  height: 92px;
+}
+[data-aspect="1x1"] .row .cat {
+  font-size: 15px;
+  padding-right: var(--s-4);
+}
+[data-aspect="1x1"] .barwrap {
+  height: 44px;
+}
+[data-aspect="1x1"] .value {
+  font-size: 16px;
+  padding: 0 var(--s-3);
+}
+[data-aspect="1x1"] .xaxis {
+  margin-left: 180px;
+  margin-right: var(--s-3);
+}
+[data-aspect="1x1"] .xlabel {
+  margin-left: 180px;
+  margin-right: var(--s-3);
+}
+[data-aspect="1x1"] .tick {
+  font-size: 14px;
+}
+[data-aspect="1x1"] .subtitle {
+  font-size: 13px;
+}
+/* Ranked scorecard specifics at 1:1 — drop the accuracy bar column.
+   Also tightens row padding so 8 rows fit in 1080×1080. */
+[data-aspect="1x1"] .row-grid {
+  --cols: 48px 1fr 120px 110px 95px;
+  grid-template-columns: var(--cols);
+  column-gap: var(--s-4);
+}
+[data-aspect="1x1"] .cell-acc-bar { display: none; }
+[data-aspect="1x1"] .col-header.bar { display: none; }
+[data-aspect="1x1"] .axis-key { display: none; }
+/* Scorecard 1:1 — honor the spacing floor. Tbody row-gap stays at --s-4,
+   row padding stays at --s-4. To fit within 1080 the social card shows
+   only the top 6 leaderboard entries: the 1:1 narrative is 'who's at the
+   top', not 'the full ranking'. The 8-row view stays on 16:9. */
+[data-aspect="1x1"] .tbody { row-gap: var(--s-4); }
+[data-aspect="1x1"] .tbody .row { padding: var(--s-4) 0; }
+[data-aspect="1x1"] .tbody .row:nth-child(n+7) { display: none; }
+[data-aspect="1x1"] .cell-model .name { font-size: 16px; }
+[data-aspect="1x1"] .cell-model .org { font-size: 11px; }
+[data-aspect="1x1"] .cell-accuracy { font-size: 17px; }
+[data-aspect="1x1"] .cell-latency { font-size: 15px; }
+[data-aspect="1x1"] .cell-delta { font-size: 14px; }
+[data-aspect="1x1"] .cell-rank { font-size: 15px; }
+[data-aspect="1x1"] .col-header { font-size: 11px; }
+/* Hero row left border thinner at 1:1 so it doesn't dominate */
+[data-aspect="1x1"] .row.hero::before {
+  width: 2px;
+  left: calc(var(--s-3) * -1);
+}
+/* Frontier line at 1:1 — fit the SVG to its container by height not
+   aspect-ratio, otherwise it overflows the 1080×1080 frame and clips
+   the x-axis labels and the legend. */
+[data-aspect="1x1"] svg.chart {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  display: block;
+  max-height: 100%;
+}
+[data-aspect="1x1"] .chart-wrap {
+  display: block;
+  overflow: hidden;
+  min-height: 0;
+}
+/* Legend reflows to 2x2 at 1:1 so all four series fit. */
+[data-aspect="1x1"] .legend {
+  grid-template-columns: 1fr 1fr;
+  row-gap: var(--s-4);
+  column-gap: var(--s-5);
+}
+[data-aspect="1x1"] .legend .item { font-size: 15px; }
+[data-aspect="1x1"] .legend .item .sub { font-size: 13px; }
+
+</style>
+</head>
+<body data-theme="light" data-aspect="16x9">
+
+<div class="frame">
+
+  <div class="header">
+    <div class="title">Snippet composition: change in tokens per snippet</div>
+    <svg class="mark" viewBox="0 0 254 275" xmlns="http://www.w3.org/2000/svg" aria-label="Perplexity">
+      <path d="M207.649 2.21927C209.816 0.0528457 213.075 -0.595764 215.905 0.576694C218.736 1.74918 220.581 4.5119 220.581 7.57572V86.2554H245.452C249.636 86.2557 253.027 89.6472 253.027 93.8306V202.187C253.027 206.371 249.636 209.762 245.452 209.762H220.581V267.043C220.581 270.107 218.735 272.87 215.904 274.043C213.074 275.215 209.816 274.566 207.649 272.4L134.091 198.841V267.085C134.091 271.268 130.699 274.66 126.516 274.66C122.332 274.66 118.94 271.268 118.94 267.085V198.842L45.3828 272.4C43.2164 274.566 39.9585 275.215 37.1279 274.043C34.2973 272.87 32.4512 270.107 32.4512 267.043V209.762H7.5752C3.39155 209.762 2.88624e-05 206.371 0 202.187V93.8306C6.59711e-05 89.647 3.39158 86.2554 7.5752 86.2554H32.4512V7.57572C32.4512 4.51189 34.2973 1.74917 37.1279 0.576694C39.9584 -0.595448 43.2165 0.0529879 45.3828 2.21927L118.94 75.7769V7.57572C118.94 3.39212 122.332 0.000522602 126.516 0.000522602C130.699 0.000522602 134.091 3.39212 134.091 7.57572V75.7769L207.649 2.21927ZM47.6016 173.175V248.755L118.94 177.417V110.757L47.6016 173.175ZM134.091 177.416L205.431 248.755V202.303C205.43 202.265 205.428 202.226 205.428 202.187C205.428 202.148 205.43 202.109 205.431 202.07V173.175L134.091 110.757V177.416ZM217.993 164.037C219.637 165.475 220.581 167.553 220.581 169.738V194.612H237.877V101.406H146.411L217.993 164.037ZM15.1504 194.612H32.4512V169.738C32.4512 167.553 33.3941 165.475 35.0381 164.037L106.621 101.406H15.1504V194.612ZM47.6016 86.2554H107.993L47.6016 25.8638V86.2554ZM145.04 86.2554H205.431V25.8638L145.04 86.2554Z" fill="currentColor"/>
+    </svg>
+  </div>
+
+  <div class="section-label">Change vs. baseline (%)</div>
+
+  <div class="chart-wrap">
+    <div class="chart" id="chart"></div>
+    <div class="xaxis" id="xaxis"></div>
+    <div class="xlabel">Change in tokens per snippet (%)</div>
+  </div>
+
+  <div class="footer">
+    <span>negative = fewer tokens consumed · positive = more vital tokens retained</span>
+    <span></span>
+  </div>
+
+</div>
+
+<script>
+  const X_MIN = -75;
+  const X_MAX = 75;
+  const TICKS = [-75, -50, -25, 0, 25, 50, 75];
+  const pct = v => ((v - X_MIN) / (X_MAX - X_MIN)) * 100;
+
+  const data = [
+    { label: 'UI / navigation',     value: -58, color: 'var(--bar-1)' },
+    { label: 'Metadata',            value: -46, color: 'var(--bar-2)' },
+    { label: 'Ads',                 value: -43, color: 'var(--bar-3)' },
+    { label: 'Off-topic',           value: -27, color: 'var(--bar-4)' },
+    { label: 'Duplicate',           value: -26, color: 'var(--bar-5)' },
+    { label: 'Irrelevant (total)',  value: -29, color: 'var(--c-neutral)', dim: true, divider: true },
+    { label: 'Vital',               value: +63, color: 'var(--c-positive)' },
+  ];
+
+  const chart = document.getElementById('chart');
+  data.forEach((d) => {
+    const row = document.createElement('div');
+    row.className = 'row';
+    const cat = document.createElement('div');
+    cat.className = 'cat' + (d.dim ? ' dim' : '');
+    cat.textContent = d.label;
+    row.appendChild(cat);
+
+    const plot = document.createElement('div');
+    plot.className = 'plot';
+
+    if (d.divider) {
+      const div = document.createElement('div');
+      div.className = 'divider';
+      plot.appendChild(div);
+    }
+
+    const gridLayer = document.createElement('div');
+    gridLayer.className = 'grid-layer';
+    TICKS.forEach(t => {
+      const g = document.createElement('div');
+      g.className = 'gridline' + (t === 0 ? ' zero' : '');
+      g.style.left = pct(t) + '%';
+      gridLayer.appendChild(g);
+    });
+    plot.appendChild(gridLayer);
+
+    const barwrap = document.createElement('div');
+    barwrap.className = 'barwrap';
+    const zeroPct = pct(0);
+    const valPct = pct(d.value);
+    barwrap.dataset.targetLeft = (d.value < 0 ? valPct : zeroPct) + '%';
+    barwrap.dataset.targetWidth = Math.abs(zeroPct - valPct) + '%';
+    barwrap.style.left = zeroPct + '%';
+    barwrap.style.width = '0%';
+
+    const bar = document.createElement('div');
+    bar.className = 'bar ' + (d.value < 0 ? 'neg' : 'pos');
+    bar.style.background = d.color;
+    const val = document.createElement('div');
+    val.className = 'value';
+    val.textContent = (d.value > 0 ? '+' : '') + d.value + '%';
+    bar.appendChild(val);
+    barwrap.appendChild(bar);
+    plot.appendChild(barwrap);
+    row.appendChild(plot);
+    chart.appendChild(row);
+  });
+
+  const xaxis = document.getElementById('xaxis');
+  TICKS.forEach(t => {
+    const tk = document.createElement('div');
+    tk.className = 'tick';
+    tk.style.left = pct(t) + '%';
+    tk.textContent = (t > 0 ? '+' : '') + t + '%';
+    xaxis.appendChild(tk);
+  });
+
+  // Static (no animation) for the corrected reference. Original anim retained
+  // in 01-snippet-bar.html.
+  document.querySelectorAll('.barwrap').forEach(w => {
+    w.style.left = w.dataset.targetLeft;
+    w.style.width = w.dataset.targetWidth;
+  });
+  document.querySelectorAll('.value').forEach(v => v.classList.add('show'));
+</script>
+
+</body>
+</html>

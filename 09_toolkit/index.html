@@ -4,39 +4,56 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Chart toolkit · Perplexity</title>
-<meta name="description" content="Honest defaults for the charts you put in research blog posts, decks, and launch pages. Built so nobody has to become a data-viz expert to ship something decent.">
+<meta name="description" content="Pre-built chart templates with the color, spacing, and hierarchy decisions already made. Swap in your data, ship.">
 
 <style>
 /* ====================================================================
-   Page inherits the chart-base contract.
-   Same spacing scale, same Comet palette, same fonts, same grid-stack.
-   The only difference: section→section rhythm is --s-7 (page) instead
-   of --s-5 (chart). Page rhythm is slower than chart rhythm.
+   Tokens
+   ──────────────────────────────────────────────────────────────────
+   Spacing scale is universal. Color tokens flip per theme. Default
+   theme is dark; set data-theme="light" on <html> to flip the page.
+   The chart previews are static images already rendered in both themes.
    ==================================================================== */
 
 :root {
   --s-1: 4px;
   --s-2: 8px;
   --s-3: 14px;
-  --s-4: 20px;   /* FLOOR for layout gaps */
+  --s-4: 20px;
   --s-5: 28px;
   --s-6: 40px;
   --s-7: 56px;
   --s-8: 80px;
   --s-9: 112px;
 
-  --bg: #000000;
-  --surface: #0a0a0a;
-  --border: #1f1f1f;
-  --rule: #1a1a1a;
-  --text: #e8e8e8;
+  /* Comet accents (constant across themes) */
+  --hero:    #35bec8;
+  --extreme: #dd54ac;
+  --cool:    #7284e6;
+  --neutral: #d4cdc1;
+}
+
+/* Dark theme (default) */
+:root,
+[data-theme="dark"] {
+  --bg:       #000000;
+  --surface:  #0a0a0a;
+  --border:   #1f1f1f;
+  --rule:     #1a1a1a;
+  --text:     #e8e8e8;
   --text-dim: #8a8a8a;
   --text-muted: #6a6a6a;
+}
 
-  --hero:    #35bec8;   /* teal 300 */
-  --extreme: #dd54ac;   /* magenta 400 */
-  --cool:    #7284e6;   /* indigo 400 */
-  --neutral: #d4cdc1;   /* warm grey */
+/* Light theme */
+[data-theme="light"] {
+  --bg:       #faf7f1;
+  --surface:  #f0ece2;
+  --border:   #e0d9c8;
+  --rule:     #d6cebd;
+  --text:     #1a1a1a;
+  --text-dim: #5a5a5a;
+  --text-muted: #7a7a7a;
 }
 
 @font-face {
@@ -57,20 +74,17 @@
 }
 
 * { box-sizing: border-box; }
-html, body {
-  margin: 0;
-  padding: 0;
-  background: var(--bg);
-}
+html, body { margin: 0; padding: 0; background: var(--bg); }
 body {
   font-family: 'PPLX Sans', -apple-system, system-ui, sans-serif;
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   text-rendering: geometricPrecision;
   line-height: 1.5;
+  transition: background-color 200ms ease, color 200ms ease;
 }
 
-/* ────── Page · grid-stack, same pattern as .frame ────── */
+/* ────── Page ────── */
 .page {
   max-width: 1316px;
   margin: 0 auto;
@@ -79,11 +93,55 @@ body {
   row-gap: var(--s-9);
 }
 
-/* ────── Hero ────── */
-.hero {
-  display: grid;
-  row-gap: var(--s-5);
+/* ────── Theme toggle (global) ────── */
+.theme-toggle {
+  position: fixed;
+  top: var(--s-6);
+  right: var(--s-9);
+  display: flex;
+  gap: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: var(--s-1);
+  z-index: 200;
+  font-family: 'PPLX Mono', ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
 }
+.theme-toggle button {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  padding: var(--s-2) var(--s-4);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  border-radius: 100px;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+.theme-toggle button[aria-pressed="true"] {
+  background: var(--text);
+  color: var(--bg);
+}
+
+/* Mark */
+.mark {
+  position: fixed;
+  top: var(--s-6);
+  right: var(--s-6);
+  width: 36px;
+  height: 36px;
+  color: var(--text-dim);
+  z-index: 100;
+}
+.mark svg { width: 100%; height: 100%; display: block; }
+
+/* ────── Hero ────── */
+.hero { display: grid; row-gap: var(--s-5); }
 .eyebrow {
   font-family: 'PPLX Mono', ui-monospace, monospace;
   font-size: 14px;
@@ -100,11 +158,10 @@ body {
   letter-spacing: -0.012em;
   color: var(--text);
   margin: 0;
-  max-width: 24ch;
+  max-width: 22ch;
 }
-.h1 .accent { color: var(--hero); }
 .lede {
-  font-size: 20px;
+  font-size: 19px;
   line-height: 1.5;
   color: var(--text-dim);
   margin: 0;
@@ -112,13 +169,7 @@ body {
 }
 
 /* ────── Section heading ────── */
-.section {
-  display: grid;
-  row-gap: var(--s-6);
-}
-/* Section-head bottom rule is constrained to a reading-width so it
-   doesn't run all the way across at full viewport. The rule sits
-   visually anchored to the content it introduces. */
+.section { display: grid; row-gap: var(--s-6); }
 .section-head {
   display: grid;
   row-gap: var(--s-4);
@@ -153,9 +204,9 @@ body {
   margin: 0;
 }
 
-/* Body prose */
+/* ────── Prose ────── */
 .prose { display: grid; row-gap: var(--s-4); max-width: 72ch; }
-.prose p { margin: 0; font-size: 17px; line-height: 1.6; color: var(--text); }
+.prose p { margin: 0; font-size: 17px; line-height: 1.55; color: var(--text); }
 .prose p.dim { color: var(--text-dim); }
 .prose strong { color: var(--text); font-variation-settings: 'wght' 600, 'slnt' 0; }
 .prose code, code.inline {
@@ -167,25 +218,220 @@ body {
   color: var(--neutral);
   border: 1px solid var(--border);
 }
-.prose a, a.inline {
-  color: var(--hero);
-  text-decoration: none;
-  border-bottom: 1px solid rgba(53, 190, 200, 0.3);
-}
-.prose a:hover { border-bottom-color: var(--hero); }
 
-/* ────── Before/after pair · 2-col with --s-6 column-gap ────── */
+/* ────── Catalog (3 cards, image+meta) ────── */
+.catalog {
+  display: grid;
+  grid-template-columns: 1fr;
+  row-gap: var(--s-6);
+}
+.cat-card {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  column-gap: var(--s-6);
+  align-items: center;
+  padding: var(--s-5);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.cat-preview {
+  position: relative;
+  display: block;
+  width: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  aspect-ratio: 1316 / 1645;  /* matches chart frame ratio at 16:9 */
+}
+.cat-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.cat-meta { display: grid; row-gap: var(--s-4); align-content: start; }
+.cat-name {
+  font-family: 'PPLX Mono', ui-monospace, monospace;
+  font-variation-settings: 'wght' 520, 'slnt' 0;
+  font-size: 22px;
+  color: var(--text);
+  margin: 0;
+}
+.cat-use {
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text-dim);
+  margin: 0;
+}
+.cat-controls {
+  display: grid;
+  row-gap: var(--s-3);
+}
+.cat-theme {
+  display: flex;
+  gap: 0;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px;
+  width: max-content;
+  font-family: 'PPLX Mono', ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+}
+.cat-theme button {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  padding: var(--s-2) var(--s-3);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  border-radius: 3px;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+.cat-theme button[aria-pressed="true"] {
+  background: var(--text);
+  color: var(--bg);
+}
+.cat-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-4);
+}
+.cat-links a {
+  font-family: 'PPLX Mono', ui-monospace, monospace;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: var(--text);
+  text-decoration: none;
+  padding: var(--s-2) var(--s-4);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+}
+.cat-links a:hover {
+  border-color: var(--hero);
+  color: var(--hero);
+}
+
+/* ────── Social cards (3 squares in a row) ────── */
+.social {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  column-gap: var(--s-5);
+  row-gap: var(--s-5);
+}
+.social-card {
+  display: grid;
+  row-gap: var(--s-4);
+  padding: var(--s-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.social-preview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  display: block;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--bg);
+}
+.social-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.social-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+.social-name {
+  font-family: 'PPLX Mono', ui-monospace, monospace;
+  font-variation-settings: 'wght' 520, 'slnt' 0;
+  font-size: 15px;
+  color: var(--text);
+  margin: 0;
+}
+.social-meta {
+  font-family: 'PPLX Mono', ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ────── Disclosure (collapsed why + rules) ────── */
+details.disclosure {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0;
+  overflow: hidden;
+}
+details.disclosure[open] { padding-bottom: var(--s-5); }
+details.disclosure summary {
+  cursor: pointer;
+  list-style: none;
+  padding: var(--s-5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  font-family: 'PPLX Mono', ui-monospace, monospace;
+  font-size: 15px;
+  font-variation-settings: 'wght' 500, 'slnt' 0;
+  color: var(--text);
+  letter-spacing: 0.01em;
+}
+details.disclosure summary::-webkit-details-marker { display: none; }
+details.disclosure summary .chevron {
+  width: 14px;
+  height: 14px;
+  transition: transform 200ms ease;
+  color: var(--text-dim);
+}
+details.disclosure[open] summary .chevron { transform: rotate(180deg); }
+details.disclosure summary .summary-meta {
+  font-family: 'PPLX Mono';
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-left: auto;
+  margin-right: var(--s-3);
+}
+
+.disclosure-body {
+  padding: 0 var(--s-5);
+  display: grid;
+  row-gap: var(--s-6);
+}
+.disclosure-body .prose p { font-size: 16px; }
+
+/* Pair (before/after) inside disclosure */
 .pair {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  column-gap: var(--s-6);
-  row-gap: var(--s-5);
+  column-gap: var(--s-5);
+  row-gap: var(--s-4);
 }
 .pair-card { display: grid; row-gap: var(--s-4); }
 .pair-card.full { grid-column: 1 / -1; }
 .pair-label {
   font-family: 'PPLX Mono', ui-monospace, monospace;
-  font-size: 14px;
+  font-size: 13px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   margin: 0;
@@ -205,7 +451,7 @@ body {
   width: 100%;
   display: block;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 4px;
   background: var(--bg);
 }
 .pair-caption {
@@ -217,20 +463,20 @@ body {
   letter-spacing: 0.01em;
 }
 
-/* ────── Four-rules grid · 2x2 ────── */
+/* Rules grid inside disclosure */
 .rules {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  column-gap: var(--s-6);
-  row-gap: var(--s-6);
+  column-gap: var(--s-5);
+  row-gap: var(--s-5);
 }
 .rule {
   display: grid;
   row-gap: var(--s-4);
   padding: var(--s-5);
-  background: var(--surface);
+  background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 4px;
   border-left: 3px solid var(--hero);
 }
 .rule:nth-child(2) { border-left-color: var(--cool); }
@@ -238,7 +484,7 @@ body {
 .rule:nth-child(4) { border-left-color: var(--extreme); }
 .rule-num {
   font-family: 'PPLX Mono', ui-monospace, monospace;
-  font-size: 13px;
+  font-size: 12px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--text-muted);
@@ -247,114 +493,57 @@ body {
 .rule-h {
   font-family: 'PPLX Mono', ui-monospace, monospace;
   font-variation-settings: 'wght' 520, 'slnt' 0;
-  font-size: 19px;
+  font-size: 17px;
   line-height: 1.25;
   color: var(--text);
   margin: 0;
 }
 .rule-body {
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.55;
   color: var(--text-dim);
   margin: 0;
 }
 .rule-source {
   font-family: 'PPLX Mono', ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 11px;
   letter-spacing: 0.06em;
   color: var(--text-muted);
   margin: 0;
 }
 
-/* ────── Chart catalog · 3 cards ────── */
-.catalog {
-  display: grid;
-  grid-template-columns: 1fr;
-  row-gap: var(--s-6);
-}
-.cat-card {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  column-gap: var(--s-6);
-  align-items: center;   /* center the text column vertically vs the chart image */
+/* ────── Audit one-liner ────── */
+.audit-line {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
   padding: var(--s-5);
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 6px;
-}
-.cat-img {
-  width: 100%;
-  border-radius: 4px;
-  display: block;
-  background: var(--bg);
-  border: 1px solid var(--border);
-}
-.cat-meta { display: grid; row-gap: var(--s-4); align-content: start; }
-.cat-name {
   font-family: 'PPLX Mono', ui-monospace, monospace;
-  font-variation-settings: 'wght' 520, 'slnt' 0;
-  font-size: 22px;
-  color: var(--text);
-  margin: 0;
-}
-.cat-use {
-  font-size: 16px;
-  line-height: 1.5;
+  font-size: 14px;
+  letter-spacing: 0.04em;
   color: var(--text-dim);
-  margin: 0;
 }
-.cat-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--s-4);
-  margin-top: var(--s-2);
-}
-.cat-links a {
-  font-family: 'PPLX Mono', ui-monospace, monospace;
-  font-size: 13px;
-  letter-spacing: 0.06em;
-  color: var(--text);
-  text-decoration: none;
-  padding: var(--s-2) var(--s-4);
-  background: var(--bg);
-  border: 1px solid var(--border);
+.audit-line .badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: var(--hero);
+  color: var(--bg);
   border-radius: 3px;
-}
-.cat-links a:hover {
-  border-color: var(--hero);
-  color: var(--hero);
-}
-
-/* ────── Audit verdict block ────── */
-.verdict {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: var(--s-6);
-  display: grid;
-  row-gap: var(--s-4);
-}
-.verdict-row {
-  display: grid;
-  grid-template-columns: 1fr auto auto auto auto;
-  column-gap: var(--s-5);
-  align-items: center;
-  padding: var(--s-3) 0;
-  font-family: 'PPLX Mono', ui-monospace, monospace;
-  font-size: 15px;
-}
-.verdict-row + .verdict-row { border-top: 1px solid var(--rule); }
-.verdict-row.head {
   font-size: 12px;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--text-muted);
+  font-variation-settings: 'wght' 520, 'slnt' 0;
 }
-.verdict-name { color: var(--text); }
-.verdict-pass { color: var(--hero); }
-.verdict-zero { color: var(--hero); }
-.verdict-warn { color: var(--text-dim); }
-.verdict-num  { color: var(--text); }
+.audit-line .count { color: var(--text); }
+.audit-line a {
+  margin-left: auto;
+  color: var(--hero);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(53, 190, 200, 0.4);
+}
 
 /* ────── Footer ────── */
 .footer {
@@ -376,90 +565,23 @@ body {
   text-transform: uppercase;
   color: var(--text-muted);
 }
-.footer-col a {
-  color: var(--text-dim);
-  text-decoration: none;
-}
+.footer-col a { color: var(--text-dim); text-decoration: none; }
 .footer-col a:hover { color: var(--hero); }
 
-/* Paths · 3-card column */
-.paths {
-  display: grid;
-  grid-template-columns: 1fr;
-  row-gap: var(--s-5);
+/* ────── Responsive ────── */
+@media (max-width: 1080px) {
+  .social { grid-template-columns: 1fr 1fr; }
 }
-.path {
-  display: grid;
-  grid-template-columns: 120px 1fr;
-  column-gap: var(--s-6);
-  align-items: baseline;
-  padding: var(--s-5);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  border-left: 3px solid var(--hero);
-}
-.path:nth-child(2) { border-left-color: var(--cool); }
-.path:nth-child(3) { border-left-color: var(--neutral); }
-.path-tag {
-  font-family: 'PPLX Mono', ui-monospace, monospace;
-  font-size: 14px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin: 0;
-  align-self: start;
-  padding-top: 2px;
-}
-.path-h {
-  font-family: 'PPLX Mono', ui-monospace, monospace;
-  font-variation-settings: 'wght' 520, 'slnt' 0;
-  font-size: 18px;
-  color: var(--text);
-  margin: 0 0 var(--s-3) 0;
-  line-height: 1.3;
-  grid-column: 2;
-  grid-row: 1;
-}
-.path-body {
-  font-size: 15px;
-  line-height: 1.55;
-  color: var(--text-dim);
-  margin: 0;
-  grid-column: 2;
-  grid-row: 2;
-}
-.path-body code {
-  font-family: 'PPLX Mono', ui-monospace, monospace;
-  font-size: 0.92em;
-  background: var(--bg);
-  padding: 1px 6px;
-  border-radius: 3px;
-  color: var(--neutral);
-  border: 1px solid var(--border);
-}
-
-/* Mark in top right */
-.mark {
-  position: fixed;
-  top: var(--s-6);
-  right: var(--s-6);
-  width: 36px;
-  height: 36px;
-  color: var(--text-dim);
-  z-index: 100;
-}
-.mark svg { width: 100%; height: 100%; display: block; }
-
-/* Small responsive — collapse pair and rules to single column on narrow viewports.
-   The internal cards still hold their grid contracts. */
 @media (max-width: 880px) {
-  .pair { grid-template-columns: 1fr; }
-  .rules { grid-template-columns: 1fr; }
   .cat-card { grid-template-columns: 1fr; }
-  .h1 { font-size: 32px; }
-  .h2 { font-size: 22px; }
+  .social { grid-template-columns: 1fr; }
+  .rules { grid-template-columns: 1fr; }
+  .pair { grid-template-columns: 1fr; }
+  .h1 { font-size: 30px; }
+  .h2 { font-size: 21px; }
   .page { padding: var(--s-7) var(--s-5) var(--s-6); row-gap: var(--s-7); }
+  .theme-toggle { right: var(--s-5); top: var(--s-5); }
+  .mark { display: none; }
 }
 </style>
 </head>
@@ -468,6 +590,11 @@ body {
 <svg class="mark" viewBox="0 0 254 275" xmlns="http://www.w3.org/2000/svg" aria-label="Perplexity">
   <path d="M207.649 2.21927C209.816 0.0528457 213.075 -0.595764 215.905 0.576694C218.736 1.74918 220.581 4.5119 220.581 7.57572V86.2554H245.452C249.636 86.2557 253.027 89.6472 253.027 93.8306V202.187C253.027 206.371 249.636 209.762 245.452 209.762H220.581V267.043C220.581 270.107 218.735 272.87 215.904 274.043C213.074 275.215 209.816 274.566 207.649 272.4L134.091 198.841V267.085C134.091 271.268 130.699 274.66 126.516 274.66C122.332 274.66 118.94 271.268 118.94 267.085V198.842L45.3828 272.4C43.2164 274.566 39.9585 275.215 37.1279 274.043C34.2973 272.87 32.4512 270.107 32.4512 267.043V209.762H7.5752C3.39155 209.762 2.88624e-05 206.371 0 202.187V93.8306C6.59711e-05 89.647 3.39158 86.2554 7.5752 86.2554H32.4512V7.57572C32.4512 4.51189 34.2973 1.74917 37.1279 0.576694C39.9584 -0.595448 43.2165 0.0529879 45.3828 2.21927L118.94 75.7769V7.57572C118.94 3.39212 122.332 0.000522602 126.516 0.000522602C130.699 0.000522602 134.091 3.39212 134.091 7.57572V75.7769L207.649 2.21927ZM47.6016 173.175V248.755L118.94 177.417V110.757L47.6016 173.175ZM134.091 177.416L205.431 248.755V202.303C205.43 202.265 205.428 202.226 205.428 202.187C205.428 202.148 205.43 202.109 205.431 202.07V173.175L134.091 110.757V177.416ZM217.993 164.037C219.637 165.475 220.581 167.553 220.581 169.738V194.612H237.877V101.406H146.411L217.993 164.037ZM15.1504 194.612H32.4512V169.738C32.4512 167.553 33.3941 165.475 35.0381 164.037L106.621 101.406H15.1504V194.612ZM47.6016 86.2554H107.993L47.6016 25.8638V86.2554ZM145.04 86.2554H205.431V25.8638L145.04 86.2554Z" fill="currentColor"/>
 </svg>
+
+<div class="theme-toggle" role="group" aria-label="Page theme">
+  <button type="button" data-theme-set="dark" aria-pressed="true">Dark</button>
+  <button type="button" data-theme-set="light" aria-pressed="false">Light</button>
+</div>
 
 <main class="page">
 
@@ -478,154 +605,71 @@ body {
     <p class="lede">Pre-built chart templates with the color, spacing, and hierarchy decisions already made. Swap in your data, ship. The audit harness catches the mistakes you'd otherwise catch in review.</p>
   </section>
 
-  <!-- ─────────── WHY ─────────── -->
+  <!-- ─────────── CATALOG ─────────── -->
   <section class="section">
     <header class="section-head">
-      <p class="section-tag">01 · Why this exists</p>
-      <h2 class="h2">Most chart mistakes are repeatable. Most are also invisible to the person making them.</h2>
+      <p class="section-tag">01 · Templates</p>
+      <h2 class="h2">Three starting points. Pick one, swap your data.</h2>
     </header>
-    <div class="prose">
-      <p>We ship a lot of charts. Blog posts, social cards, decks, launch pages. Until last week the chart on each one was a one-off built from scratch, which meant whoever made it had to re-decide every visual question from zero. Some of those decisions went well. Many didn't. Hue-coded sequential data, color carrying both category and intensity, four retinal variables stacked on one diagram, spacing that wandered between five and eighteen pixels with no consistent reason.</p>
-      <p>None of this is malicious. The rules that catch it live in books most of us haven't read. So the goal of this page isn't to teach you Tufte or Bertin. It's to take what's in their books, what we've learned shipping real work, and turn it into defaults you can grab without becoming a data-viz expert.</p>
-      <p class="dim">Three charts, six diagrams, two audit frameworks. That's the system today. It's not finished. But it's enough to keep us from shipping the same five mistakes over and over.</p>
-    </div>
-  </section>
-
-  <!-- ─────────── BAD GRAPHS ─────────── -->
-  <section class="section">
-    <header class="section-head">
-      <p class="section-tag">02 · What bad looks like</p>
-      <h2 class="h2">You can't avoid mistakes you can't name. So here are the ones we've actually made.</h2>
-    </header>
-
-    <div class="prose">
-      <p>Each pair below is a real chart we shipped (or almost shipped) and the corrected version. The point isn't to dunk on the original. The point is that the failure modes are <strong>structural</strong>, not aesthetic. Once you see them, you can't unsee them.</p>
-    </div>
-
-    <!-- ============ Pair 1: Bumblebee ============ -->
-    <div class="pair">
-      <div class="pair-card">
-        <p class="pair-label bad">Before · shipped on launch day</p>
-        <img class="pair-img" src="assets/bumblebee.original.jpg" alt="Original Bumblebee pipeline diagram with crowded steps and unclear flow">
-        <p class="pair-caption">The original. Five steps cluttered into a single horizontal band. No clear hierarchy between the action (scanning) and the outcome (the block). Bertin: 4 retinal variables active at once (color, size, position, and outline weight), which exceeds the image limit of 3.</p>
-      </div>
-      <div class="pair-card">
-        <p class="pair-label good">After · same data, rebuilt</p>
-        <img class="pair-img" src="assets/bumblebee.rebuilt.jpg" alt="Rebuilt Bumblebee pipeline diagram with clear vertical flow and one accent">
-        <p class="pair-caption">The rebuild. Position carries the flow (left to right is time). Value (border weight) separates the live step from the rest. One accent (teal) marks the punchline. That's three retinal variables. The story reads in one glance.</p>
-      </div>
-    </div>
-
-    <!-- ============ Pair 2: Snippet bar — hue ramp ============ -->
-    <div class="pair">
-      <div class="pair-card full">
-        <p class="pair-label bad">Before · ordered data encoded with hue</p>
-        <img class="pair-img" src="assets/snippet-bar.annotated.png" alt="Snippet bar chart with ten spacing violations marked in red">
-        <p class="pair-caption">The audit harness found ten places where the spacing was below the 20px floor. That's not a taste issue. It's a math issue. Margins collapsed, sub-floor gaps fought for the same eight pixels, the chart read as cramped without anyone being able to point to why.</p>
-      </div>
-    </div>
-
-    <!-- ============ Pair 3: Frontier line ============ -->
-    <div class="pair">
-      <div class="pair-card full">
-        <p class="pair-label bad">Same chart family, same audit</p>
-        <img class="pair-img" src="assets/frontier-line.annotated.png" alt="Frontier line chart with seven spacing violations marked in red">
-        <p class="pair-caption">Seven violations on the frontier chart. Same root cause. A chain of <code>margin-top</code> and <code>margin-bottom</code> declarations across the section stack means the actual gap between any two elements is the result of margin collapse, which is unreliable across nested containers, browsers, and zoom levels.</p>
-      </div>
-    </div>
-
-    <div class="prose">
-      <p>The fix in both cases is the same. Stop using margins to space sections. Use a <code>display: grid</code> container with a single <code>row-gap</code> token. The gap is the contract. There's nothing to compute or collapse.</p>
-    </div>
-  </section>
-
-  <!-- ─────────── THE FOUR RULES ─────────── -->
-  <section class="section">
-    <header class="section-head">
-      <p class="section-tag">03 · The four rules</p>
-      <h2 class="h2">If you only remember four things, remember these.</h2>
-    </header>
-
-    <div class="prose">
-      <p>Pulled from Bertin's <em>Semiology of Graphics</em> and Tufte's <em>Visual Display of Quantitative Information</em>. We read both books so you don't have to. The full research briefs are linked at the bottom of each rule if you want the source.</p>
-    </div>
-
-    <div class="rules">
-      <article class="rule">
-        <p class="rule-num">Rule 01</p>
-        <h3 class="rule-h">One accent. Pick the punchline.</h3>
-        <p class="rule-body">Every chart has one thing the reader should take away. Color that. Leave everything else neutral. If three bars are teal, two are magenta, and one is indigo, you've encoded nothing. You've just made noise. Reserve hue for the moment that earns it.</p>
-        <p class="rule-source">Bertin pp. 85–91 · selective vs associative variables</p>
-      </article>
-
-      <article class="rule">
-        <p class="rule-num">Rule 02</p>
-        <h3 class="rule-h">Length on a common scale wins.</h3>
-        <p class="rule-body">When comparing quantities, position-on-aligned-scale (bar length, point position on a shared axis) is more accurate than every other encoding by a wide margin. Cleveland and McGill ranked it #1 across forty years of perception experiments. Use bars or aligned dot plots. Resist the urge to reach for pie, area, or angle.</p>
-        <p class="rule-source">Cleveland & McGill 1984 · perceptual accuracy ranking</p>
-      </article>
-
-      <article class="rule">
-        <p class="rule-num">Rule 03</p>
-        <h3 class="rule-h">Hue is for categories. Value is for order.</h3>
-        <p class="rule-body">If your data has an order (low to high, before to after, worst to best), encode that with value: a single-hue ramp from light to dark. Multiple hues to encode ordered data is a construction error. The reader has to learn a color-to-number mapping that the chart is hiding from them. It's the most common chart mistake at Perplexity, and the one fixed on the snippet bar last week.</p>
-        <p class="rule-source">Bertin pp. 85–91 · the construction error</p>
-      </article>
-
-      <article class="rule">
-        <p class="rule-num">Rule 04</p>
-        <h3 class="rule-h">The channel between elements is the most important spacing decision.</h3>
-        <p class="rule-body">Whether it's a wire between two nodes, a gap between bars, or padding around a chart's data area, the channel is what makes the relationship legible. Pick one token from the spacing scale and use it everywhere. Don't let any channel collapse below 20 pixels. The system below catches you when you do.</p>
-        <p class="rule-source">Tufte chapter 5 · data-ink ratio and the small-multiples grid</p>
-      </article>
-    </div>
-  </section>
-
-  <!-- ─────────── CATALOG · START FROM THESE ─────────── -->
-  <section class="section">
-    <header class="section-head">
-      <p class="section-tag">04 · Start from these</p>
-      <h2 class="h2">Three chart starting points. Take any of them, swap your data in, ship.</h2>
-    </header>
-
-    <div class="prose">
-      <p>Each one has been audited end to end. The HTML is single-file, no build step. Copy it into your blog post or deck export, edit the <code>data</code> object near the bottom of the file, you're done. If your chart doesn't fit any of these patterns, that's a real signal. The system grows from those gaps.</p>
-    </div>
 
     <div class="catalog">
 
-      <article class="cat-card">
-        <img class="cat-img" src="assets/snippet-bar.png" alt="Snippet bar chart, horizontal bars showing change in tokens per snippet">
+      <article class="cat-card" data-chart="snippet-bar">
+        <a class="cat-preview" href="assets/snippet-bar.dark.16x9.html" target="_blank">
+          <img data-preview src="assets/snippet-bar.dark.16x9.jpg" alt="Snippet bar chart">
+        </a>
         <div class="cat-meta">
           <h3 class="cat-name">Snippet bar</h3>
-          <p class="cat-use"><strong>Use it when</strong> you have a handful of named categories and a single quantity per category, and the story is the spread between them. Negative and positive on the same axis works fine. The bar with the punchline gets the accent; everything else goes neutral.</p>
-          <div class="cat-links">
-            <a href="assets/snippet-bar.html" target="_blank">Open live</a>
-            <a href="assets/snippet-bar.html" target="_blank">View source</a>
+          <p class="cat-use"><strong>Use when</strong> you have a handful of named categories and one quantity per category. The story is the spread between them. Negative and positive on the same axis works fine.</p>
+          <div class="cat-controls">
+            <div class="cat-theme" role="group" aria-label="Preview theme">
+              <button type="button" data-card-theme="dark" aria-pressed="true">Dark</button>
+              <button type="button" data-card-theme="light" aria-pressed="false">Light</button>
+            </div>
+            <div class="cat-links">
+              <a data-live="snippet-bar" href="assets/snippet-bar.dark.16x9.html" target="_blank">Open live</a>
+              <a data-source="snippet-bar" href="assets/snippet-bar.dark.16x9.html" target="_blank">View source</a>
+            </div>
           </div>
         </div>
       </article>
 
-      <article class="cat-card">
-        <img class="cat-img" src="assets/frontier-line.png" alt="Frontier line chart, accuracy versus context tokens across model variants">
+      <article class="cat-card" data-chart="frontier-line">
+        <a class="cat-preview" href="assets/frontier-line.dark.16x9.html" target="_blank">
+          <img data-preview src="assets/frontier-line.dark.16x9.jpg" alt="Frontier line chart">
+        </a>
         <div class="cat-meta">
           <h3 class="cat-name">Frontier line</h3>
-          <p class="cat-use"><strong>Use it when</strong> you're showing a tradeoff curve. Two continuous axes, two to four lines, and the story is which line sits higher and to the left. The hero variant gets a solid line; reference baselines go dashed in warm grey. Markers stay sparse so the curve reads as a curve.</p>
-          <div class="cat-links">
-            <a href="assets/frontier-line.html" target="_blank">Open live</a>
-            <a href="assets/frontier-line.html" target="_blank">View source</a>
+          <p class="cat-use"><strong>Use when</strong> you're showing a tradeoff curve. Two continuous axes, two to four lines, and the story is which line sits higher and to the left. The hero variant gets a solid line; reference baselines go dashed in warm grey.</p>
+          <div class="cat-controls">
+            <div class="cat-theme" role="group" aria-label="Preview theme">
+              <button type="button" data-card-theme="dark" aria-pressed="true">Dark</button>
+              <button type="button" data-card-theme="light" aria-pressed="false">Light</button>
+            </div>
+            <div class="cat-links">
+              <a data-live="frontier-line" href="assets/frontier-line.dark.16x9.html" target="_blank">Open live</a>
+              <a data-source="frontier-line" href="assets/frontier-line.dark.16x9.html" target="_blank">View source</a>
+            </div>
           </div>
         </div>
       </article>
 
-      <article class="cat-card">
-        <img class="cat-img" src="assets/ranked-scorecard.png" alt="Ranked scorecard, frontier model leaderboard with accuracy bars">
+      <article class="cat-card" data-chart="ranked-scorecard">
+        <a class="cat-preview" href="assets/ranked-scorecard.dark.16x9.html" target="_blank">
+          <img data-preview src="assets/ranked-scorecard.dark.16x9.jpg" alt="Ranked scorecard">
+        </a>
         <div class="cat-meta">
           <h3 class="cat-name">Ranked scorecard</h3>
-          <p class="cat-use"><strong>Use it when</strong> you have a leaderboard. Small set of named entities (six to ten), multiple comparable metrics, and the reader's job is to scan the ranking. The top row gets the accent; the reference row uses warm grey; the trailing row gets magenta. The accuracy bar is length-on-common-scale, which is what's doing the actual perceptual work.</p>
-          <div class="cat-links">
-            <a href="assets/ranked-scorecard.html" target="_blank">Open live</a>
-            <a href="audit/" target="_blank">Audit scripts</a>
+          <p class="cat-use"><strong>Use when</strong> you have a leaderboard. Six to ten named entities, multiple comparable metrics, and the reader's job is to scan the ranking. The accuracy bar is length-on-common-scale, the most perceptually accurate encoding for quantitative comparison.</p>
+          <div class="cat-controls">
+            <div class="cat-theme" role="group" aria-label="Preview theme">
+              <button type="button" data-card-theme="dark" aria-pressed="true">Dark</button>
+              <button type="button" data-card-theme="light" aria-pressed="false">Light</button>
+            </div>
+            <div class="cat-links">
+              <a data-live="ranked-scorecard" href="assets/ranked-scorecard.dark.16x9.html" target="_blank">Open live</a>
+              <a data-source="ranked-scorecard" href="assets/ranked-scorecard.dark.16x9.html" target="_blank">View source</a>
+            </div>
           </div>
         </div>
       </article>
@@ -633,107 +677,237 @@ body {
     </div>
   </section>
 
-  <!-- ─────────── THE SYSTEM CATCHES YOU ─────────── -->
+  <!-- ─────────── SOCIAL ─────────── -->
   <section class="section">
     <header class="section-head">
-      <p class="section-tag">05 · The audit catches you</p>
-      <h2 class="h2">There's a script that measures every gap in your chart and tells you if any of them are below floor.</h2>
+      <p class="section-tag">02 · Social cards</p>
+      <h2 class="h2">1:1 versions for X, Threads, LinkedIn.</h2>
     </header>
 
     <div class="prose">
-      <p>It's called <code>measure.cjs</code>. It opens your HTML in a headless browser, reads the computed styles and bounding rectangles of every element, and classifies every gap against the spacing scale. Anything below 20 pixels (the <code>--s-4</code> floor) is flagged as a violation. Anything between scale tokens is flagged as off-scale. Everything else passes.</p>
-      <p>Here's what the verdict looks like on the three charts above. Each ran through the harness with zero sub-floor violations. The numbers are real measurements, not claims.</p>
+      <p>Each template has a 1080×1080 variant tuned for social feeds. Type sizes scale up, the frame becomes square, and density drops to fit a phone screen. The scorecard shows the top six rows at 1:1 instead of all eight, because the social card story is who's at the top, not the full ranking.</p>
     </div>
 
-    <div class="verdict">
-      <div class="verdict-row head">
-        <span class="verdict-name">Chart</span>
-        <span>On scale</span>
-        <span>Off scale</span>
-        <span>Sub-floor</span>
-        <span>Intra-label</span>
-      </div>
-      <div class="verdict-row">
-        <span class="verdict-name">Snippet bar</span>
-        <span class="verdict-num">13</span>
-        <span class="verdict-warn">0</span>
-        <span class="verdict-zero">0</span>
-        <span class="verdict-warn">—</span>
-      </div>
-      <div class="verdict-row">
-        <span class="verdict-name">Frontier line</span>
-        <span class="verdict-num">12</span>
-        <span class="verdict-warn">0</span>
-        <span class="verdict-zero">0</span>
-        <span class="verdict-warn">—</span>
-      </div>
-      <div class="verdict-row">
-        <span class="verdict-name">Ranked scorecard</span>
-        <span class="verdict-num">20</span>
-        <span class="verdict-warn">1</span>
-        <span class="verdict-zero">0</span>
-        <span class="verdict-warn">2</span>
-      </div>
-    </div>
-
-    <div class="prose">
-      <p class="dim">The scorecard's one off-scale value is the title-text-end to mark-start gap (44 pixels), which is content-driven whitespace, not a layout decision. The two intra-label gaps are the model-name to org-label stack and the delta-arrow to delta-number gap. Both are inside a single visual unit where tight stacking is correct. The harness tracks these separately so the verdict stays honest.</p>
-      <p>If you're remixing one of the templates and you change a margin, run the harness before you ship. It catches mistakes you wouldn't catch by eye.</p>
+    <div class="social">
+      <article class="social-card">
+        <a class="social-preview" href="assets/snippet-bar.dark.1x1.html" target="_blank">
+          <img data-social="snippet-bar" src="assets/snippet-bar.dark.1x1.jpg" alt="Snippet bar, 1:1">
+        </a>
+        <div class="social-label">
+          <h4 class="social-name">Snippet bar</h4>
+          <span class="social-meta">1080 × 1080</span>
+        </div>
+      </article>
+      <article class="social-card">
+        <a class="social-preview" href="assets/frontier-line.dark.1x1.html" target="_blank">
+          <img data-social="frontier-line" src="assets/frontier-line.dark.1x1.jpg" alt="Frontier line, 1:1">
+        </a>
+        <div class="social-label">
+          <h4 class="social-name">Frontier line</h4>
+          <span class="social-meta">1080 × 1080</span>
+        </div>
+      </article>
+      <article class="social-card">
+        <a class="social-preview" href="assets/ranked-scorecard.dark.1x1.html" target="_blank">
+          <img data-social="ranked-scorecard" src="assets/ranked-scorecard.dark.1x1.jpg" alt="Ranked scorecard, 1:1">
+        </a>
+        <div class="social-label">
+          <h4 class="social-name">Ranked scorecard</h4>
+          <span class="social-meta">1080 × 1080</span>
+        </div>
+      </article>
     </div>
   </section>
 
-  <!-- ─────────── HOW TO USE ─────────── -->
+  <!-- ─────────── AUDIT ONE-LINER ─────────── -->
   <section class="section">
     <header class="section-head">
-      <p class="section-tag">06 · How to use this</p>
-      <h2 class="h2">Three paths, depending on how much customization you need.</h2>
+      <p class="section-tag">03 · Audit</p>
+      <h2 class="h2">The system catches the mistakes you'd otherwise catch in review.</h2>
     </header>
 
-    <div class="paths">
-      <article class="path">
-        <p class="path-tag">Path A</p>
-        <h3 class="path-h">Copy a template, swap your data.</h3>
-        <p class="path-body">Open one of the three live links in section 04. Save the HTML. Edit the <code>data</code> array near the bottom of the file. Open the file in a browser, screenshot it, embed it in your post. No build step.</p>
-      </article>
-      <article class="path">
-        <p class="path-tag">Path B</p>
-        <h3 class="path-h">Embed the live HTML directly.</h3>
-        <p class="path-body">If your blog supports raw HTML embeds, drop the chart in. Fonts and colors are self-contained. The frame fits a 1316-pixel column at full resolution and scales down responsively below 880 pixels.</p>
-      </article>
-      <article class="path">
-        <p class="path-tag">Path C</p>
-        <h3 class="path-h">Request a new pattern.</h3>
-        <p class="path-body">If your data doesn't fit any of the three existing patterns, that's information. It means there's a real chart type missing from the system. Open an issue describing what you're trying to show. The system grows when it hits a gap.</p>
-      </article>
+    <div class="audit-line">
+      <span class="badge">Pass</span>
+      <span><span class="count">All 12 chart variants</span> · zero sub-floor spacing violations · <span class="count">measure.cjs</span> in the audit folder runs the check in CI.</span>
+      <a href="audit/" target="_blank">View the harness →</a>
     </div>
+  </section>
+
+  <!-- ─────────── DISCLOSURE: WHY + RULES + BAD GRAPHS ─────────── -->
+  <section class="section">
+    <header class="section-head">
+      <p class="section-tag">04 · Background</p>
+      <h2 class="h2">Why these defaults, and what they're protecting against.</h2>
+    </header>
+
+    <details class="disclosure">
+      <summary>
+        <span>Why this exists, the four rules, and what bad looks like</span>
+        <span class="summary-meta">~3 min read</span>
+        <svg class="chevron" viewBox="0 0 14 14" fill="none"><path d="M3 5 L7 9 L11 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </summary>
+      <div class="disclosure-body">
+
+        <div class="prose">
+          <p>Until last week, every chart shipped at Perplexity was a one-off. Whoever built it had to re-decide every visual question from scratch. Some decisions went well. Many didn't. Hue-coded sequential data, four retinal variables stacked on one diagram, spacing that wandered between five and eighteen pixels with no consistent reason.</p>
+          <p>The rules that catch these mistakes live in books most of us haven't read. The toolkit pulls what's in those books, adds what's been learned shipping real work, and turns it into defaults that don't require a data-viz background.</p>
+        </div>
+
+        <!-- The four rules -->
+        <div class="rules">
+          <article class="rule">
+            <p class="rule-num">Rule 01</p>
+            <h3 class="rule-h">One accent. Pick the punchline.</h3>
+            <p class="rule-body">Every chart has one thing the reader should take away. Color that. Leave everything else neutral. If three bars are teal, two are magenta, and one is indigo, nothing is encoded. Reserve hue for the moment that earns it.</p>
+            <p class="rule-source">Bertin pp. 85–91 · selective vs associative variables</p>
+          </article>
+
+          <article class="rule">
+            <p class="rule-num">Rule 02</p>
+            <h3 class="rule-h">Length on a common scale wins.</h3>
+            <p class="rule-body">For quantitative comparison, position-on-aligned-scale beats every other encoding by a wide margin. Cleveland and McGill ranked it #1 across forty years of perception experiments. Bars and aligned dot plots. Skip pie, area, angle.</p>
+            <p class="rule-source">Cleveland &amp; McGill 1984 · perceptual accuracy ranking</p>
+          </article>
+
+          <article class="rule">
+            <p class="rule-num">Rule 03</p>
+            <h3 class="rule-h">Hue is for categories. Value is for order.</h3>
+            <p class="rule-body">If your data has an order (low to high, before to after, worst to best), encode it with value: a single-hue ramp from light to dark. Multiple hues for ordered data is a construction error. The reader has to learn a color-to-number mapping the chart is hiding from them.</p>
+            <p class="rule-source">Bertin pp. 85–91 · the construction error</p>
+          </article>
+
+          <article class="rule">
+            <p class="rule-num">Rule 04</p>
+            <h3 class="rule-h">The channel between elements is the most important spacing decision.</h3>
+            <p class="rule-body">A wire between two nodes, a gap between bars, padding around a chart's data area: the channel is what makes the relationship legible. Pick one token from the spacing scale and use it everywhere. Don't let any channel collapse below 20 pixels.</p>
+            <p class="rule-source">Tufte chapter 5 · data-ink ratio and the small-multiples grid</p>
+          </article>
+        </div>
+
+        <!-- Bad-graph evidence -->
+        <div class="prose">
+          <p><strong>What bad looks like.</strong> The pair below is a real diagram from a launch day, and the rebuilt version. The failure mode is structural, not aesthetic. Four retinal variables active at once (color, size, position, outline weight) instead of three.</p>
+        </div>
+
+        <div class="pair">
+          <div class="pair-card">
+            <p class="pair-label bad">Before · launch day</p>
+            <img class="pair-img" src="assets/bumblebee.original.jpg" alt="Original Bumblebee pipeline diagram">
+            <p class="pair-caption">Five steps crowded into one horizontal band. No hierarchy between action and outcome. Four retinal variables active, exceeding Bertin's image limit of three.</p>
+          </div>
+          <div class="pair-card">
+            <p class="pair-label good">After · rebuilt</p>
+            <img class="pair-img" src="assets/bumblebee.rebuilt.jpg" alt="Rebuilt Bumblebee pipeline diagram">
+            <p class="pair-caption">Position carries the flow. Value separates the live step from the rest. One accent marks the punchline. Three retinal variables. The story reads in one glance.</p>
+          </div>
+        </div>
+
+        <div class="prose">
+          <p>The harness found ten sub-floor spacing violations on the original snippet bar and seven on the frontier line. Both were caused by chained margins between sections, which collapse unreliably across browsers and zoom levels. The corrected versions use a CSS Grid stack with a single <code>row-gap</code> token. The gap becomes the contract. There's nothing to compute.</p>
+        </div>
+
+        <div class="pair">
+          <div class="pair-card full">
+            <p class="pair-label bad">Before · 10 spacing violations</p>
+            <img class="pair-img" src="assets/snippet-bar.annotated.png" alt="Snippet bar with violations annotated">
+            <p class="pair-caption">Every red box is a layout gap below the 20-pixel floor. The legend on the right enumerates them. Each violation maps to a specific token; the fix in every case is to replace the margin with a grid <code>row-gap</code>.</p>
+          </div>
+        </div>
+
+      </div>
+    </details>
   </section>
 
   <!-- ─────────── FOOTER ─────────── -->
   <footer class="footer">
     <div class="footer-col">
       <p class="label">Research briefs</p>
-      <a href="../06_docs/research-tufte-canon.md">Tufte canon · research brief</a>
-      <a href="../06_docs/research-bertin-semiology.md">Bertin semiology · research brief</a>
+      <a href="../06_docs/research-tufte-canon.md">Tufte canon</a>
+      <a href="../06_docs/research-bertin-semiology.md">Bertin semiology</a>
     </div>
     <div class="footer-col">
       <p class="label">Audit frameworks</p>
       <a href="../06_docs/audit-tufte-v01.md">Tufte audit · 14 criteria</a>
       <a href="../06_docs/audit-bertin-v01.md">Bertin audit · 15 criteria</a>
-      <a href="../06_docs/audit-type-v01.md">Type audit</a>
+      <a href="audit/">Spacing audit · measure.cjs</a>
     </div>
     <div class="footer-col">
-      <p class="label">Diagrams (system family)</p>
-      <a href="../08_diagrams/">All six archetypes</a>
+      <p class="label">Diagram archetypes</p>
+      <a href="../08_diagrams/">All six (P/T/H/S/C/D)</a>
       <a href="../08_diagrams/README.md">Diagram system README</a>
     </div>
     <div class="footer-col">
-      <p class="label">Repo &amp; contact</p>
+      <p class="label">Repo &amp; issues</p>
       <a href="https://github.com/phi-pplx/pplx-chart-system">github.com/phi-pplx/pplx-chart-system</a>
-      <a href="https://github.com/phi-pplx/pplx-chart-system/issues">Open an issue · flag what's not working</a>
+      <a href="https://github.com/phi-pplx/pplx-chart-system/issues">Open an issue</a>
     </div>
   </footer>
 
 </main>
+
+<script>
+  // ───── Page-level theme toggle ─────
+  const root = document.documentElement;
+  const stored = localStorage.getItem('toolkit-theme');
+  if (stored === 'light') root.setAttribute('data-theme', 'light');
+
+  function setPageTheme(t) {
+    if (t === 'light') root.setAttribute('data-theme', 'light');
+    else root.removeAttribute('data-theme');
+    localStorage.setItem('toolkit-theme', t);
+    document.querySelectorAll('.theme-toggle button').forEach(b => {
+      b.setAttribute('aria-pressed', b.dataset.themeSet === t ? 'true' : 'false');
+    });
+  }
+  // Sync the toggle UI to the active theme on load
+  setPageTheme(root.getAttribute('data-theme') === 'light' ? 'light' : 'dark');
+
+  document.querySelectorAll('.theme-toggle button').forEach(b => {
+    b.addEventListener('click', () => setPageTheme(b.dataset.themeSet));
+  });
+
+  // ───── Per-card theme toggle ─────
+  // Swaps the preview image and the open-live / view-source links to
+  // the matching theme variant. Each card maintains its own theme state
+  // so a researcher can compare the snippet bar in dark next to the
+  // frontier line in light if they want to.
+  document.querySelectorAll('.cat-card').forEach(card => {
+    const chart = card.dataset.chart;
+    const buttons = card.querySelectorAll('[data-card-theme]');
+    const preview = card.querySelector('[data-preview]');
+    const live = card.querySelector('[data-live]');
+    const source = card.querySelector('[data-source]');
+
+    buttons.forEach(b => {
+      b.addEventListener('click', () => {
+        const t = b.dataset.cardTheme;
+        buttons.forEach(other => other.setAttribute('aria-pressed', other === b ? 'true' : 'false'));
+        preview.src   = `assets/${chart}.${t}.16x9.jpg`;
+        live.href     = `assets/${chart}.${t}.16x9.html`;
+        source.href   = `assets/${chart}.${t}.16x9.html`;
+      });
+    });
+  });
+
+  // ───── Social cards · follow page theme ─────
+  // Social previews swap when the page theme toggles, so the social
+  // section reads in the same theme the page is currently using.
+  function syncSocial(t) {
+    document.querySelectorAll('[data-social]').forEach(img => {
+      const chart = img.dataset.social;
+      img.src = `assets/${chart}.${t}.1x1.jpg`;
+      const link = img.parentElement;
+      link.href = `assets/${chart}.${t}.1x1.html`;
+    });
+  }
+  // Hook into the page theme setter
+  const originalSetPageTheme = setPageTheme;
+  setPageTheme = function(t) {
+    originalSetPageTheme(t);
+    syncSocial(t);
+  };
+  syncSocial(root.getAttribute('data-theme') === 'light' ? 'light' : 'dark');
+</script>
 
 </body>
 </html>

@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Three-variant evidence frontier · spacing-corrected</title>
+<style>
+/* === Spacing scale (matches diagram system) === */
+:root {
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 14px;
+  --s-4: 20px;   /* FLOOR */
+  --s-5: 28px;
+  --s-6: 40px;
+  --s-7: 56px;
+  --s-8: 80px;
+  --s-9: 112px;
+}
+
+:root {
+  --bg: #000000;
+  --border: #1f1f1f;
+  --rule: #1a1a1a;
+  --grid: #161616;
+  --grid-axis: #2a2a2a;
+  --text: #e8e8e8;
+  --text-dim: #8a8a8a;
+  --text-muted: #7a7a7a;
+  --hero:    #35bec8;  /* teal 300 · distilled (production) */
+  --pruned:  #7284e6;  /* indigo 400 */
+  --teacher: #d4cdc1;  /* warm grey · reference */
+  --eleven:  #dd54ac;  /* magenta 400 · trailing */
+}
+
+@font-face {
+  font-family: 'PPLX Sans';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: block;
+  font-synthesis: none;
+  src: url('../../04_brand/fonts/PPLX-Sans-Beta-v2-VF.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'PPLX Mono';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: block;
+  font-synthesis: none;
+  src: url('../../04_brand/fonts/PPLX-Mono-Beta-v0-VF.woff2') format('woff2');
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); }
+body {
+  font-family: 'PPLX Sans', system-ui, sans-serif;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+
+/* ────── Frame · grid stack replaces flex+margin chain ──────
+   header | section-label | chart-wrap | legend | footer */
+.frame {
+  width: 1316px;
+  height: 1645px;
+  margin: 0 auto;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: var(--s-6);
+  display: grid;
+  grid-template-rows: auto auto 1fr auto auto;
+  row-gap: var(--s-5);  /* --s-5 (28px) uniform between major blocks */
+  position: relative;
+}
+
+/* ────── Header ──────
+   Header rule clearance bumped 18px → --s-4 (20px) */
+.header {
+  position: relative;
+  display: block;
+  padding: 0 var(--s-8) var(--s-4) 0;
+  border-bottom: 1px solid var(--rule);
+  min-height: 56px;
+}
+.title {
+  display: block;
+  margin: 0;
+  font-family: 'PPLX Mono', ui-monospace, SFMono-Regular, monospace;
+  font-variation-settings: 'wght' 520, 'slnt' 0;
+  font-size: 28px;
+  line-height: 1.18;
+  font-weight: 520;
+  letter-spacing: -0.005em;
+  color: var(--text);
+}
+
+/* Subtitle: previous 8px gap → --s-4 (20px) so it has air between title and itself */
+.subtitle {
+  display: block;
+  margin: var(--s-4) 0 0 0;
+  font-family: 'PPLX Mono', ui-monospace, SFMono-Regular, monospace;
+  font-variation-settings: 'wght' 450, 'slnt' 0;
+  font-size: 14px;
+  line-height: 1.25;
+  font-weight: 450;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.mark {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 36px;
+  height: 36px;
+  display: block;
+  color: var(--text);
+}
+.mark svg { width: 36px; height: 36px; display: block; }
+
+.section-label {
+  font-family: 'PPLX Mono', ui-monospace, SFMono-Regular, monospace;
+  font-variation-settings: 'wght' 500, 'slnt' 0;
+  font-size: 18px;
+  line-height: 1.25;
+  letter-spacing: 0.16em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.chart-wrap {
+  position: relative;
+  margin: 0;
+}
+svg.chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1236 / 1100;
+}
+
+.ax-tick {
+  font-family: 'PPLX Mono';
+  font-variation-settings: 'wght' 400, 'slnt' 0;
+  font-size: 18px;
+  fill: var(--text-dim);
+  letter-spacing: 0.02em;
+}
+.ax-label {
+  font-family: 'PPLX Mono';
+  font-variation-settings: 'wght' 500, 'slnt' 0;
+  font-size: 18px;
+  fill: var(--text-dim);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.annotation {
+  font-family: 'PPLX Mono';
+  font-variation-settings: 'wght' 400, 'slnt' 0;
+  font-size: 18px;
+  fill: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+/* ────── Legend · grid with row-gap and column-gap on the scale ──────
+   Was 14px row / 28px column. Row gap raised to floor --s-4 (20px). */
+.legend {
+  display: grid;
+  grid-template-columns: 1.1fr 1.2fr 1fr 0.8fr;
+  row-gap: var(--s-4);     /* was 14px */
+  column-gap: var(--s-5);  /* was 28px → snap to --s-5 (28px) */
+  font-family: 'PPLX Mono', ui-monospace, SFMono-Regular, monospace;
+  font-variation-settings: 'wght' 500, 'slnt' 0;
+  color: var(--text);
+}
+.legend .item {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);  /* was 16px → --s-4 (20px) glyph→label */
+  font-size: 19px;
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--text);
+  white-space: nowrap;
+}
+.legend .item.dim { color: var(--text-dim); }
+.legend .glyph {
+  flex: 0 0 46px;
+  height: 18px;
+  position: relative;
+}
+.legend .glyph svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.legend .item .sub {
+  color: var(--text-dim);
+  margin-left: 6px;
+  font-variation-settings: 'wght' 400, 'slnt' 0;
+  font-size: 17px;
+}
+
+/* ────── Footer · padding-top raised 14px → --s-4 (20px) ────── */
+.footer {
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--rule);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--s-5);
+  font-family: 'PPLX Mono', ui-monospace, SFMono-Regular, monospace;
+  font-variation-settings: 'wght' 400, 'slnt' 0;
+  font-size: 17px;
+  line-height: 1.25;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+
+/* ────── Light theme overlay ──────
+   Surfaces flip to warm whites. Text inverts. Accents stay identical so
+   the punchline/extreme/cool/neutral roles remain consistent across themes. */
+[data-theme="light"] {
+  --bg:        #faf7f1;   /* warm white, matches PPLX paper */
+  --surface:   #f0ece2;
+  --border:    #e0d9c8;
+  --rule:      #d6cebd;
+  --grid:      #e8e2d4;
+  --grid-axis: #c8bfac;
+  --grid-zero: #b4a994;
+  --text:      #1a1a1a;
+  --text-dim:  #5a5a5a;
+  --text-muted:#7a7a7a;
+  --inset:     #faf7f1;
+  --bar-rest:  #d6cebd;
+}
+[data-theme="light"] .value.light { color: #1a1a1a; }
+
+
+/* ────── 1:1 social aspect ──────
+   Frame becomes square. Type sizes scale up so the chart reads on a phone
+   in a feed. Footer collapses to a single line where applicable. */
+[data-aspect="1x1"] .frame {
+  width: 1080px;
+  height: 1080px;
+  padding: var(--s-7);   /* tighter outer padding at 1:1 */
+}
+[data-aspect="1x1"] .title {
+  font-size: 26px;
+}
+[data-aspect="1x1"] .section-label {
+  font-size: 16px;
+}
+[data-aspect="1x1"] .footer {
+  font-size: 14px;
+  gap: var(--s-4);
+}
+/* Snippet bar specifics — shorter category column at 1:1 */
+[data-aspect="1x1"] .row {
+  grid-template-columns: 180px 1fr;
+  height: 92px;
+}
+[data-aspect="1x1"] .row .cat {
+  font-size: 15px;
+  padding-right: var(--s-4);
+}
+[data-aspect="1x1"] .barwrap {
+  height: 44px;
+}
+[data-aspect="1x1"] .value {
+  font-size: 16px;
+  padding: 0 var(--s-3);
+}
+[data-aspect="1x1"] .xaxis {
+  margin-left: 180px;
+  margin-right: var(--s-3);
+}
+[data-aspect="1x1"] .xlabel {
+  margin-left: 180px;
+  margin-right: var(--s-3);
+}
+[data-aspect="1x1"] .tick {
+  font-size: 14px;
+}
+[data-aspect="1x1"] .subtitle {
+  font-size: 13px;
+}
+/* Ranked scorecard specifics at 1:1 — drop the accuracy bar column.
+   Also tightens row padding so 8 rows fit in 1080×1080. */
+[data-aspect="1x1"] .row-grid {
+  --cols: 48px 1fr 120px 110px 95px;
+  grid-template-columns: var(--cols);
+  column-gap: var(--s-4);
+}
+[data-aspect="1x1"] .cell-acc-bar { display: none; }
+[data-aspect="1x1"] .col-header.bar { display: none; }
+[data-aspect="1x1"] .axis-key { display: none; }
+/* Scorecard 1:1 — honor the spacing floor. Tbody row-gap stays at --s-4,
+   row padding stays at --s-4. To fit within 1080 the social card shows
+   only the top 6 leaderboard entries: the 1:1 narrative is 'who's at the
+   top', not 'the full ranking'. The 8-row view stays on 16:9. */
+[data-aspect="1x1"] .tbody { row-gap: var(--s-4); }
+[data-aspect="1x1"] .tbody .row { padding: var(--s-4) 0; }
+[data-aspect="1x1"] .tbody .row:nth-child(n+7) { display: none; }
+[data-aspect="1x1"] .cell-model .name { font-size: 16px; }
+[data-aspect="1x1"] .cell-model .org { font-size: 11px; }
+[data-aspect="1x1"] .cell-accuracy { font-size: 17px; }
+[data-aspect="1x1"] .cell-latency { font-size: 15px; }
+[data-aspect="1x1"] .cell-delta { font-size: 14px; }
+[data-aspect="1x1"] .cell-rank { font-size: 15px; }
+[data-aspect="1x1"] .col-header { font-size: 11px; }
+/* Hero row left border thinner at 1:1 so it doesn't dominate */
+[data-aspect="1x1"] .row.hero::before {
+  width: 2px;
+  left: calc(var(--s-3) * -1);
+}
+/* Frontier line at 1:1 — fit the SVG to its container by height not
+   aspect-ratio, otherwise it overflows the 1080×1080 frame and clips
+   the x-axis labels and the legend. */
+[data-aspect="1x1"] svg.chart {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  display: block;
+  max-height: 100%;
+}
+[data-aspect="1x1"] .chart-wrap {
+  display: block;
+  overflow: hidden;
+  min-height: 0;
+}
+/* Legend reflows to 2x2 at 1:1 so all four series fit. */
+[data-aspect="1x1"] .legend {
+  grid-template-columns: 1fr 1fr;
+  row-gap: var(--s-4);
+  column-gap: var(--s-5);
+}
+[data-aspect="1x1"] .legend .item { font-size: 15px; }
+[data-aspect="1x1"] .legend .item .sub { font-size: 13px; }
+
+</style>
+</head>
+<body data-theme="light" data-aspect="1x1">
+
+<div class="frame">
+
+  <div class="header">
+    <div class="title">Three-variant evidence frontier</div>
+    <div class="subtitle">UPPER-LEFT IS BETTER</div>
+    <svg class="mark" viewBox="0 0 254 275" xmlns="http://www.w3.org/2000/svg" aria-label="Perplexity">
+      <path d="M207.649 2.21927C209.816 0.0528457 213.075 -0.595764 215.905 0.576694C218.736 1.74918 220.581 4.5119 220.581 7.57572V86.2554H245.452C249.636 86.2557 253.027 89.6472 253.027 93.8306V202.187C253.027 206.371 249.636 209.762 245.452 209.762H220.581V267.043C220.581 270.107 218.735 272.87 215.904 274.043C213.074 275.215 209.816 274.566 207.649 272.4L134.091 198.841V267.085C134.091 271.268 130.699 274.66 126.516 274.66C122.332 274.66 118.94 271.268 118.94 267.085V198.842L45.3828 272.4C43.2164 274.566 39.9585 275.215 37.1279 274.043C34.2973 272.87 32.4512 270.107 32.4512 267.043V209.762H7.5752C3.39155 209.762 2.88624e-05 206.371 0 202.187V93.8306C6.59711e-05 89.647 3.39158 86.2554 7.5752 86.2554H32.4512V7.57572C32.4512 4.51189 34.2973 1.74917 37.1279 0.576694C39.9584 -0.595448 43.2165 0.0529879 45.3828 2.21927L118.94 75.7769V7.57572C118.94 3.39212 122.332 0.000522602 126.516 0.000522602C130.699 0.000522602 134.091 3.39212 134.091 7.57572V75.7769L207.649 2.21927ZM47.6016 173.175V248.755L118.94 177.417V110.757L47.6016 173.175ZM134.091 177.416L205.431 248.755V202.303C205.43 202.265 205.428 202.226 205.428 202.187C205.428 202.148 205.43 202.109 205.431 202.07V173.175L134.091 110.757V177.416ZM217.993 164.037C219.637 165.475 220.581 167.553 220.581 169.738V194.612H237.877V101.406H146.411L217.993 164.037ZM15.1504 194.612H32.4512V169.738C32.4512 167.553 33.3941 165.475 35.0381 164.037L106.621 101.406H15.1504V194.612ZM47.6016 86.2554H107.993L47.6016 25.8638V86.2554ZM145.04 86.2554H205.431V25.8638L145.04 86.2554Z" fill="currentColor"/>
+    </svg>
+  </div>
+
+  <div class="section-label">Useful evidence retained vs context tokens sent downstream</div>
+
+  <div class="chart-wrap">
+    <svg class="chart" id="chart" viewBox="0 0 1236 1100" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>
+
+  <div class="legend" id="legend"></div>
+
+  <div class="footer">
+    <span>x: context tokens sent downstream · y: useful evidence retained</span>
+    <span></span>
+  </div>
+
+</div>
+
+<script>
+  const series = [
+    { key: 'teacher',   label: '28-layer', sub: '(full, teacher)',   color: 'var(--teacher)', rawColor: '#d4cdc1', dashed: true,  marker: 'none', dim: true,
+      points: [[1.05,83.5],[1.20,86.5],[1.40,89.5],[1.70,93.0],[2.00,95.4],[2.30,97.2],[2.60,98.4],[3.60,99.7],[4.30,100.0]] },
+    { key: 'distilled', label: '17-layer', sub: '(distilled, prod)', color: 'var(--hero)',    rawColor: '#35bec8', dashed: false, dotted: true,  marker: 'none', hero: true,
+      points: [[1.05,83.5],[1.20,86.5],[1.40,89.5],[1.70,93.0],[2.00,95.4],[2.30,97.2],[2.60,98.4],[3.60,99.7],[4.30,100.0]] },
+    { key: 'pruned',    label: '17-layer', sub: '(pruned)',          color: 'var(--pruned)',  rawColor: '#7284e6', dashed: false, marker: 'ring',
+      points: [[1.05,81.5],[1.20,85.2],[1.40,88.5],[1.70,92.0],[2.00,94.5],[2.30,96.0],[2.60,97.5],[3.60,99.1],[4.50,99.8]] },
+    { key: 'eleven',    label: '11-layer', sub: '',                  color: 'var(--eleven)',  rawColor: '#dd54ac', dashed: false, marker: 'square',
+      points: [[1.40,79.5],[1.60,82.0],[1.80,86.5],[2.10,91.5],[2.30,94.5],[2.70,96.5],[3.00,98.0],[3.60,99.0],[5.30,100.0]] }
+  ];
+
+  // ====== Geometry · PAD lifted to spacing scale ======
+  // Was: { top: 50, right: 40, bottom: 100, left: 80 }
+  // Now: { top: 56, right: 40, bottom: 112, left: 80 } — all snapped to scale
+  const W = 1236, H = 1100;
+  const PAD = { top: 56, right: 40, bottom: 112, left: 80 };
+  const innerW = W - PAD.left - PAD.right;
+  const innerH = H - PAD.top - PAD.bottom;
+
+  const X_MIN = 1.0, X_MAX = 5.5;
+  const lx = v => Math.log10(v);
+  const xScale = v => PAD.left + ((lx(v) - lx(X_MIN)) / (lx(X_MAX) - lx(X_MIN))) * innerW;
+  const Y_MIN = 78, Y_MAX = 100;
+  const yScale = v => PAD.top + (1 - (v - Y_MIN) / (Y_MAX - Y_MIN)) * innerH;
+
+  const svg = document.getElementById('chart');
+  const NS = 'http://www.w3.org/2000/svg';
+  const make = (tag, attrs={}) => { const el = document.createElementNS(NS, tag); for (const k in attrs) el.setAttribute(k, attrs[k]); return el; };
+
+  // Y gridlines · tick label offset bumped 14 → 20 (--s-4)
+  const yTicks = [80, 85, 90, 95, 100];
+  yTicks.forEach(t => {
+    const y = yScale(t);
+    svg.appendChild(make('line', { x1: PAD.left, x2: W - PAD.right, y1: y, y2: y, stroke: t === Y_MIN ? 'var(--grid-axis)' : 'var(--grid)', 'stroke-width': 1 }));
+    const lbl = make('text', { x: PAD.left - 20, y: y + 4, 'text-anchor': 'end', class: 'ax-tick' });
+    lbl.textContent = t + '%';
+    svg.appendChild(lbl);
+  });
+
+  // X gridlines · tick label offset bumped 22 → 28 (--s-5)
+  const xTicks = [1, 2, 3, 4, 5];
+  xTicks.forEach(t => {
+    const x = xScale(t);
+    svg.appendChild(make('line', { x1: x, x2: x, y1: PAD.top, y2: H - PAD.bottom, stroke: 'var(--grid)', 'stroke-width': 1 }));
+    const lbl = make('text', { x: x, y: H - PAD.bottom + 28, 'text-anchor': 'middle', class: 'ax-tick' });
+    lbl.textContent = t + 'k';
+    svg.appendChild(lbl);
+  });
+
+  // X axis label
+  const xLab = make('text', { x: PAD.left + innerW / 2, y: H - 20, 'text-anchor': 'middle', class: 'ax-label' });
+  xLab.textContent = 'Avg context tokens sent downstream per query';
+  svg.appendChild(xLab);
+
+  // "upper-left is better" annotation
+  const ann = make('text', { x: PAD.left + innerW * 0.62, y: PAD.top + innerH * 0.86, 'text-anchor': 'middle', class: 'annotation' });
+  ann.textContent = '↖ upper-left is better';
+  svg.appendChild(ann);
+
+  function smoothPath(points) {
+    if (points.length < 2) return '';
+    const pts = points.map(([x,y]) => [xScale(x), yScale(y)]);
+    let d = `M ${pts[0][0]},${pts[0][1]}`;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[i-1] || pts[i];
+      const p1 = pts[i];
+      const p2 = pts[i+1];
+      const p3 = pts[i+2] || p2;
+      const t = 0.18;
+      const c1x = p1[0] + (p2[0] - p0[0]) * t;
+      const c1y = p1[1] + (p2[1] - p0[1]) * t;
+      const c2x = p2[0] - (p3[0] - p1[0]) * t;
+      const c2y = p2[1] - (p3[1] - p1[1]) * t;
+      d += ` C ${c1x},${c1y} ${c2x},${c2y} ${p2[0]},${p2[1]}`;
+    }
+    return d;
+  }
+
+  const order = [...series].sort((a,b) => (a.hero ? 1 : 0) - (b.hero ? 1 : 0));
+  order.forEach(s => {
+    let dashPattern = '';
+    if (s.dashed) dashPattern = '9 7';
+    else if (s.dotted) dashPattern = '1 9';
+    const path = make('path', {
+      d: smoothPath(s.points),
+      stroke: s.color,
+      'stroke-width': s.hero ? 5.4 : 4.0,
+      'stroke-dasharray': dashPattern,
+      fill: 'none',
+      'stroke-linecap': 'round',
+      'stroke-linejoin': 'round',
+      opacity: s.hero ? 1 : (s.dim ? 0.85 : 1),
+    });
+    svg.appendChild(path);
+
+    s.points.forEach(([px, py]) => {
+      const cx = xScale(px), cy = yScale(py);
+      let m = null;
+      if (s.marker === 'ring') {
+        m = make('circle', { cx, cy, r: 5, fill: 'var(--bg)', stroke: s.color, 'stroke-width': 2 });
+      } else if (s.marker === 'square') {
+        const sz = 6;
+        m = make('rect', { x: cx - sz/2, y: cy - sz/2, width: sz, height: sz, fill: 'var(--bg)', stroke: s.color, 'stroke-width': 1.5 });
+      }
+      if (m) svg.appendChild(m);
+    });
+  });
+
+  // ====== Legend ======
+  const legend = document.getElementById('legend');
+  series.forEach(s => {
+    const item = document.createElement('div');
+    item.className = 'item' + (s.dim ? ' dim' : '');
+    const glyph = document.createElement('div');
+    glyph.className = 'glyph';
+    const w = 36, h = 14, mid = h/2;
+    let inner = '';
+    if (s.dashed) inner += `<line x1="0" y1="${mid}" x2="${w}" y2="${mid}" stroke="${s.rawColor}" stroke-width="3.8" stroke-dasharray="7 6" stroke-linecap="round"/>`;
+    else if (s.dotted) inner += `<line x1="0" y1="${mid}" x2="${w}" y2="${mid}" stroke="${s.rawColor}" stroke-width="4.2" stroke-dasharray="1.5 7" stroke-linecap="round"/>`;
+    else inner += `<line x1="0" y1="${mid}" x2="${w}" y2="${mid}" stroke="${s.rawColor}" stroke-width="${s.hero ? 4.4 : 3.6}" stroke-linecap="round"/>`;
+    if (s.marker === 'ring') inner += `<circle cx="${w/2}" cy="${mid}" r="4.6" fill="#000" stroke="${s.rawColor}" stroke-width="2"/>`;
+    else if (s.marker === 'square') inner += `<rect x="${w/2 - 3}" y="${mid - 3}" width="6" height="6" fill="#000" stroke="${s.rawColor}" stroke-width="1.4"/>`;
+    glyph.innerHTML = `<svg viewBox="0 0 ${w} ${h}">${inner}</svg>`;
+    item.appendChild(glyph);
+    const label = document.createElement('span');
+    label.innerHTML = `${s.label}${s.sub ? `<span class="sub">${s.sub}</span>` : ''}`;
+    item.appendChild(label);
+    legend.appendChild(item);
+  });
+</script>
+
+</body>
+</html>
