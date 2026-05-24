@@ -475,7 +475,7 @@ body {
   <section class="hero">
     <p class="eyebrow">Chart toolkit · for anyone making charts at Perplexity</p>
     <h1 class="h1">Charts that <span class="accent">don't embarrass us</span> when we ship them.</h1>
-    <p class="lede">A small set of charts and diagrams, designed against Tufte and Bertin, with the spacing audit baked in. Use them. Remix them. If something's broken, tell me and I'll fix the system.</p>
+    <p class="lede">A small set of charts and diagrams, designed against Tufte and Bertin, with the spacing audit baked in. Use them. Remix them. If something's broken, the repo takes issues.</p>
   </section>
 
   <!-- ─────────── WHY ─────────── -->
@@ -568,7 +568,7 @@ body {
       <article class="rule">
         <p class="rule-num">Rule 03</p>
         <h3 class="rule-h">Hue is for categories. Value is for order.</h3>
-        <p class="rule-body">If your data has an order (low to high, before to after, worst to best), encode that with value: a single-hue ramp from light to dark. Multiple hues to encode ordered data is a construction error. The reader has to learn a color-to-number mapping that the chart is hiding from them. This is the most common mistake I see, and it's the one we fixed on the snippet bar last week.</p>
+        <p class="rule-body">If your data has an order (low to high, before to after, worst to best), encode that with value: a single-hue ramp from light to dark. Multiple hues to encode ordered data is a construction error. The reader has to learn a color-to-number mapping that the chart is hiding from them. It's the most common chart mistake at Perplexity, and the one fixed on the snippet bar last week.</p>
         <p class="rule-source">Bertin pp. 85–91 · the construction error</p>
       </article>
 
@@ -589,7 +589,7 @@ body {
     </header>
 
     <div class="prose">
-      <p>Each one has been audited end to end. The HTML is single-file, no build step. Copy it into your blog post or deck export, edit the <code>data</code> object near the bottom of the file, you're done. If your chart doesn't fit any of these patterns, that's a real signal. Tell me and we'll add a fourth.</p>
+      <p>Each one has been audited end to end. The HTML is single-file, no build step. Copy it into your blog post or deck export, edit the <code>data</code> object near the bottom of the file, you're done. If your chart doesn't fit any of these patterns, that's a real signal. The system grows from those gaps.</p>
     </div>
 
     <div class="catalog">
@@ -703,7 +703,7 @@ body {
       <article class="path">
         <p class="path-tag">Path C</p>
         <h3 class="path-h">Request a new pattern.</h3>
-        <p class="path-body">If your data doesn't fit any of the three existing patterns, that's information. It means there's a real chart type missing from the system. Tell me what you're trying to show and I'll add it. The point of this is to absorb the next bottleneck, not to be the bottleneck.</p>
+        <p class="path-body">If your data doesn't fit any of the three existing patterns, that's information. It means there's a real chart type missing from the system. Open an issue describing what you're trying to show. The system grows when it hits a gap.</p>
       </article>
     </div>
   </section>
@@ -729,7 +729,7 @@ body {
     <div class="footer-col">
       <p class="label">Repo &amp; contact</p>
       <a href="https://github.com/phi-pplx/pplx-chart-system">github.com/phi-pplx/pplx-chart-system</a>
-      <a href="mailto:phi@perplexity.ai">phi@perplexity.ai · flag what's not working</a>
+      <a href="https://github.com/phi-pplx/pplx-chart-system/issues">Open an issue · flag what's not working</a>
     </div>
   </footer>
 
