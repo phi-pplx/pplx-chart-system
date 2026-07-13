@@ -28,7 +28,7 @@ Grid (G) intentionally omitted — categorical × categorical matrices fold into
 ## Two modes × three aspects
 
 Every archetype renders in:
-- **Editorial mode** (`#FBFAF4` warm cream surface) — for blog, docs, PDF embeds
+- **Editorial mode** (`#FFFFFF` white surface) — for blog, docs, PDF embeds
 - **Branded mode** (`#0A0A0A` near-black) — for social cards, press kits
 
 At three aspect ratios:

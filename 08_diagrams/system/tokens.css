@@ -41,7 +41,7 @@
 
 /* ─── Editorial mode (light) ─────────────────────────────────────────────── */
 :root, [data-mode="editorial"] {
-  --bg:           #FBFAF4;
+  --bg:           #FFFFFF;
   --surface-1:   #FFFFFF;
   --surface-2:   #F5F2E8;
   --ink:          #091717;
